@@ -1,0 +1,138 @@
+Este capítulo describe la situación actual que motiva el desarrollo del sistema y las alternativas tecnológicas existentes.
+
+\section{Contexto}
+
+\subsection{La realidad de las personas con dificultades comunicativas}
+
+Para quienes pueden hablar sin dificultad, es fácil olvidar lo que significa no poder hacerlo. Pero para una persona con TEA u otras condiciones que afectan al habla, expresar algo tan básico como ``tengo sed'' o ``me duele algo'' puede convertirse en un reto frustrante. Esta dificultad no solo limita la autonomía; afecta a la capacidad de participar en la escuela, en el trabajo, en la vida social.
+
+En España, se estima que aproximadamente X personas tienen TEA (TODO: Buscar estadística actualizada), y una proporción significativa de ellas necesita algún tipo de apoyo para comunicarse. Estas personas dependen con frecuencia de familiares, cuidadores o profesionales como logopedas para hacer llegar sus mensajes al mundo.
+
+\subsection{Cómo funciona hoy la comunicación aumentativa}
+
+Los Sistemas Aumentativos y Alternativos de Comunicación (SAAC) llevan décadas ofreciendo alternativas al habla. Los más extendidos son los basados en pictogramas, especialmente en entornos educativos y terapéuticos.
+
+El recurso de referencia en español es ARASAAC, el Centro Aragonés para la Comunicación Aumentativa y Alternativa. ARASAAC pone a disposición de cualquiera más de 40.000 pictogramas de uso libre, que cubren desde objetos cotidianos hasta emociones o acciones complejas. Es la base sobre la que se construyen la mayoría de aplicaciones y materiales en nuestro idioma.
+
+Conviene distinguir dos problemas técnicos relacionados pero distintos. Por un lado, la traducción de texto a pictogramas (\textit{text-to-picto}), que permite a una persona sin dificultades comunicativas expresarse en un formato comprensible para usuarios de SAAC. Por otro, la generación de texto a partir de pictogramas (\textit{picto-to-text}), que es el foco de este trabajo: permitir que el usuario del SAAC construya mensajes que resulten naturales para cualquier interlocutor. Esta segunda dirección presenta complejidades adicionales, ya que requiere no solo mapear símbolos a palabras, sino reconstruir la estructura gramatical completa de una oración.
+
+\subsection{El día a día: cómo se comunica alguien usando pictogramas}
+
+Imaginemos el proceso. Una persona quiere decir algo. Abre la aplicación o mira su tablero de pictogramas. Busca, entre decenas o cientos de símbolos, los que representan lo que quiere expresar. Los selecciona uno a uno. La aplicación los muestra en fila y, si tiene síntesis de voz, los reproduce: ``yo - querer - ir - parque''.
+
+El interlocutor escucha esa secuencia fragmentada y tiene que reconstruir mentalmente la frase: ``Ah, quiere ir al parque''. El sistema funciona, sí, pero el esfuerzo recae en ambos lados: en el usuario, que debe navegar por menús poco intuitivos, y en quien escucha, que debe interpretar un mensaje incompleto.
+
+La brecha es cuantificable: mientras el habla natural alcanza entre 125 y 185 palabras por minuto, los sistemas AAC típicos apenas llegan a 8-15~\cite{elsahar2019aac}. Esta diferencia de un orden de magnitud no es solo una estadística; es la diferencia entre una conversación fluida y un intercambio laborioso que agota a ambas partes.
+
+\subsection{Quién participa en este ecosistema}
+
+En torno a la comunicación aumentativa hay varios actores con roles distintos:
+
+\begin{itemize}
+  \item El \textbf{usuario final} es, obviamente, el centro de todo: la persona que necesita comunicarse y para quien diseñamos el sistema. Pero no actúa sola.
+  \item Los \textbf{familiares y cuidadores} son frecuentemente los interlocutores principales y quienes facilitan el uso diario de estas herramientas.
+  \item Los \textbf{profesionales} ---logopedas, educadores, terapeutas--- configuran los sistemas, los personalizan y entrenan a los usuarios en su manejo.
+  \item Y están los \textbf{interlocutores ocasionales}: el dependiente de una tienda, el conductor del autobús, cualquier persona que no conoce los SAAC y necesita entender un mensaje lo más claro posible.
+\end{itemize}
+
+\subsection{Lo que funciona y lo que no}
+
+El ecosistema actual tiene cosas buenas. Existen recursos de calidad como ARASAAC, hay una comunidad activa de profesionales y familias, y los SAAC están relativamente aceptados en entornos educativos y terapéuticos.
+
+Pero también hay problemas serios, y la literatura reciente los documenta con claridad. Las aplicaciones disponibles ---\textit{LetMeTalk}, \textit{Talk Together} y similares--- adoptan la solución más simple: concatenar las etiquetas de los pictogramas seleccionados sin procesamiento lingüístico alguno. Esta aproximación es predecible y fácil de implementar, pero impone al interlocutor la tarea de reconstruir mentalmente la oración correcta. Para usuarios que ya enfrentan barreras comunicativas, esta carga adicional sobre el receptor no es trivial.
+
+Las alternativas más sofisticadas, como los sistemas basados en plantillas, garantizan corrección gramatical dentro de su ámbito pero adolecen de rigidez: cubren solo las estructuras anticipadas por los diseñadores, y cualquier combinación no prevista produce resultados pobres o nulos. Revisiones recientes del campo remarcan que, pese al crecimiento de soluciones móviles y el uso creciente de IA, persisten brechas metodológicas significativas: falta de estudios con muestras diversas, evaluación longitudinal, y medidas comparables de rendimiento en contextos cotidianos~\cite{curtis2022stateofart}.
+
+A nivel de interfaz, muchas aplicaciones parecen diseñadas sin considerar seriamente la experiencia de usuario. Tecnológicamente, están ancladas en el pasado: no aprovechan los avances en inteligencia artificial, sus voces sintetizadas suenan robóticas ---un problema que los usuarios reportan frecuentemente como barrera para la adopción--- y no se adaptan a las necesidades individuales.
+
+Hay, en resumen, una base sólida sobre la que construir, pero un vacío claro en cuanto a innovación. Ese vacío es precisamente lo que este proyecto pretende llenar.
+
+\subsection{La voz como identidad}
+
+Hay un aspecto que las discusiones técnicas suelen pasar por alto: para muchas personas, la voz no es solo un canal de comunicación, sino parte de su identidad. Los primeros sistemas AAC utilizaban voces sintetizadas mediante concatenación de fonemas, produciendo un habla robótica e impersonal. Los usuarios frecuentemente reportaban que estas voces no les representaban, generando resistencia a su uso.
+
+Los avances recientes en síntesis neuronal han transformado este panorama, produciendo locuciones que en muchos contextos resultan prácticamente indistinguibles del habla humana. Pero la calidad técnica no es suficiente: la voz debe sentirse \textit{propia}. En patologías degenerativas como la ELA, la posibilidad de preservar una voz similar a la del paciente mediante técnicas de \textit{voice banking} se relaciona con aspectos psicosociales profundos: identidad, aceptación del sistema y carga emocional~\cite{regondi2025aivoiceals}. Para usuarios de SAAC desde edades tempranas, el desafío es diferente pero igualmente importante: encontrar una voz que puedan sentir como suya.
+
+\section{Estado de la técnica}
+
+El problema central que aborda este proyecto ---transformar secuencias de pictogramas en oraciones naturales--- ha sido estudiado desde múltiples perspectivas en la literatura. Sin embargo, como se argumentará en esta sección, las soluciones existentes presentan limitaciones significativas que justifican el desarrollo de nuevos enfoques.
+
+\subsection{El problema de la generación de lenguaje a partir de pictogramas}
+
+La comunicación mediante pictogramas plantea un desafío lingüístico particular. Cuando un usuario selecciona una secuencia como \texttt{[yo] [querer] [agua]}, el sistema debe generar una oración gramaticalmente correcta y natural: ``Quiero agua'' o ``Me gustaría beber agua''. Este proceso, aparentemente sencillo, involucra decisiones complejas: conjugación verbal, concordancia, inserción de artículos y preposiciones, e incluso reformulación semántica para producir expresiones más naturales.
+
+La literatura distingue dos tareas relacionadas pero distintas. Por un lado, la \textbf{traducción de texto a pictogramas} (\textit{text-to-picto}), que permite a una persona sin dificultades comunicativas expresarse en un formato comprensible para usuarios de SAAC. Por otro, la \textbf{generación de texto a partir de pictogramas} (\textit{picto-to-text}), que es el foco de este trabajo: permitir que el usuario del SAAC construya mensajes que resulten naturales para cualquier interlocutor.
+
+Ambas direcciones han recibido atención en la comunidad investigadora. La iniciativa ImageCLEF ToPicto~\cite{imageclef2024topicto}, por ejemplo, propuso en 2024 un desafío específico para la traducción de texto y voz a secuencias de pictogramas en francés, evidenciando el interés creciente en este campo. Sin embargo, la dirección inversa ---de pictogramas a texto natural--- presenta complejidades adicionales, ya que requiere no solo mapear símbolos a palabras, sino reconstruir la estructura gramatical completa de una oración.
+
+\subsection{Aproximaciones basadas en concatenación y plantillas}
+
+La solución más extendida en las aplicaciones comerciales actuales es, paradójicamente, la más simple: concatenar las etiquetas de los pictogramas seleccionados. Aplicaciones como \textit{LetMeTalk} o \textit{Talk Together} reproducen literalmente la secuencia de palabras asociada a cada pictograma, sin procesamiento lingüístico alguno.
+
+Esta aproximación tiene ventajas evidentes: es predecible, fácil de implementar y no introduce errores de procesamiento. Sin embargo, sus limitaciones son igualmente claras. La secuencia ``yo querer ir parque'' resulta comprensible, pero impone al interlocutor la tarea de reconstruir mentalmente la oración correcta. Para usuarios que ya enfrentan barreras comunicativas, esta carga adicional sobre el receptor no es trivial.
+
+Un paso intermedio lo constituyen los sistemas basados en plantillas. Estas aproximaciones definen estructuras predefinidas (por ejemplo, \texttt{[SUJETO] quiere [OBJETO]}) y rellenan los huecos con los pictogramas seleccionados. El sistema Araboard~\cite{baldassarri2014aac}, desarrollado en la Universidad de Zaragoza, explora este enfoque para el español. Las plantillas garantizan corrección gramatical dentro de su ámbito, pero adolecen de rigidez: cubren solo las estructuras anticipadas por los diseñadores, y cualquier combinación no prevista produce resultados pobres o nulos.
+
+Además de concatenación y plantillas, una línea particularmente relevante para el contexto móvil es la \textbf{asistencia a la composición mediante predicción}. En lugar de intentar ``traducir'' la frase completa, el sistema optimiza el flujo de selección de pictogramas anticipando qué símbolos son más probables a continuación (por frecuencia, historial del usuario o patrones pseudo-sintácticos). Hervás et al.~\cite{hervas2020predictivecomposition} presentan \textit{PictoEditor}, una app en tablet que incorpora predicción en tableros pictográficos; sus resultados sugieren que la predicción basada en frecuencia mejora la disponibilidad inmediata del pictograma deseado, reduciendo fricción de interacción. Este tipo de apoyo es relevante porque ataca un cuello de botella práctico en SAAC: no solo \emph{qué} se dice, sino \emph{cuán rápido} se puede construir el mensaje, un aspecto subrayado también por revisiones recientes del campo~\cite{curtis2022stateofart}.
+
+\subsection{Generación basada en reglas gramaticales}
+
+Una aproximación más sofisticada consiste en definir gramáticas formales que capturen las reglas de construcción de oraciones. El sistema puede entonces generar texto aplicando estas reglas a los pictogramas de entrada, tratando el problema como una tarea de realización superficial (\textit{surface realization}) en el campo de la Generación de Lenguaje Natural (GLN).
+
+La biblioteca SimpleNLG~\cite{gatt2009simplenlg}, originalmente desarrollada para inglés, ha sido adaptada a múltiples idiomas incluyendo español~\cite{ramos2017simplenlg, garciamendez2019spanish}. Estas adaptaciones permiten generar oraciones gramaticalmente correctas a partir de especificaciones semánticas, manejando automáticamente la morfología verbal, la concordancia y la inserción de elementos funcionales.
+
+García-Méndez et al.~\cite{garciamendez2018aac} propusieron una versión mejorada de SimpleNLG específicamente orientada a comunicación aumentativa, capaz de inferir automáticamente preposiciones y otros elementos a partir de información semántica. Su sistema, evaluado con un corpus de frases cotidianas, alcanzó una precisión del 77\% en la generación correcta de oraciones. Este trabajo demostró que las gramáticas formales pueden ser efectivas para el dominio AAC, aunque reconocen limitaciones en construcciones complejas y expresiones idiomáticas.
+
+El proyecto COMPANSION~\cite{demasco1992compansion}, desarrollado en los años 90, ya exploraba la expansión de ``mensajes comprimidos'' a oraciones completas mediante gramáticas de unificación. Aunque pionero, su dependencia de marcadores léxicos explícitos (por ejemplo, para indicar plurales o posesivos) y su elevado coste computacional limitaron su aplicabilidad práctica.
+
+El enfoque gramatical presenta ventajas claras: produce resultados predecibles, permite control fino sobre la generación y no requiere grandes volúmenes de datos de entrenamiento. Sus limitaciones residen en la cobertura: las reglas deben anticipar las estructuras posibles, y el mantenimiento de gramáticas extensas es costoso. Además, tienden a producir un lenguaje ``correcto pero artificial'', carente de la variabilidad natural del habla humana.
+
+\subsection{Aproximaciones basadas en similitud semántica y \textit{embeddings}}
+
+\textit{TODO: Esta sección se desarrollará tras la implementación y evaluación del enfoque basado en embeddings.}
+
+Una línea de investigación diferente aborda el problema desde la perspectiva de la similitud semántica. En lugar de aplicar reglas gramaticales, estos sistemas representan tanto los pictogramas como las posibles oraciones en un espacio vectorial, y seleccionan la oración cuya representación sea más cercana a la secuencia de entrada.
+
+Orellana et al.~\cite{orellana2024semantic} exploraron esta aproximación para relacionar expresiones coloquiales de adultos mayores con pictogramas de ARASAAC. Utilizando el modelo BERT preentrenado para español, calcularon la similitud semántica entre frases y definiciones de pictogramas, obteniendo correlaciones moderadas (Pearson de 0,57) con el juicio humano. Su trabajo evidencia tanto el potencial como las limitaciones actuales: los modelos capturan relaciones semánticas generales, pero las expresiones idiomáticas y el lenguaje coloquial siguen representando un desafío.
+
+El uso de \textit{word embeddings} permite además abordar el problema de la desambiguación. Un pictograma de ``ratón'' podría referirse al animal o al dispositivo informático; la representación vectorial del contexto ayuda a seleccionar la interpretación correcta. Norré et al.~\cite{norre2023wsd} aplicaron técnicas de \textit{Word Sense Disambiguation} para la traducción de diálogos médicos a pictogramas en francés, comparando diversos modelos preentrenados y encontrando que Word2Vec Skip-Gram ofrecía los mejores resultados con una precisión del 73\%.
+
+\subsection{Modelos de lenguaje y aprendizaje profundo}
+
+\textit{TODO: Esta sección se desarrollará tras la implementación y evaluación del enfoque basado en LLMs.}
+
+La irrupción de los modelos de lenguaje de gran escala (LLM) ha abierto nuevas posibilidades para la generación de texto natural. Estos modelos, entrenados sobre corpus masivos, capturan patrones lingüísticos complejos y pueden generar texto fluido y contextualmente apropiado.
+
+PictoBERT~\cite{pereira2022pictobert} representa un trabajo pionero en la aplicación de arquitecturas Transformer al dominio de pictogramas. Los autores adaptaron BERT para predecir el siguiente pictograma en una secuencia, modificando el vocabulario y la capa de \textit{embeddings} para trabajar con \textit{word-senses} en lugar de palabras. Entrenado sobre el corpus CHILDES de habla infantil, PictoBERT superó a los modelos basados en n-gramas en la tarea de predicción. Además, demostraron la capacidad de transferencia del modelo mediante \textit{fine-tuning} con el vocabulario específico de ARASAAC.
+
+Este trabajo es particularmente relevante porque evidencia que los modelos Transformer pueden aprender patrones de uso de pictogramas, incluso con corpus de tamaño moderado. Sin embargo, PictoBERT se centra en la predicción del siguiente pictograma ---una tarea de asistencia a la composición--- más que en la generación de texto natural a partir de secuencias completas.
+
+Los LLM más recientes, como GPT-4 o Gemini, ofrecen capacidades de generación de texto significativamente superiores. Su aplicación al dominio AAC plantea preguntas interesantes: ¿pueden estos modelos transformar secuencias de pictogramas en oraciones naturales mediante \textit{prompting} adecuado? ¿Qué nivel de \textit{fine-tuning} sería necesario? ¿Cómo manejan las ambigüedades inherentes a la comunicación pictográfica? Estas cuestiones, hasta donde alcanza nuestra revisión, permanecen abiertas en la literatura.
+
+En paralelo, la literatura reciente en HCI y accesibilidad ha empezado a estudiar el impacto real de \textbf{modelos generativos} como asistentes de escritura para usuarios de SAAC. Valencia et al.~\cite{valencia2023lessitype} muestran que las sugerencias de un modelo de lenguaje pueden aumentar la variedad y fluidez del texto, pero también pueden \emph{dificultar} el control del usuario sobre el mensaje final (p.\,ej., riesgo de que el dispositivo ``hable por la persona'' si las sugerencias dominan la interacción). En esa misma dirección, prototipos actuales combinan \textit{prompting} con señales de contexto (interlocutor, tono emocional, historial) para mejorar expresividad y adecuación pragmática~\cite{xu2025speakease}, o integran recomendación de tarjetas y guía contextual en escenarios familiares (p.\,ej.\ comunicación niño--madre/padre) con despliegues longitudinales cortos~\cite{choi2025aacesstalk}. Este conjunto de trabajos sugiere que, más allá de la calidad lingüística, la variable crítica en SAAC con LLMs es el \textbf{equilibrio entre ayuda y autoría}.
+
+\subsection{Recursos y bases de datos de pictogramas}
+
+Cualquier sistema de comunicación aumentativa requiere una base de pictogramas sobre la que operar. En el ámbito hispanohablante, ARASAAC (Centro Aragonés para la Comunicación Aumentativa y Alternativa) constituye el recurso de referencia indiscutible. Mantenido por el Gobierno de Aragón, ofrece más de 40.000 pictogramas bajo licencia Creative Commons, cubriendo desde conceptos cotidianos hasta vocabulario especializado.
+
+Varios trabajos han abordado la integración de ARASAAC con recursos lingüísticos computacionales. Schwab et al.~\cite{schwab2020arasaac} propusieron vincular los pictogramas de ARASAAC con WordNet, creando una base de datos que relaciona símbolos con definiciones semánticas estructuradas. Este tipo de integración es fundamental para sistemas que necesitan razonar sobre el significado de los pictogramas, aunque los autores identificaron desafíos como la polisemia (un mismo pictograma con múltiples significados) y la dependencia contextual de ciertas palabras.
+
+\subsection{Síntesis de voz en sistemas AAC}
+
+La generación de texto es solo una parte del problema; convertir ese texto en voz natural es igualmente importante. Los primeros sistemas AAC utilizaban voces sintetizadas mediante concatenación de fonemas, produciendo un habla robótica e impersonal. Los usuarios frecuentemente reportaban que estas voces no les representaban, generando resistencia a su uso.
+
+Los avances recientes en síntesis neuronal de voz han transformado este panorama. Motores como los ofrecidos por Google, Amazon o Microsoft producen locuciones que, en muchos contextos, resultan prácticamente indistinguibles del habla humana. Además, permiten personalización de parámetros como tono, velocidad y estilo, ofreciendo a los usuarios mayor capacidad de expresión.
+
+Un punto que ha cobrado relevancia en los últimos años es la \textbf{preservación de identidad vocal} mediante \textit{voice banking} y clonación/ajuste de voces neuronales. En patologías degenerativas como la ELA, la posibilidad de sintetizar una voz similar a la del paciente se relaciona con aspectos psicosociales (identidad, aceptación del sistema y carga emocional). Regondi et al.~\cite{regondi2025aivoiceals} estudian un enfoque de síntesis personalizada para pacientes con ELA y discuten tanto la viabilidad técnica como la percepción de naturalidad y similitud. De forma alineada, propuestas recientes de SAAC con LLMs incorporan explícitamente TTS personalizado como componente clave para aumentar expresividad y autenticidad~\cite{xu2025speakease}.
+
+Elsahar et al.~\cite{elsahar2019aac} ofrecen una revisión exhaustiva de las tecnologías de acceso en sistemas AAC, incluyendo la síntesis de voz. Su análisis subraya que la velocidad de comunicación sigue siendo un cuello de botella: mientras el habla natural alcanza 125-185 palabras por minuto, los sistemas AAC típicos apenas llegan a 8-15. Esta brecha sugiere que la optimización no debe centrarse únicamente en la calidad del texto generado, sino también en la eficiencia del proceso completo de comunicación.
+
+\subsection{Discusión: limitaciones del estado actual}
+
+La revisión realizada revela un campo activo pero fragmentado. Existen aproximaciones basadas en reglas que garantizan corrección gramatical pero carecen de naturalidad; aproximaciones estadísticas que capturan patrones de uso pero requieren grandes volúmenes de datos; y aproximaciones basadas en modelos de lenguaje que prometen flexibilidad pero cuya aplicación al dominio AAC está poco explorada.
+
+Ninguna de las soluciones revisadas aborda de manera integral los requisitos de un sistema AAC moderno: generación de texto natural, adaptabilidad al usuario, velocidad de respuesta adecuada para comunicación en tiempo real, e integración con síntesis de voz de calidad. Este vacío constituye precisamente la motivación técnica del presente proyecto.
+
+Finalmente, revisiones recientes remarcan que, pese al crecimiento de soluciones móviles y el uso creciente de IA, persisten brechas metodológicas y de transferencia a práctica real: falta de estudios con muestras diversas, evaluación longitudinal, y medidas comparables de rendimiento (tasa de comunicación, esfuerzo, abandono) en contextos cotidianos~\cite{curtis2022stateofart}. En esa misma línea, un \textit{scoping review} centrado en tecnologías emergentes para SAAC destaca como tendencias la personalización (usuario y contexto), la integración con modelos generativos y la mejora de interfaces móviles, pero subraya la necesidad de marcos de evaluación y consideraciones éticas (privacidad, consentimiento, control del mensaje) para que estas innovaciones sean aplicables en productos reales~\cite{benevento2025futuretechnologies}.
+
+En los capítulos siguientes se describirá la implementación y evaluación de tres aproximaciones ---gramáticas formales, \textit{embeddings} y modelos LLM--- con el objetivo de determinar cuál ofrece el mejor equilibrio entre calidad de generación, eficiencia computacional y aplicabilidad práctica en el contexto de una aplicación móvil para comunicación aumentativa.

@@ -1,0 +1,78 @@
+# LaTeX build artifacts
+*.aux
+*.lof
+*.log
+*.lot
+*.fls
+*.out
+*.toc
+*.fmt
+*.fot
+*.cb
+*.cb2
+.*.lb
+
+# Bibliography artifacts
+*.bbl
+*.bcf
+*.blg
+*-blx.aux
+*-blx.bib
+*.run.xml
+
+# Build tool artifacts
+*.fdb_latexmk
+*.synctex
+*.synctex(busy)
+*.synctex.gz
+*.synctex.gz(busy)
+*.pdfsync
+
+# Auxiliary and intermediate files
+*.dvi
+*.xdv
+*-converted-to.*
+*.ps
+
+# Index and glossary
+*.idx
+*.ilg
+*.ind
+*.ist
+*.glo
+*.gls
+*.glg
+*.acn
+*.acr
+*.alg
+
+# Listings
+*.lol
+
+# Hyperref
+*.nav
+*.snm
+*.vrb
+
+# Beamer
+*.brf
+
+# Makefile output
+/output/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor files
+*.swp
+*.swo
+*~
+\#*\#
+.#*
+
+# IDE
+.idea/
+*.sublime-*
+.vscode/
