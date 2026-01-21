@@ -2,56 +2,23 @@ Este capítulo describe la situación actual que motiva el desarrollo del sistem
 
 \section{Contexto}
 
-\subsection{La realidad de las personas con dificultades comunicativas}
-
 Para quienes pueden hablar sin dificultad, es fácil olvidar lo que significa no poder hacerlo. Pero para una persona con TEA u otras condiciones que afectan al habla, expresar algo tan básico como ``tengo sed'' o ``me duele algo'' puede convertirse en un reto frustrante. Esta dificultad no solo limita la autonomía; afecta a la capacidad de participar en la escuela, en el trabajo, y en la vida social.
 
 En España, se estima que aproximadamente 450.000 personas tienen TEA~\cite{autismoespana2024}. Según datos del CDC de 2023, aproximadamente el 26,7\% de las personas con autismo presentan lo que se denomina «autismo profundo», caracterizado por ser no verbales, mínimamente verbales o tener un coeficiente intelectual inferior a 50~\cite{cdc2023profound}. Esto implica que más de 120.000 personas en España podrían necesitar sistemas alternativos para comunicarse. Estas personas dependen con frecuencia de familiares, cuidadores o profesionales como logopedas para hacer llegar sus mensajes al mundo.
 
-\subsection{Cómo funciona hoy la comunicación aumentativa}
+Los Sistemas Aumentativos y Alternativos de Comunicación (SAAC) llevan décadas ofreciendo alternativas al habla. Los más extendidos son los basados en pictogramas, especialmente en entornos educativos y terapéuticos. El recurso de referencia en español es ARASAAC~\cite{arasaac}, el Centro Aragonés para la Comunicación Aumentativa y Alternativa, que pone a disposición de cualquiera más de 40.000 pictogramas de uso libre, cubriendo desde objetos cotidianos hasta emociones o acciones complejas. Es la base sobre la que se construyen la mayoría de aplicaciones y materiales en nuestro idioma. Este trabajo se centra en la generación de texto a partir de pictogramas (\textit{picto-to-text}): permitir que el usuario del SAAC construya mensajes que resulten naturales para cualquier interlocutor. Esta tarea, como se detallará en el estado de la técnica, presenta complejidades específicas que motivan el presente proyecto.
 
-Los Sistemas Aumentativos y Alternativos de Comunicación (SAAC) llevan décadas ofreciendo alternativas al habla. Los más extendidos son los basados en pictogramas, especialmente en entornos educativos y terapéuticos.
+Imaginemos el proceso de comunicación actual. Una persona quiere decir algo. Abre la aplicación o mira su tablero de pictogramas. Busca, entre decenas o cientos de símbolos, los que representan lo que quiere expresar. Los selecciona uno a uno. La aplicación los muestra en fila y, si tiene síntesis de voz, los reproduce: ``yo - querer - ir - parque''. El interlocutor escucha esa secuencia fragmentada y tiene que reconstruir mentalmente la frase: ``Ah, quiere ir al parque''. El sistema funciona, sí, pero el esfuerzo recae en ambos lados: en el usuario, que debe navegar por menús poco intuitivos, y en quien escucha, que debe interpretar un mensaje incompleto. La brecha es cuantificable: mientras el habla natural alcanza entre 125 y 185 palabras por minuto, los sistemas AAC típicos apenas llegan a 8-15~\cite{elsahar2019aac}. Esta diferencia de un orden de magnitud no es solo una estadística; es la diferencia entre una conversación fluida y un intercambio laborioso que agota a ambas partes.
 
-El recurso de referencia en español es ARASAAC~\cite{arasaac}, el Centro Aragonés para la Comunicación Aumentativa y Alternativa, que pone a disposición de cualquiera más de 40.000 pictogramas de uso libre, cubriendo desde objetos cotidianos hasta emociones o acciones complejas. Es la base sobre la que se construyen la mayoría de aplicaciones y materiales en nuestro idioma.
+En torno a la comunicación aumentativa hay varios actores con roles distintos. El \textbf{usuario final} es la persona que necesita comunicarse y para quien diseñamos el sistema. Los \textbf{familiares y cuidadores} son frecuentemente los interlocutores principales y quienes facilitan el uso diario de estas herramientas. Los \textbf{profesionales} ---logopedas, educadores, terapeutas--- configuran los sistemas, los personalizan y entrenan a los usuarios en su manejo. Y están los \textbf{interlocutores ocasionales}: el dependiente de una tienda, el conductor del autobús, cualquier persona que no conoce los SAAC y necesita entender un mensaje lo más claro posible.
 
-Este trabajo se centra en la generación de texto a partir de pictogramas (\textit{picto-to-text}): permitir que el usuario del SAAC construya mensajes que resulten naturales para cualquier interlocutor. Esta tarea, como se detallará en el estado de la técnica, presenta complejidades específicas que motivan el presente proyecto.
-
-\subsection{El día a día: cómo se comunica alguien usando pictogramas}
-
-Imaginemos el proceso. Una persona quiere decir algo. Abre la aplicación o mira su tablero de pictogramas. Busca, entre decenas o cientos de símbolos, los que representan lo que quiere expresar. Los selecciona uno a uno. La aplicación los muestra en fila y, si tiene síntesis de voz, los reproduce: ``yo - querer - ir - parque''.
-
-El interlocutor escucha esa secuencia fragmentada y tiene que reconstruir mentalmente la frase: ``Ah, quiere ir al parque''. El sistema funciona, sí, pero el esfuerzo recae en ambos lados: en el usuario, que debe navegar por menús poco intuitivos, y en quien escucha, que debe interpretar un mensaje incompleto.
-
-La brecha es cuantificable: mientras el habla natural alcanza entre 125 y 185 palabras por minuto, los sistemas AAC típicos apenas llegan a 8-15~\cite{elsahar2019aac}. Esta diferencia de un orden de magnitud no es solo una estadística; es la diferencia entre una conversación fluida y un intercambio laborioso que agota a ambas partes.
-
-\subsection{Quién participa en este ecosistema}
-
-En torno a la comunicación aumentativa hay varios actores con roles distintos:
-
-\begin{itemize}
-  \item El \textbf{usuario final} es la persona que necesita comunicarse y para quien diseñamos el sistema.
-  \item Los \textbf{familiares y cuidadores} son frecuentemente los interlocutores principales y quienes facilitan el uso diario de estas herramientas.
-  \item Los \textbf{profesionales} ---logopedas, educadores, terapeutas--- configuran los sistemas, los personalizan y entrenan a los usuarios en su manejo.
-  \item Y están los \textbf{interlocutores ocasionales}: el dependiente de una tienda, el conductor del autobús, cualquier persona que no conoce los SAAC y necesita entender un mensaje lo más claro posible.
-\end{itemize}
-
-\subsection{Lo que funciona y lo que no}
-
-El ecosistema actual tiene cosas buenas. Existen recursos de calidad como ARASAAC~\cite{arasaac}, hay una comunidad activa de profesionales y familias, y los SAAC están relativamente aceptados en entornos educativos y terapéuticos.
-
-Pero también hay problemas serios. La mayoría de aplicaciones disponibles simplemente concatenan las etiquetas de los pictogramas, produciendo secuencias fragmentadas que el interlocutor debe reconstruir mentalmente. Las alternativas más sofisticadas, como veremos en el estado de la técnica, presentan sus propias limitaciones.
-
-A nivel de interfaz, muchas aplicaciones parecen diseñadas sin considerar seriamente la experiencia de usuario. Tecnológicamente, están ancladas en el pasado: no aprovechan los avances en inteligencia artificial, sus voces sintetizadas suenan robóticas ---un problema que los usuarios reportan frecuentemente como barrera para la adopción--- y no se adaptan a las necesidades individuales.
+El ecosistema actual tiene cosas buenas. Existen recursos de calidad como ARASAAC, hay una comunidad activa de profesionales y familias, y los SAAC están relativamente aceptados en entornos educativos y terapéuticos. Pero también hay problemas serios. La mayoría de aplicaciones disponibles simplemente concatenan las etiquetas de los pictogramas, produciendo secuencias fragmentadas que el interlocutor debe reconstruir mentalmente. Las alternativas más sofisticadas, como veremos en el estado de la técnica, presentan sus propias limitaciones. A nivel de interfaz, muchas aplicaciones parecen diseñadas sin considerar seriamente la experiencia de usuario. Tecnológicamente, están ancladas en el pasado: no aprovechan los avances en inteligencia artificial, sus voces sintetizadas suenan robóticas ---un problema que los usuarios reportan frecuentemente como barrera para la adopción--- y no se adaptan a las necesidades individuales.
 
 A estas limitaciones técnicas se suma una barrera práctica que no debe ignorarse. Una búsqueda en las tiendas de aplicaciones convencionales ---App Store o Google Play--- revela que la mayoría de aplicaciones de comunicación aumentativa están disponibles únicamente en inglés, o bien requieren un pago que puede resultar prohibitivo. Para familias que acaban de recibir un diagnóstico y aún no conocen los recursos disponibles ni tienen contacto con profesionales especializados, encontrar una herramienta adecuada, gratuita y en español se convierte en un obstáculo adicional en un momento ya de por sí difícil.
 
+Hay un aspecto adicional que las discusiones técnicas suelen pasar por alto: para muchas personas, la voz no es solo un canal de comunicación, sino parte de su identidad. Una voz robótica o impersonal puede generar rechazo hacia el sistema, independientemente de su utilidad funcional. La voz debe sentirse \textit{propia}. Para usuarios de SAAC desde edades tempranas, el desafío es encontrar una voz con la que puedan identificarse. En patologías degenerativas como la ELA, cobra especial relevancia la posibilidad de preservar la voz del paciente antes de perderla. Esta dimensión emocional de la síntesis de voz, frecuentemente ignorada en las discusiones técnicas, tiene implicaciones directas en la adopción y uso continuado de estos sistemas.
+
 Hay, en resumen, una base sólida sobre la que construir, pero un vacío claro en cuanto a innovación. Ese vacío es precisamente lo que este proyecto pretende llenar.
-
-\subsection{La voz como parte de la identidad del individuo}
-
-Hay un aspecto que las discusiones técnicas suelen pasar por alto: para muchas personas, la voz no es solo un canal de comunicación, sino parte de su identidad. Una voz robótica o impersonal puede generar rechazo hacia el sistema, independientemente de su utilidad funcional.
-
-La voz debe sentirse \textit{propia}. Para usuarios de SAAC desde edades tempranas, el desafío es encontrar una voz con la que puedan identificarse. En patologías degenerativas como la ELA, cobra especial relevancia la posibilidad de preservar la voz del paciente antes de perderla. Esta dimensión emocional de la síntesis de voz, frecuentemente ignorada en las discusiones técnicas, tiene implicaciones directas en la adopción y uso continuado de estos sistemas.
 
 \section{Estado de la técnica}
 
