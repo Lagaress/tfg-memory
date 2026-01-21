@@ -5,56 +5,41 @@ A continuación, se describe la motivación del presente proyecto y su alcance. 
 
 \section{Motivación}
 
-Comunicarse es, probablemente, una de las capacidades más definitorias del ser humano. A través de la comunicación construimos relaciones, expresamos necesidades, compartimos ideas y, en última instancia, participamos en la sociedad. Sin embargo, para un porcentaje significativo de la población, esta capacidad que muchos damos por sentada representa un desafío diario.
+La comunicación es una de las actividades que definen a la especie humana. A través de la comunicación construimos relaciones, expresamos necesidades, compartimos ideas y, en última instancia, participamos en sociedad. Sin embargo, para un porcentaje significativo de la población, esta capacidad que muchos damos por sentada representa un desafío diario.
 
-Las personas con Trastorno del Espectro Autista (TEA), entre otras condiciones, encuentran a menudo dificultades importantes para comunicarse verbalmente. Según la Organización Mundial de la Salud, aproximadamente 1 de cada 127 personas presenta autismo a nivel mundial~\cite{who2025autism}, y en España se estima que existen más de 450.000 personas con esta condición~\cite{autismoespana2024}. En muchos casos, estas dificultades comunicativas condicionan profundamente su día a día.
+Las personas con Trastorno del Espectro Autista (TEA), entre otras condiciones, encuentran a menudo dificultades importantes para comunicarse verbalmente. Según la Organización Mundial de la Salud, aproximadamente 1 de cada 127 personas presenta autismo a nivel mundial~\cite{who2025autism}, y en España se estima que existen más de 450.000 personas con esta condición~\cite{autismoespana2024}. Estas condiciones hacen que su comunicación se vea afecta, y que su día a día esté profundamente condicionado.
 
-¿Cómo se aborda actualmente este problema? Mediante los llamados Sistemas Aumentativos y Alternativos de Comunicación (SAAC). Estos sistemas permiten a las personas con dificultades del habla expresarse por vías alternativas, y entre los más utilizados están los basados en pictogramas: símbolos gráficos que representan conceptos, acciones u objetos de forma visual.
+¿Cómo se aborda actualmente este problema para estas personas? Mediante los llamados Sistemas Aumentativos y Alternativos de Comunicación (SAAC). Estos sistemas permiten a las personas con dificultades del habla expresarse por vías alternativas, y entre los más utilizados están los basados en pictogramas: símbolos gráficos que representan conceptos, acciones u objetos de forma visual.
 
-El problema es que las aplicaciones disponibles hoy en el mercado, aunque funcionales, dejan mucho que desear. Herramientas como \textit{LetMeTalk}~\cite{letmetalk2024} o \textit{Proloquo2Go}~\cite{proloquo2go2024} ofrecen tableros de pictogramas con síntesis de voz básica, pero sus interfaces parecen diseñadas sin pensar demasiado en quién las va a usar: resultan confusas, poco intuitivas y, siendo honestos, bastante descuidadas estéticamente. Pero el problema va más allá de lo visual. Tecnológicamente, estas aplicaciones se han quedado estancadas. No aprovechan los avances recientes en inteligencia artificial: ni los modelos de lenguaje que podrían generar frases naturales, ni los motores de síntesis de voz que hoy pueden sonar casi humanos. Tampoco exploran técnicas como el aprendizaje por refuerzo, que permitirían al sistema adaptarse progresivamente a cada usuario.
+El problema es que las aplicaciones disponibles hoy en el mercado, aunque funcionales, dejan mucho que desear. Herramientas como \textit{LetMeTalk}~\cite{letmetalk2024} o \textit{Proloquo2Go}~\cite{proloquo2go2024} ofrecen tableros de pictogramas con síntesis de voz básica, pero sus interfaces parecen diseñadas sin pensar demasiado en quién las va a usar: resultan confusas, poco intuitivas y están bastante descuidadas estéticamente. Aunque el problema va más allá de lo visual. Tecnológicamente, estas aplicaciones se han quedado estancadas en el momento de su creación. No aprovechan los avances recientes en inteligencia artificial: ni los modelos de lenguaje que podrían generar frases naturales, ni los motores de síntesis de voz que hoy pueden sonar casi humanos. Tampoco exploran técnicas como el aprendizaje por refuerzo, que permitirían al sistema adaptarse progresivamente a cada usuario.
 
-Y hay un problema aún más básico: la mayoría de estas herramientas simplemente concatenan palabras. Si un usuario selecciona los pictogramas ``yo'', ``querer'' y ``agua'', el sistema reproduce exactamente eso: ``yo querer agua''. Una construcción pobre, artificial, que obliga al interlocutor a hacer el trabajo de interpretación. Para alguien que ya enfrenta barreras comunicativas, esto no es suficiente.
+Y hay un problema aún más básico: la mayoría de estas herramientas simplemente ofrecen la solución más básica que les permitan decir que funcionan. En muchos casos, se dedican a concatenar palabras. Si un usuario selecciona los pictogramas ``yo'', ``querer'' y ``agua'', el sistema reproduce exactamente eso: ``yo querer agua''. Una construcción pobre, artificial, que obliga al interlocutor a hacer el trabajo de interpretación, y genera frustración en el emisor por no poder comunicarse como le gustaría. Para alguien que ya enfrenta barreras comunicativas en su día a día, este tipo de soluciones no son suficientes.
 
 El resultado es una brecha comunicativa que los números evidencian con crudeza: mientras el habla natural alcanza entre 125 y 185 palabras por minuto, los sistemas AAC actuales raramente superan las 8-15~\cite{elsahar2019aac}. Esta diferencia de un orden de magnitud no es solo una cuestión de eficiencia; condiciona el tipo de comunicación posible, relegando a los usuarios a intercambios transaccionales cuando lo que necesitan es poder mantener conversaciones reales.
 
-Lo cierto es que este es un momento especialmente bueno para cambiar esta situación. Los modelos de lenguaje han madurado enormemente en los últimos años y hoy pueden generar texto natural de alta calidad. Los motores de síntesis de voz neuronal producen locuciones que, en muchos casos, resultan prácticamente indistinguibles de una voz humana. La tecnología está lista; lo que falta es aplicarla donde realmente puede marcar una diferencia.
+Actualmente estamos en un momento muy bueno para cambiar esta situación. Los modelos de lenguaje han madurado enormemente en los últimos años y hoy pueden generar texto natural de alta calidad. Los motores de síntesis de voz neuronal producen locuciones que, en muchos casos, resultan prácticamente indistinguibles de una voz humana. La tecnología está lista; lo que falta es aplicarla donde realmente puede marcar una diferencia. Por ese motivo nace este proyecto.
 
-Este proyecto tiene, además, un carácter claramente interdisciplinar. Combina inteligencia artificial, procesamiento del lenguaje natural, desarrollo móvil, diseño de experiencia de usuario y criterios de accesibilidad. Es, en ese sentido, un ejercicio de ingeniería del software completo, representativo de los retos que enfrenta la disciplina hoy.
+Este trabajo tiene, además, un carácter claramente interdisciplinar. Combina inteligencia artificial, procesamiento del lenguaje natural, desarrollo móvil, diseño de experiencia de usuario y criterios de accesibilidad. Es, en ese sentido, un ejercicio de ingeniería del software completo, representativo de los retos que enfrenta la disciplina hoy.
 
-Pero más allá de lo técnico, este Trabajo de Fin de Grado nace de una convicción personal. A lo largo de mi vida he podido comprobar el papel que juega la comunicación en todo lo que hacemos: en los proyectos que emprendemos, en las relaciones que construimos, en nuestra capacidad de vivir plenamente en sociedad. Comunicarse bien ---o simplemente poder comunicarse--- no es un lujo; es un elemento central de la felicidad y la realización personal. Privar a alguien de esa capacidad es limitarlo de formas que van mucho más allá de lo práctico.
+Aunque más allá de lo técnico, este Trabajo de Fin de Grado parte de una convicción personal. A lo largo de mi vida he podido comprobar el papel que juega la comunicación en todo lo que hacemos: en los proyectos que emprendemos, en las relaciones que construimos, en nuestra capacidad de vivir plenamente. Comunicarse bien ---o simplemente poder comunicarse--- no es un lujo; es un elemento central de la felicidad y la realización personal. Privar a alguien de esa capacidad es limitarlo de formas que van mucho más allá de lo práctico.
 
 Por eso, este proyecto no pretende ser únicamente un ejercicio académico ni una demostración de competencias técnicas. El objetivo es contribuir, de forma real y tangible, a que personas con dificultades comunicativas puedan mejorar su calidad de vida. Para asegurar que este impacto no se quede en el papel, el prototipo se validará con usuarios reales. La comunicación debería ser accesible para todos, sin importar las capacidades de cada uno. Este trabajo es, en el fondo, una oportunidad de poner el conocimiento técnico al servicio de quienes más pueden beneficiarse de él.
 
 \section{Alcance y Objetivos}
 
-\subsection{Objetivos}
-
-El objetivo general de este proyecto es desarrollar una aplicación móvil multiplataforma que permita a personas con dificultades del habla construir frases seleccionando pictogramas y convertirlas en voz de forma natural.
-
-Este objetivo general se concreta en los siguientes objetivos específicos:
+El objetivo de este proyecto es desarrollar una aplicación móvil multiplataforma que permita a personas con dificultades del habla construir frases seleccionando pictogramas y convertirlas en voz de forma natural. Para ello, el trabajo abarca las siguientes actividades:
 
 \begin{enumerate}
-    \item Crear una base de datos de pictogramas y frases frecuentes, orientada al dominio de comunicación cotidiana de personas con TEA.
-    \item Proponer y evaluar distintas técnicas para transformar secuencias de pictogramas en oraciones naturales: gramáticas formales, representaciones mediante \textit{embeddings} y modelos de lenguaje de gran escala (LLM).
-    \item Integrar un motor de síntesis de voz (TTS) que reproduzca las frases generadas de forma clara y natural.
-    \item Diseñar e implementar una interfaz accesible e intuitiva, pensada específicamente para las necesidades de los usuarios objetivo.
-\end{enumerate}
-
-\subsection{Alcance}
-
-El trabajo abarca las siguientes actividades:
-
-\begin{itemize}
     \item Análisis del estado del arte en sistemas SAAC y técnicas de generación de lenguaje natural aplicadas a comunicación aumentativa.
-    \item Selección y preparación de una base de datos de pictogramas para un dominio concreto.
-    \item Implementación y evaluación comparativa de tres enfoques de IA para la generación de oraciones: gramáticas formales, \textit{embeddings} y modelos LLM.
-    \item Integración de un motor TTS.
-    \item Diseño e implementación de la aplicación móvil multiplataforma.
+    \item Selección y preparación de una base de datos de pictogramas y frases frecuentes, orientada al dominio de comunicación cotidiana de personas con TEA.
+    \item Implementación y evaluación comparativa de tres enfoques de IA para la generación de oraciones: gramáticas formales, representaciones mediante \textit{embeddings} y modelos de lenguaje de gran escala (LLM).
+    \item Integración de un motor de síntesis de voz (TTS) que reproduzca las frases generadas de forma clara y natural.
+    \item Diseño e implementación de una interfaz accesible e intuitiva, pensada específicamente para las necesidades de los usuarios objetivo.
     \item Validación del prototipo con usuarios reales.
     \item Documentación técnica y manual de uso.
-\end{itemize}
+\end{enumerate}
 
-El sistema está pensado principalmente para personas con TEA que presentan dificultades en la comunicación verbal, sin restricción de edad. La validación con usuarios reales se realizará en colaboración con profesionales o entidades del ámbito.
+El sistema está pensado principalmente para personas con TEA que presentan dificultades en la comunicación verbal, sin restricción de edad. La validación con usuarios reales se realizará en colaboración con profesionales o entidades del ámbito (TODO: Incluir aquí las diversas entidades conforme vayamos contactando con ellas).
 
 \section{Glosario de términos}
 
