@@ -43,6 +43,7 @@ apalike7.bst                # Bibliography style file
 ## Key Conventions
 
 - **Language**: All content is in Spanish. Use `\selectlanguage{spanish}` and babel's `es-tabla` option.
+- **No bold text**: Do not use `\textbf{}` in the document content. Use italics (`\textit{}`) for emphasis if needed.
 - **Bibliography**: Uses natbib with numeric citations. Add references to `bibliography.bib`.
 - **Code listings**: Use `lstlisting` environment. Style defined in `config/styles.tex`.
 - **Figures**: Place in `figures/` directory. Use `\includegraphics` with `graphicx` package.
