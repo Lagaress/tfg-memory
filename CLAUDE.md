@@ -1,50 +1,38 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+TFG (Trabajo Final de Grado) de la Universidad de Cádiz. Documento LaTeX en español sobre un proyecto de desarrollo de software.
 
-## Project Overview
-
-This is a LaTeX thesis template for TFG (Trabajo Final de Grado) from Universidad de Cádiz. The document is written in Spanish and follows a structure suitable for software development projects.
-
-## Build Commands
+## Commands
 
 ```bash
-# Compile the document (run twice for references)
-pdflatex main.tex
+# Build (recommended)
+latexmk -pdf main.tex
 
 # Full build with bibliography
 pdflatex main.tex && bibtex main && pdflatex main.tex && pdflatex main.tex
-
-# Using latexmk (recommended)
-latexmk -pdf main.tex
 
 # Clean auxiliary files
 latexmk -c
 ```
 
-## Document Structure
+## Key Files
 
-```
-main.tex                    # Entry point - configures metadata and includes parts
-config/
-  packages.tex              # LaTeX package imports
-  styles.tex                # Visual styling (margins, headings, code blocks)
-sections/
-  1-frontmatter.tex         # Covers, abstract, acknowledgments (unnumbered)
-  2-preface.tex             # Introduction, context, project plan
-  3-development.tex         # Requirements, analysis, design, implementation, testing, deployment
-  4-epilogue.tex            # Conclusions, license
-  5-backmatter.tex          # Annexes (user guide, developer guide)
-figures/                    # Images (JPG format, includes UCA logos)
-bibliography.bib            # BibTeX references (uses natbib with numeric style)
-apalike7.bst                # Bibliography style file
-```
+- `main.tex` — Entry point, metadata and `\input` calls
+- `config/packages.tex` — Package imports
+- `config/styles.tex` — Margins, headings, code block styles
+- `sections/` — Content files numbered 1 through 5
+- `bibliography.bib` — BibTeX references (natbib, numeric style)
 
-## Key Conventions
+## IMPORTANT: Conventions
 
-- **Language**: All content is in Spanish. Use `\selectlanguage{spanish}` and babel's `es-tabla` option.
-- **No bold text**: Do not use `\textbf{}` in the document content. Use italics (`\textit{}`) for emphasis if needed.
-- **Bibliography**: Uses natbib with numeric citations. Add references to `bibliography.bib`.
-- **Code listings**: Use `lstlisting` environment. Style defined in `config/styles.tex`.
-- **Figures**: Place in `figures/` directory. Use `\includegraphics` with `graphicx` package.
-- **PDF metadata**: Update `\hypersetup` in `main.tex` with actual author, title, and keywords.
+- All content MUST be written in Spanish
+- NEVER use `\textbf{}` — use `\textit{}` for emphasis instead
+- Figures go in `figures/` directory (JPG format)
+- Code listings use `lstlisting` environment (style in `config/styles.tex`)
+- Add references to `bibliography.bib` using natbib numeric citations
+
+## Gotchas
+
+- Always run build twice (or use `latexmk`) to resolve cross-references
+- Babel requires `es-tabla` option to correctly label tables in Spanish
+- `apalike7.bst` is a custom bibliography style — do not replace it
