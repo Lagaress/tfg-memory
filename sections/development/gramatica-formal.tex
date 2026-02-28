@@ -1,0 +1,177 @@
+La primera técnica de generación de lenguaje natural aborda el problema desde un enfoque puramente simbólico: una gramática formal extendida con restricciones de selección semánticas. Este capítulo describe su diseño, implementación y resultados.
+
+\section{Planteamiento del enfoque}
+\label{sec:f1-planteamiento}
+
+La decisión de comenzar con una gramática formal responde a tres motivaciones. En primer lugar, establecer una línea base determinista: ante la misma entrada, la gramática produce siempre la misma salida, lo que facilita la depuración y la evaluación. En segundo lugar, lograr control total sobre la generación: cada transformación lingüística ---inferencia de verbos, inserción de artículos, concordancia de género--- está codificada explícitamente, sin comportamientos emergentes que diagnosticar. En tercer lugar, alcanzar independencia de dependencias externas: el motor funciona con la biblioteca estándar de Python, sin modelos descargados ni APIs remotas, lo que lo hace viable en cualquier entorno.
+
+El sistema no emplea una gramática libre de contexto (CFG) pura en el sentido de Chomsky. En lugar de reglas de producción clásicas del tipo $S \rightarrow NP\ VP$, implementa una CFG extendida mediante tres mecanismos complementarios. El primero es \textit{pattern-matching} sobre categorías gramaticales: cada patrón sintáctico se define como una secuencia ordenada de categorías (por ejemplo, \texttt{[verbo\_necesidad, verbo\_accion, objeto]}), y el parser selecciona el primer patrón que coincide con la clasificación categorial de la entrada. El segundo mecanismo consiste en restricciones de selección semánticas: el sistema valida que los argumentos de cada verbo cumplan rasgos específicos ---\textit{comer} requiere un objeto con el rasgo \texttt{comestible=True}, \textit{ir} requiere un complemento con \texttt{lugar=True}---. El tercero es un conjunto de reglas de inferencia contextual que completan la oración cuando la entrada del usuario es incompleta: por ejemplo, la entrada \texttt{agua} activa la inferencia del verbo \textit{quiero}, produciendo \textit{Quiero agua}.
+
+Esta combinación permite manejar la ambigüedad inherente a la entrada telegráfica de CAA sin recurrir a modelos estadísticos o neuronales.
+
+\section{Arquitectura del pipeline}
+\label{sec:f1-pipeline}
+
+El motor se organiza como un pipeline de tres componentes secuenciales. El \textit{parser} recibe la secuencia de palabras, las clasifica mediante el léxico y detecta el patrón sintáctico que mejor se ajusta. El \textit{postprocesador} ---el módulo más complejo--- transforma la secuencia tokenizada en una oración natural a través de nueve etapas sucesivas. El \textit{generador} orquesta ambos componentes, construye la frase final, calcula la confianza de la salida y produce interpretaciones alternativas cuando el patrón es ambiguo.
+
+El flujo de datos atraviesa una cadena de estructuras tipadas: cada palabra se envuelve primero en un \texttt{PalabraInfo} con su información léxica estática, luego en un \texttt{TokenInfo} que añade la categoría normalizada, y finalmente en un \texttt{AnalisisSintactico} que incluye el patrón detectado y el tipo de oración. Esta cadena de transformaciones, implementada con dataclasses inmutables, permite trazar cada decisión del sistema en cualquier punto del pipeline.
+
+\section{El léxico}
+\label{sec:f1-lexico}
+
+El léxico constituye la base de conocimiento lingüístico del sistema. Implementa un índice invertido palabra $\rightarrow$ \texttt{PalabraInfo} que permite consultas en tiempo O(1) para cualquier operación: clasificación categorial, obtención de género, verificación de rasgos semánticos o recuperación del infinitivo de una forma conjugada.
+
+\subsection{Vocabulario}
+
+El vocabulario comprende 646 entradas indexadas, distribuidas en las categorías que muestra la Tabla~\ref{tab:f1-vocabulario}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r l}
+\hline
+Categoría & Entradas & Subcategorías principales \\
+\hline
+Pronombres & 10 & --- \\
+Verbos de necesidad & 33 & querer, necesitar, poder, deber + conjugaciones \\
+Verbos de estado & 29 & estar, tener, sentir, parecer + conjugaciones \\
+Verbos copulativos & 19 & ser, estar, parecer + conjugaciones \\
+Verbos de acción & 148 & 36 infinitivos con sus formas conjugadas \\
+Verbos de movimiento & 63 & 9 infinitivos (ir, venir, volver\ldots) \\
+Objetos & 99 & comida, bebida, cotidianos, juguetes, higiene \\
+Lugares & 35 & domésticos, educativos, comerciales, ocio \\
+Personas & 28 & familia, profesionales, amigos \\
+Adjetivos & 101 & emociones, estados físicos, cualidades, colores \\
+Interrogativos & 20 & qué, quién, dónde, cuándo, cómo, por qué \\
+Otros & 82 & conjunciones, marcadores, determinantes, preposiciones \\
+\hline
+\textit{Total} & \textit{646} & \\
+\hline
+\end{tabular}
+\caption{Distribución del vocabulario por categoría.}
+\label{tab:f1-vocabulario}
+\end{table}
+
+La inicialización del léxico sigue cinco fases: definición de los conjuntos de vocabulario por categoría, asignación de rasgos semánticos, mapeo de géneros, construcción del índice inverso de verbos (forma conjugada $\rightarrow$ infinitivo) y generación del índice principal.
+
+\subsection{Sistema de rasgos semánticos}
+
+Cada sustantivo, persona y lugar tiene asociados ocho rasgos semánticos booleanos: \texttt{comestible}, \texttt{bebible}, \texttt{animado}, \texttt{humano}, \texttt{lugar}, \texttt{peligroso}, \texttt{legible} y \texttt{audible}. La asignación es automática a partir de los conjuntos de vocabulario: todos los elementos de \texttt{objetos\_comida} reciben \texttt{comestible=True}, todos los de \texttt{objetos\_bebida} reciben \texttt{bebible=True}, y así sucesivamente.
+
+Estos rasgos alimentan dos mecanismos del pipeline. Las restricciones de selección verifican la compatibilidad semántica entre verbos y argumentos ---por ejemplo, \textit{comer} exige un objeto comestible y un sujeto animado---. Las restricciones de seguridad generan advertencias críticas cuando se detectan combinaciones potencialmente peligrosas, como \textit{beber lejía}, donde el rasgo \texttt{peligroso=True} activa una alerta que reduce la confianza de la salida a 0,5.
+
+\subsection{Sistema de género}
+
+El sistema soporta cuatro valores de género: \texttt{masculino}, \texttt{femenino}, \texttt{neutro} y \texttt{femenino\_el}. Este último merece atención especial porque modela sustantivos femeninos que toman artículo masculino (\textit{el agua}, \textit{el hambre}), donde la concordancia del artículo es masculina pero la del adjetivo sigue siendo femenina.
+
+\section{Análisis de patrones sintácticos}
+\label{sec:f1-patrones}
+
+El parser define 46 patrones sintácticos organizados en seis grupos, ordenados por prioridad descendente. Cuando una secuencia de entrada coincide con varios patrones, se selecciona el de mayor prioridad; a igualdad de prioridad, se prefiere el de mayor longitud.
+
+\subsection{Patrones compuestos (prioridad 9-10)}
+
+Siete patrones capturan oraciones con marcadores temporales y coordinación. Los temporales combinan un marcador (\textit{ahora}, \textit{mañana}, \textit{después}) con un verbo y sus complementos ---por ejemplo, el patrón \texttt{temporal\_necesidad\_verbo} reconoce la secuencia \texttt{[marcador\_temporal, verbo\_necesidad, verbo\_accion]} y genera oraciones como \textit{Ahora quiero jugar}---. Los patrones de coordinación reconocen objetos y verbos unidos por conjunciones: \texttt{[objeto, conjunción, objeto]} para \textit{agua y pan}, \texttt{[verbo\_accion, conjunción, verbo\_accion]} para \textit{comer y beber}.
+
+\subsection{Patrones interrogativos (prioridad 8)}
+
+Ocho patrones cubren las interrogativas, distinguiendo según la partícula interrogativa y el tipo de verbo. El patrón \texttt{interrogativa\_donde\_verbo\_sujeto} reconoce secuencias como \texttt{[interrogativo, verbo\_accion, persona]} para generar \textit{¿Dónde está mamá?}, mientras que \texttt{interrogativa\_que\_verbo} captura \texttt{[interrogativo, verbo\_accion]} para producir \textit{¿Qué quieres?}. La detección de la persona gramatical en interrogativas sigue reglas específicas: \textit{quién} implica tercera persona, \textit{qué} implica segunda persona por defecto, y la presencia de un sujeto explícito tras el verbo fuerza tercera persona.
+
+\subsection{Patrones negativos (prioridad 7)}
+
+Seis patrones reconocen oraciones negativas, siempre con la partícula \textit{no} en posición inicial: desde \texttt{negativa\_necesidad\_objeto} (\textit{No quiero agua}) hasta \texttt{negativa\_estado\_sustantivo} (\textit{No tengo hambre}). La negación se procesa en dos fases: el parser la detecta como flag y el postprocesador la inserta en la posición correcta durante el formateo final.
+
+\subsection{Patrones de necesidad (prioridad 1-6)}
+
+El grupo más numeroso, con diecisiete patrones, cubre las expresiones de deseo y necesidad que constituyen la base de la comunicación en CAA. Los patrones de mayor prioridad reconocen secuencias completas como \texttt{[pronombre, verbo\_necesidad, verbo\_accion, objeto, adjetivo]} (\textit{Yo quiero comer una manzana roja}), mientras que los de menor prioridad capturan entradas mínimas como un solo objeto o un solo lugar, activando la inferencia de elementos implícitos.
+
+\subsection{Patrones de estado y descripción}
+
+Cinco patrones de estado (prioridad 2-4) cubren expresiones como \textit{Yo estoy cansado} o \textit{Tengo mucha hambre}, distinguiendo entre adjetivos y sustantivos de estado. Tres patrones de descripción (prioridad 3) manejan atribuciones con verbos copulativos: \textit{Mamá es bonita}, \textit{El perro es grande}, \textit{La casa es grande}, diferenciando el tratamiento de determinantes según el sujeto sea persona, objeto o lugar.
+
+\section{Pipeline de postprocesamiento}
+\label{sec:f1-postprocesamiento}
+
+El postprocesador transforma la secuencia tokenizada en una oración natural a través de nueve etapas secuenciales. Cada etapa recibe el resultado de la anterior y puede añadir, modificar o reordenar palabras, registrando cada transformación como una inferencia trazable.
+
+\subsection{Detección de sujeto y verbo}
+
+La primera etapa recorre los tokens para extraer el sujeto explícito (si hay pronombre), la persona gramatical, el verbo principal y el marcador temporal. Cuando no hay sujeto explícito y la oración no es interrogativa, el sistema asume primera persona singular ---el caso típico en CAA, donde el usuario habla de sí mismo---.
+
+\subsection{Inferencia de elementos faltantes}
+
+Esta etapa constituye el núcleo de la inteligencia del sistema. Detecta elementos implícitos en la entrada del usuario y los añade explícitamente, siguiendo un conjunto de reglas que priorizan la inferencia conservadora. Cuando la entrada contiene solo un objeto (\textit{agua}), se inserta el verbo \textit{quiero}; cuando contiene solo un lugar (\textit{baño}), se insertan \textit{quiero} e \textit{ir}; cuando contiene un infinitivo sin verbo modal (\textit{comer manzana}), se antepone \textit{quiero}. La inferencia opera exclusivamente en primera persona y no se activa en interrogativas, evitando asumir la intención del usuario cuando pregunta sobre terceros.
+
+\subsection{Validación semántica}
+
+La tercera etapa verifica la compatibilidad entre verbos y sus argumentos mediante dos conjuntos de restricciones. Las restricciones de selección, definidas para 16 verbos, comprueban rasgos como \texttt{comestible}, \texttt{animado} o \texttt{lugar}. Las restricciones de seguridad, definidas para \textit{comer} y \textit{beber}, detectan objetos con el rasgo \texttt{peligroso=True} y generan advertencias críticas. Las violaciones semánticas no bloquean la generación sino que reducen la confianza de la salida, permitiendo que el sistema responda incluso ante combinaciones inusuales.
+
+\subsection{Conjugación verbal}
+
+La cuarta etapa conjuga el verbo principal según la persona y número del sujeto. El motor de conjugación mantiene tablas completas para 24 verbos irregulares (144 formas conjugadas) y aplica reglas morfológicas regulares (sufijos \textit{-ar}, \textit{-er}, \textit{-ir}) para el resto. Solo se conjuga el verbo en posición principal; los verbos en posición de complemento se mantienen en infinitivo (\textit{quiero \textit{comer}}, no \textit{quiero como}).
+
+\subsection{Inserción de determinantes}
+
+La quinta etapa decide qué determinante acompaña a cada sustantivo, una decisión que depende del contexto sintáctico. Los sustantivos incontables (agua, pan, leche) no reciben determinante tras verbos de necesidad. Los objetos con artículo definido (televisión, teléfono, música) usan \textit{el/la} en lugar de \textit{un/una}. En interrogativas se utiliza artículo definido (\textit{¿Dónde está el perro?}). En coordinaciones, la coherencia entre los miembros determina el tratamiento: si un elemento es incontable, el otro también omite el determinante.
+
+\subsection{Inserción de preposiciones}
+
+La sexta etapa selecciona la preposición correcta para complementos de lugar, utilizando tres diccionarios: preposiciones por verbo de movimiento (9 verbos: \textit{ir} $\rightarrow$ \textit{a}, \textit{venir} $\rightarrow$ \textit{de}), preposiciones por lugar con verbos de movimiento (35 lugares: \textit{baño} $\rightarrow$ \textit{al}, \textit{escuela} $\rightarrow$ \textit{a la}) y preposiciones de ubicación para verbos de estado (19 lugares: \textit{colegio} $\rightarrow$ \textit{en el}). La lógica busca hacia atrás desde el lugar hasta encontrar el verbo que lo rige, y selecciona el diccionario apropiado según el tipo de verbo.
+
+\subsection{Contracciones, concordancia y formateo}
+
+Las tres últimas etapas aplican transformaciones de superficie. Las contracciones fusionan \textit{a el} en \textit{al} y \textit{de el} en \textit{del}. La concordancia de género ajusta los adjetivos al género del sustantivo que modifican: ante un sustantivo femenino, un adjetivo terminado en \textit{-o} muta a \textit{-a} (\textit{cansado} $\rightarrow$ \textit{cansada}), mientras que los adjetivos invariables (\textit{feliz}, \textit{triste}, \textit{azul}) permanecen inalterados. El formateo final capitaliza la primera letra, inserta la negación en la posición correcta (antes del verbo conjugado) y envuelve las interrogativas con los signos \textit{¿...?}.
+
+\section{Organización del código}
+\label{sec:f1-codigo}
+
+El motor se implementa en 4.330 líneas distribuidas en siete archivos, cada uno con una responsabilidad delimitada.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r l}
+\hline
+Archivo & Líneas & Propósito \\
+\hline
+\texttt{models.py} & 355 & Modelos de datos, enumeraciones y excepciones \\
+\texttt{lexicon.py} & 1.208 & Léxico categorizado e índice invertido \\
+\texttt{parser.py} & 727 & 46 patrones sintácticos y tokenización \\
+\texttt{conjugation.py} & 482 & Motor de conjugación (24 irregulares + regulares) \\
+\texttt{postprocessor.py} & 1.148 & Pipeline de 9 etapas de postprocesamiento \\
+\texttt{generator.py} & 353 & Orquestador principal y alternativas \\
+\texttt{\_\_init\_\_.py} & 57 & API pública del módulo \\
+\hline
+\textit{Total} & \textit{4.330} & \\
+\hline
+\end{tabular}
+\caption{Estructura del código del motor de gramática formal.}
+\label{tab:f1-codigo}
+\end{table}
+
+Las decisiones de diseño más relevantes son la ausencia total de dependencias externas, el uso de dataclasses inmutables para el flujo de datos y la separación estricta entre conocimiento lingüístico (léxico), análisis (parser) y transformación (postprocesador). Esta separación permite modificar las reglas de un componente sin afectar a los demás.
+
+\section{Resultados}
+\label{sec:f1-resultados}
+
+La evaluación sobre el corpus de 115 casos arroja los resultados que muestra la Tabla~\ref{tab:f1-resultados}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r}
+\hline
+Métrica & Valor \\
+\hline
+Cobertura & 88,46\% (115 de 130 patrones reconocidos) \\
+Exact Match (casos parseables) & 100\% \\
+BLEU-1 corpus & 0,8846 \\
+BLEU-4 corpus & 0,8074 \\
+ROUGE-L $F_1$ & 0,9211 \\
+Latencia media & $<$1 ms \\
+\hline
+\end{tabular}
+\caption{Resultados del motor de gramática formal.}
+\label{tab:f1-resultados}
+\end{table}
+
+El dato más destacado es la combinación de cobertura limitada con precisión perfecta: para todo caso que el sistema logra parsear, la oración generada coincide exactamente con la referencia. Las 15 entradas que el sistema rechaza corresponden a patrones no contemplados en los 46 patrones definidos ---secuencias cuya estructura categorial no coincide con ningún patrón conocido---.
+
+Esta dualidad revela tanto la fortaleza como la limitación fundamental del enfoque. La gramática ofrece garantías absolutas de corrección dentro de su dominio de cobertura, pero cada nuevo patrón comunicativo requiere definir explícitamente la regla correspondiente. La barrera de cobertura del 88,46\% constituye la motivación directa para la Fase 2, que busca superar este techo sin abandonar completamente el control gramatical.

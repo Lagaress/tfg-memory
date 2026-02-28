@@ -1,0 +1,126 @@
+Los capítulos anteriores han descrito tres técnicas de generación de lenguaje natural de complejidad creciente, cada una evaluada individualmente sobre el mismo corpus de 115 casos. Este capítulo las confronta directamente: primero con métricas cuantitativas, luego con un análisis por categoría semántica, después con ejemplos cualitativos donde las técnicas divergen, y finalmente con una discusión sobre los compromisos de diseño que cada una impone.
+
+\section{Comparación cuantitativa}
+\label{sec:comp-cuantitativa}
+
+La Tabla~\ref{tab:comparativa-global} resume las métricas de las cuatro configuraciones evaluadas ---gramática formal, enfoque híbrido, GPT-4o-mini y GPT-4o--- sobre el mismo corpus de 115 casos.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r r r r}
+\hline
+Métrica & Gramática & Híbrido & GPT-4o-mini & GPT-4o \\
+\hline
+Cobertura & 88,46\% & 100\% & 100\% & 100\% \\
+Exact Match & 100\%$^*$ & Variable & 93,0\% & 92,2\% \\
+BLEU-1 & 0,8846 & 0,8846 & 0,9749 & 0,9663 \\
+BLEU-4 & 0,8074 & 0,6653 & 0,6579 & 0,6515 \\
+ROUGE-L $F_1$ & 0,9211 & 0,9035 & 0,9852 & 0,9797 \\
+Latencia & $<$1 ms & $<$1 ms & $\sim$1 s & $\sim$1,4 s \\
+\hline
+\end{tabular}
+\caption{Comparación cuantitativa entre las cuatro configuraciones. $^*$Solo sobre los casos parseables (88,46\% del total).}
+\label{tab:comparativa-global}
+\end{table}
+
+La tabla revela un patrón que atraviesa todo este trabajo: no existe una técnica inequívocamente superior. La gramática formal obtiene el Exact Match más alto (100\%) y el mejor BLEU-4 (0,8074), pero solo sobre el 88,46\% de las entradas que logra parsear ---las 15 restantes no producen salida---. El enfoque híbrido resuelve el problema de cobertura (100\%) pero a costa de una precisión puntual menor. Los modelos de lenguaje combinan cobertura total con un Exact Match global alto (93\%), pero introducen latencia de red y coste económico.
+
+La métrica BLEU-1, que mide la adecuación léxica a nivel de palabra, sitúa a GPT-4o-mini por delante con 0,9749, lo que indica que el modelo utiliza las palabras correctas en la gran mayoría de los casos. Sin embargo, BLEU-4, que refleja la fluidez y el orden, favorece a la gramática formal: cuando esta produce una oración, la secuencia de palabras coincide casi perfectamente con la referencia. ROUGE-L confirma la tendencia: GPT-4o-mini lidera (0,9852), lo que sugiere que su estructura secuencial se acerca más a la referencia que la de las otras técnicas.
+
+\section{Análisis por categoría}
+\label{sec:comp-categorias}
+
+El desglose por categoría semántica revela fortalezas y debilidades específicas de cada técnica, resumidas en la Tabla~\ref{tab:comparativa-categorias}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r r r r}
+\hline
+ & \multicolumn{4}{c}{Exact Match (\%)} \\
+Categoría & Gramática$^*$ & Híbrido & GPT-4o-mini & GPT-4o \\
+\hline
+Necesidad & 100 & Variable & 80,0 & 85,0 \\
+Movimiento & 100 & Variable & 100,0 & 100,0 \\
+Estado & 100 & Variable & 100,0 & 100,0 \\
+Descripción & 100 & Variable & 90,0 & 100,0 \\
+Negativa & 100 & Variable & 100,0 & 100,0 \\
+Interrogativa & 100 & Variable & 80,0 & 70,0 \\
+Compuesta & 100 & Variable & 93,3 & 80,0 \\
+Concordancia & 100 & Variable & 100,0 & 100,0 \\
+\hline
+\end{tabular}
+\caption{Exact Match por categoría. $^*$La gramática formal solo evalúa los casos que logra parsear; el 100\% se aplica dentro de ese subconjunto.}
+\label{tab:comparativa-categorias}
+\end{table}
+
+Las categorías de movimiento, estado, negativa y concordancia alcanzan el 100\% de Exact Match en los modelos de lenguaje, igualando la perfección de la gramática formal. Son categorías con patrones regulares, bien representadas en los ejemplos \textit{few-shot} y con poca ambigüedad lingüística.
+
+Las categorías de necesidad e interrogativas revelan las diferencias más significativas. En necesidad, los LLMs obtienen 80-85\% de EM debido a la omisión de determinantes y pronombres; la gramática formal, en cambio, resuelve estas decisiones con reglas explícitas que no admiten ambigüedad. En interrogativas ---la categoría más exigente---, GPT-4o solo alcanza el 70\% de EM, por debajo de GPT-4o-mini (80\%). La dificultad reside en la inferencia de persona verbal: los pictogramas \texttt{[qué, comer]} deben expandirse a \textit{¿Qué comes?} (segunda persona) y no a \textit{¿Qué comer?} (infinitivo), una decisión que requiere conocimiento pragmático que el modelo no siempre aplica correctamente.
+
+Las oraciones compuestas también divergen: GPT-4o-mini (93,3\%) supera significativamente a GPT-4o (80\%). El modelo más potente tiende a omitir verbos inferidos y determinantes en oraciones con conjunciones o marcadores temporales, un comportamiento que sugiere que su mayor capacidad de razonamiento le lleva a interpretaciones más literales de los pictogramas, mientras que el modelo menor sigue los \textit{few-shot} de forma más fiel.
+
+\section{Análisis cualitativo}
+\label{sec:comp-cualitativo}
+
+Más allá de las métricas agregadas, los casos individuales donde las técnicas divergen revelan los compromisos de cada enfoque.
+
+\subsection{Casos donde la gramática formal supera al LLM}
+
+Para la entrada \texttt{[agua]}, la gramática formal aplica su regla de inferencia y produce \textit{Quiero agua} con confianza 1,0. GPT-4o-mini genera la misma oración, pero GPT-4o produce simplemente \textit{Agua}, sin inferir el verbo de necesidad. La gramática formal tiene esta inferencia codificada explícitamente; el LLM depende de que el patrón esté cubierto por los \textit{few-shot}.
+
+Para la entrada \texttt{[quiero, un, helado]}, la gramática mantiene el determinante explícito y produce \textit{Quiero un helado}. Ambos LLMs generan \textit{Quiero helado}, omitiendo el artículo indefinido en favor de la brevedad. La regla de brevedad del prompt entra en conflicto con la fidelidad a la entrada.
+
+\subsection{Casos donde el LLM supera a la gramática formal}
+
+Para entradas que no coinciden con ninguno de los 46 patrones de la gramática formal, el LLM produce una salida correcta mientras que la gramática rechaza la entrada. Esto ocurre en el 11,54\% de los casos del corpus.
+
+Para la entrada \texttt{[quiero, manzana, rojo]}, el LLM genera correctamente \textit{Quiero una manzana roja}, corrigiendo el género del adjetivo. La gramática formal también lo resuelve mediante su etapa de concordancia, pero el LLM lo hace sin reglas explícitas, demostrando su capacidad de generalización.
+
+\subsection{Taxonomía de errores por técnica}
+
+Los errores de cada técnica tienen naturalezas diferentes. Los errores de la gramática formal son de omisión: rechaza entradas que no puede parsear, pero nunca produce una oración incorrecta. Los errores del enfoque híbrido son de imprecisión: siempre produce una salida, pero puede asignar roles semánticos incorrectos o predecir preposiciones erróneas. Los errores de los LLMs son de interpretación: omiten determinantes, pronombres o verbos inferidos, reflejando tensiones entre las reglas del prompt.
+
+\section{Compromisos de diseño}
+\label{sec:comp-compromisos}
+
+La Tabla~\ref{tab:comparativa-compromisos} resume los compromisos operativos de cada técnica en dimensiones relevantes para un sistema de CAA real.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l l l l}
+\hline
+Dimensión & Gramática & Híbrido & LLM \\
+\hline
+Latencia & $<$1 ms & $<$1 ms & $\sim$1 s \\
+Coste por consulta & Gratis & Gratis & \$0,00018 \\
+Determinismo & Total & Total & Parcial ($T$=0,3) \\
+Funcionamiento offline & Sí & Sí & No \\
+Dependencias & Ninguna & FastText (4 GB) & API OpenAI \\
+Cobertura & 88,46\% & 100\% & 100\% \\
+Trazabilidad & Completa & Alta & Nula \\
+\hline
+\end{tabular}
+\caption{Compromisos operativos de cada técnica.}
+\label{tab:comparativa-compromisos}
+\end{table}
+
+La latencia merece atención especial. En un sistema de CAA, la velocidad de comunicación del usuario ya está limitada por la selección de pictogramas (8-15 palabras por minuto). Añadir un segundo de latencia por cada oración generada ---como requiere la Fase 3--- penaliza la fluidez de la interacción. Las Fases 1 y 2 operan en sub-milisegundos, haciendo que la generación sea imperceptible para el usuario.
+
+El funcionamiento offline es otro factor determinante. Los dispositivos de CAA se usan en contextos donde la conectividad no está garantizada ---colegios, parques, transportes---. Las Fases 1 y 2 funcionan sin conexión; la Fase 3, no.
+
+El determinismo afecta a la confianza del usuario. En comunicación asistida, la previsibilidad de la salida permite al usuario anticipar el resultado antes de que el sistema lo genere. Con las Fases 1 y 2, la misma selección de pictogramas produce siempre la misma oración; con la Fase 3, puede haber variaciones menores entre ejecuciones.
+
+\section{Discusión}
+\label{sec:comp-discusion}
+
+La pregunta de qué técnica es ``mejor'' no tiene una respuesta única ---depende del contexto de uso---.
+
+Para un dispositivo de CAA portátil que debe funcionar sin conexión, con latencia mínima y determinismo total, la combinación de las Fases 1 y 2 resulta la más adecuada. La gramática formal cubre el núcleo de las expresiones más frecuentes con precisión perfecta, y el enfoque híbrido actúa como respaldo para las entradas que la gramática no reconoce.
+
+Para un servicio con conectividad garantizada donde se prioriza la naturalidad del lenguaje y se acepta un coste marginal por consulta, GPT-4o-mini ofrece el mejor equilibrio: 93\% de Exact Match, cobertura total, latencia aceptable ($\sim$1 segundo) y un coste inferior a dos centésimas de céntimo por oración.
+
+El resultado más relevante de esta comparación no es la superioridad de una técnica sobre otra, sino la complementariedad entre ellas. La progresión de lo simbólico a lo neuronal ha revelado que cada enfoque resuelve de forma natural lo que los otros encuentran difícil: las reglas garantizan corrección gramatical, los embeddings aportan flexibilidad semántica y los LLMs ofrecen generalización lingüística. Un sistema de producción podría combinar las tres técnicas, usando la gramática como primera opción (rápida, determinista, correcta), el enfoque híbrido como segundo recurso y el LLM como fallback para casos no cubiertos.
+
+En relación con los objetivos del TFG, las tres técnicas cumplen su propósito: transforman secuencias de pictogramas en oraciones naturales en español. La evaluación demuestra que el problema de la generación de lenguaje natural para CAA es abordable con técnicas de diferente complejidad, y que la elección entre ellas responde a restricciones del entorno de despliegue más que a diferencias absolutas de calidad.
+
+Las limitaciones de esta evaluación incluyen el tamaño del corpus (115 casos), que puede no cubrir toda la variabilidad de la comunicación real en CAA; el hecho de que las referencias fueron creadas por un único anotador, lo que introduce sesgo en el estándar de referencia; y la ausencia de evaluación con usuarios reales, que aportaría una perspectiva sobre la percepción de calidad que las métricas automáticas no capturan.

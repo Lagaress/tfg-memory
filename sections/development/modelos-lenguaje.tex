@@ -1,0 +1,180 @@
+La tercera y última técnica abandona las reglas explícitas y delega la generación lingüística a modelos de lenguaje grandes. Este capítulo describe cómo se guía un LLM comercial mediante ingeniería de prompts para resolver el mismo problema que las dos fases anteriores abordaron con gramáticas y embeddings.
+
+\section{Planteamiento del enfoque}
+\label{sec:f3-planteamiento}
+
+Las dos fases anteriores comparten una característica: todo el conocimiento lingüístico está codificado manualmente, ya sea como reglas gramaticales, patrones sintácticos, tablas de conjugación o prototipos vectoriales. La Fase 3 explora una alternativa radical: prescindir de reglas explícitas y delegar la generación a un modelo que ha aprendido las regularidades del español a partir de cantidades masivas de texto.
+
+La elección de GPT-4o y GPT-4o-mini como modelos responde a factores pragmáticos. Ambos representan el estado del arte en generación de texto en español, con capacidades de seguimiento de instrucciones que permiten restringir el comportamiento al dominio CAA sin necesidad de ajuste fino. El despliegue vía API elimina la necesidad de infraestructura GPU, haciendo viable la experimentación en el contexto de un TFG. Se evalúan dos modelos para determinar si la mayor capacidad de GPT-4o se traduce en mejor rendimiento para esta tarea específica.
+
+Los compromisos de este enfoque son explícitos. Por un lado, se gana flexibilidad: el modelo puede manejar construcciones no previstas, corregir concordancia de género y generar oraciones naturales sin reglas explícitas. Por otro, se pierde determinismo ---la misma entrada puede producir salidas ligeramente diferentes entre ejecuciones---, se introduce una dependencia de red y de un servicio de pago, y se pierde la trazabilidad completa de cada decisión que ofrecían las fases anteriores.
+
+\section{Diseño del prompt}
+\label{sec:f3-prompt}
+
+La ingeniería de prompts es el componente central de este motor. A diferencia de un modelo ajustado (\textit{fine-tuned}), toda la adaptación al dominio CAA se codifica en el prompt enviado en cada llamada a la API.
+
+\subsection{System prompt}
+
+El \textit{system prompt} define el rol del modelo ---motor de lenguaje de una aplicación CAA--- y establece once reglas estrictas que gobiernan la generación. Las reglas cubren cuatro aspectos.
+
+La \textit{fidelidad semántica} (regla 1) es la restricción más importante: la oración debe expresar exactamente el significado de los pictogramas proporcionados, sin añadir información ni conceptos ausentes en la entrada. En un contexto CAA, generar contenido no seleccionado por el usuario equivaldría a poner en su boca palabras que no ha elegido.
+
+Los \textit{elementos funcionales} (regla 2) especifican qué puede añadir el modelo: artículos, preposiciones de enlace, conjugación verbal y concordancia de género. Estas son las mismas operaciones que las Fases 1 y 2 resolvían con reglas explícitas; aquí se delegan al LLM mediante una instrucción textual.
+
+El \textit{formato y registro} (reglas 3-5, 8, 10) restringe la salida a una única oración en registro coloquial-neutro, sin explicaciones ni alternativas. Sin estas restricciones, los LLMs frecuentemente producen texto adicional como \textit{Aquí tienes la oración:} o generan múltiples variantes.
+
+Las \textit{reglas lingüísticas} (reglas 6-7, 9, 11) cubren fenómenos específicos: interrogativas con signos ¿...?, posición de la negación, omisión del pronombre sujeto (\textit{pro-drop} del español) y concordancia de género. La regla 11, sobre concordancia, fue añadida respecto al diseño original para cubrir la categoría de concordancia del dataset de evaluación.
+
+\subsection{Ejemplos few-shot}
+
+El motor utiliza 15 ejemplos \textit{few-shot} que cubren las ocho categorías del dataset. Cada ejemplo es un par (pictogramas de entrada, oración esperada) que se inyecta como intercambio usuario-asistente en el historial de mensajes.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{r l l l}
+\hline
+\# & Categoría & Pictogramas & Oración \\
+\hline
+1 & Necesidad & quiero + agua & Quiero agua \\
+2 & Necesidad & necesito + dormir & Necesito dormir \\
+3 & Necesidad & quiero + comer + manzana & Quiero comer una manzana \\
+4 & Inferencia & agua & Quiero agua \\
+5 & Movimiento & ir + baño & Quiero ir al baño \\
+6 & Estado & estoy + cansado & Estoy cansado \\
+7 & Estado & tengo + hambre & Tengo hambre \\
+8 & Descripción & perro + es + grande & El perro es grande \\
+9 & Interrogativa & dónde + estar + mamá & ¿Dónde está mamá? \\
+10 & Interrogativa & qué + comer & ¿Qué comes? \\
+11 & Negación & no + quiero + dormir & No quiero dormir \\
+12 & Negación & no + tengo + hambre & No tengo hambre \\
+13 & Compuesta & agua + y + pan & Quiero agua y pan \\
+14 & Compuesta & mañana + ir + colegio & Mañana quiero ir al colegio \\
+15 & Concordancia & quiero + manzana + rojo & Quiero una manzana roja \\
+\hline
+\end{tabular}
+\caption{Los 15 ejemplos \textit{few-shot} del motor de modelos de lenguaje.}
+\label{tab:f3-fewshot}
+\end{table}
+
+Los criterios de selección priorizan la cobertura de patrones que requieren inferencia: el ejemplo 4 enseña al modelo a expandir un solo sustantivo en una oración de necesidad; el ejemplo 5, a insertar la preposición contraída \textit{al}; el ejemplo 15, a corregir la concordancia de género. Los ejemplos se adaptaron al formato real del dataset, que utiliza tanto infinitivos como formas conjugadas como pictogramas de entrada.
+
+\subsection{Construcción dinámica del prompt}
+
+La función \texttt{build\_messages()} ensambla el arreglo de mensajes en el formato de la API de OpenAI Chat Completions. La estructura resultante tiene 32 mensajes: 1 \textit{system}, 15 pares \textit{user/assistant} (30 mensajes de ejemplos \textit{few-shot}) y 1 \textit{user} final con la consulta.
+
+Cada mensaje de usuario formatea los pictogramas incluyendo su categoría gramatical entre paréntesis ---por ejemplo, \texttt{Pictogramas: quiero (verbo modal) + agua (sustantivo)}---. Esta información desambiguadora procede del inventario de metadatos y ayuda al modelo a interpretar correctamente pictogramas polisémicos: \textit{como} puede ser verbo (primera persona de \textit{comer}) o interrogativo (\textit{¿cómo?}), y la categoría aclara la interpretación esperada.
+
+Cada llamada consume aproximadamente 1.204 tokens de entrada, de los cuales la gran mayoría corresponden al \textit{system prompt} y los ejemplos \textit{few-shot}. La consulta del usuario aporta típicamente 10-20 tokens adicionales. Los tokens de salida son muy reducidos: 4 tokens en promedio, coherente con la brevedad de las oraciones de CAA.
+
+\section{Metadatos de pictogramas}
+\label{sec:f3-metadatos}
+
+El inventario de metadatos (\texttt{pictogram\_metadata.py}) contiene 539 entradas que mapean etiquetas de pictogramas a 19 categorías gramaticales. El número de entradas es mayor que el léxico de las fases anteriores porque incluye explícitamente las formas conjugadas más frecuentes: en lugar de resolver la conjugación en tiempo de ejecución, se registran las formas de primera, segunda y tercera persona del singular y del plural.
+
+La función \texttt{get\_metadata()} recibe una etiqueta y devuelve su categoría gramatical y su forma legible (reemplazando guiones bajos por espacios, de modo que \texttt{pasta\_de\_dientes} se presenta como \textit{pasta de dientes}).
+
+El inventario presenta cuatro conflictos de clave duplicada donde una misma forma pertenece a dos categorías: \textit{frío} (adjetivo y sustantivo de estado), \textit{bajo} (adjetivo y preposición), \textit{como} (verbo e interrogativo) y \textit{limpio} (verbo y adjetivo). Python resuelve las duplicaciones manteniendo la última asignación, y en la práctica el LLM interpreta correctamente el significado por contexto, por lo que estos conflictos no afectan a la calidad de la generación.
+
+\section{Cliente de API}
+\label{sec:f3-cliente}
+
+Los modelos se configuran mediante una \textit{dataclass} \texttt{ModelConfig} que encapsula seis parámetros: nombre del modelo, \texttt{max\_tokens} (100), temperatura (0,3), \texttt{top\_p} (0,9), timeout (10 segundos) y reintentos máximos (2).
+
+La temperatura de 0,3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0,3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}. El límite de 100 tokens es generoso para oraciones que promedian 4 tokens de salida, pero actúa como salvaguarda contra generaciones desbordadas. El timeout de 10 segundos refleja que, en una aplicación de comunicación asistida, el usuario espera activamente la respuesta.
+
+El cliente implementa reintentos diferenciados según el tipo de error: los errores de \textit{rate limit} se reintentan con backoff exponencial (2 y 4 segundos), los timeouts se reintentan inmediatamente, y los errores de servidor no se reintentan. Cada llamada devuelve un diccionario con el texto generado, la latencia, los tokens consumidos, el coste estimado y un indicador de éxito.
+
+El coste se estima a partir de los precios de la API: \$2,50/1M tokens de entrada y \$10,00/1M de salida para GPT-4o, frente a \$0,15/1M y \$0,60/1M para GPT-4o-mini. Con la media de 1.204 tokens de entrada y 4 de salida, cada consulta cuesta \$0,00018 con GPT-4o-mini y \$0,00305 con GPT-4o ---una diferencia de factor 16,7$\times$.
+
+\section{Validación post-generación}
+\label{sec:f3-validacion}
+
+A diferencia de las fases anteriores, donde la corrección de la salida está garantizada por las reglas, el motor de LLM requiere un sistema de validación que verifique la calidad de la respuesta generada. El validador implementa un sistema de dos niveles: errores (bloqueantes, que invalidan la respuesta) y advertencias (informativas).
+
+Las verificaciones cubren tres aspectos. La respuesta vacía genera un error inmediato. El formato interrogativo comprueba que, si la entrada contiene un pictograma interrogativo, la respuesta incluya el signo \textit{?}. La cobertura de conceptos, la verificación más compleja, mide qué proporción de los pictogramas de entrada están representados en la oración generada.
+
+\subsection{Algoritmo de cobertura de conceptos}
+
+El algoritmo implementa cuatro niveles de matching aplicados secuencialmente. El primer nivel busca el pictograma como subcadena exacta del texto generado. El segundo extrae la raíz de 4 caracteres del pictograma y la busca en el texto, capturando variaciones morfológicas (\textit{querer} $\rightarrow$ raíz \textit{quer} $\rightarrow$ se encuentra en \textit{quiero}). El tercer nivel mantiene una tabla de raíces irregulares para 12 verbos frecuentes en CAA ---por ejemplo, \textit{ir} con las raíces \textit{voy, vas, va, vamos, van}--- que cubren diptongaciones y formas muy irregulares. El cuarto nivel, como fallback, busca la raíz de 3 caracteres a nivel de palabra.
+
+Se excluyen 36 palabras funcionales del conteo de cobertura (preposiciones, determinantes, conjunciones), ya que el modelo las añade por su cuenta según las reglas del prompt. Los umbrales son: cobertura inferior al 50\% genera un error bloqueante; entre 50\% y 75\%, una advertencia; por encima del 75\%, la respuesta se acepta sin observaciones.
+
+\section{Organización del código}
+\label{sec:f3-codigo}
+
+El motor se organiza en tres paquetes: \texttt{config} (prompts y configuración de modelos), \texttt{core} (cliente de API, constructor de prompts, validador y orquestador) y \texttt{evaluation} (métricas, evaluador y reportes).
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r l}
+\hline
+Módulo & Líneas & Propósito \\
+\hline
+\texttt{config/prompts.py} & 120 & System prompt, reglas y ejemplos few-shot \\
+\texttt{config/models.py} & 30 & Configuración de GPT-4o y GPT-4o-mini \\
+\texttt{core/prompt\_builder.py} & 65 & Construcción dinámica de mensajes \\
+\texttt{core/llm\_client.py} & 90 & Cliente de API con reintentos \\
+\texttt{core/response\_validator.py} & 110 & Validación de cobertura de conceptos \\
+\texttt{core/engine.py} & 80 & Orquestador del pipeline \\
+\texttt{core/pictogram\_metadata.py} & 180 & 539 entradas de metadatos \\
+\texttt{evaluation/metrics.py} & 85 & BLEU, ROUGE-L, Exact Match \\
+\texttt{evaluation/evaluator.py} & 95 & Evaluación del dataset \\
+\texttt{evaluation/report.py} & 70 & Generación de informes \\
+\hline
+\end{tabular}
+\caption{Estructura del código del motor de modelos de lenguaje.}
+\label{tab:f3-codigo}
+\end{table}
+
+La dependencia principal es la librería \texttt{openai} para las llamadas a la API. BERTScore se incluye como dependencia opcional para la evaluación semántica.
+
+\section{Resultados}
+\label{sec:f3-resultados}
+
+La evaluación de ambos modelos sobre los 115 casos del dataset arroja los resultados que muestran las Tablas~\ref{tab:f3-resultados-global} y~\ref{tab:f3-resultados-categoria}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r r}
+\hline
+Métrica & GPT-4o-mini & GPT-4o \\
+\hline
+Exact Match & 93,0\% & 92,2\% \\
+BLEU-1 & 0,9749 & 0,9663 \\
+BLEU-4 & 0,6579 & 0,6515 \\
+ROUGE-L $F_1$ & 0,9852 & 0,9797 \\
+Cobertura de conceptos & 99,5\% & 100,0\% \\
+Latencia media & 1.032 ms & 1.397 ms \\
+Coste por caso & \$0,00018 & \$0,00305 \\
+Coste total (115 casos) & \$0,021 & \$0,351 \\
+\hline
+\end{tabular}
+\caption{Resultados globales del motor de modelos de lenguaje.}
+\label{tab:f3-resultados-global}
+\end{table}
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r r r r}
+\hline
+ & \multicolumn{2}{c}{GPT-4o-mini} & \multicolumn{2}{c}{GPT-4o} \\
+Categoría & BLEU-1 & EM & BLEU-1 & EM \\
+\hline
+Necesidad & 0,937 & 80,0\% & 0,934 & 85,0\% \\
+Movimiento & 1,000 & 100,0\% & 1,000 & 100,0\% \\
+Estado & 1,000 & 100,0\% & 1,000 & 100,0\% \\
+Descripción & 0,975 & 90,0\% & 1,000 & 100,0\% \\
+Negativa & 1,000 & 100,0\% & 1,000 & 100,0\% \\
+Interrogativa & 0,883 & 80,0\% & 0,833 & 70,0\% \\
+Compuesta & 0,985 & 93,3\% & 0,940 & 80,0\% \\
+Concordancia & 1,000 & 100,0\% & 1,000 & 100,0\% \\
+\hline
+\end{tabular}
+\caption{Resultados por categoría del motor de modelos de lenguaje.}
+\label{tab:f3-resultados-categoria}
+\end{table}
+
+El hallazgo más notable es que GPT-4o-mini iguala o supera a GPT-4o en todas las métricas de calidad, con un coste 16,7 veces menor y una latencia un 26\% inferior. La única métrica donde GPT-4o es marginalmente superior es la cobertura de conceptos (100,0\% frente a 99,5\%), una diferencia prácticamente irrelevante.
+
+El análisis de errores revela cuatro patrones recurrentes. La \textit{omisión de determinantes} es el más frecuente en ambos modelos: generan \textit{Quiero helado} en lugar de \textit{Quiero un helado}, reflejo de la tensión entre la regla de brevedad y la de elementos funcionales. La \textit{omisión del pronombre ``yo''} afecta solo a GPT-4o-mini, que aplica la regla de sujetos implícitos de forma más agresiva de lo deseado. La \textit{no inferencia de verbo} afecta solo a GPT-4o, que ante un solo sustantivo como \textit{agua} genera simplemente \textit{Agua} en lugar de inferir \textit{Quiero agua} ---una paradoja donde el modelo más potente falla en una heurística que el menor maneja correctamente---. Las \textit{interrogativas} son la categoría más problemática para ambos modelos (70-80\% de Exact Match), con errores de conjugación y persona verbal que requieren una inferencia contextual que las 2 interrogativas de los 15 ejemplos \textit{few-shot} no cubren suficientemente.

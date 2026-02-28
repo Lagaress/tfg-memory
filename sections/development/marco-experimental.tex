@@ -1,0 +1,152 @@
+Antes de describir cada técnica de generación de lenguaje natural, conviene establecer el marco experimental que las tres comparten. Este capítulo define la arquitectura general del sistema, el conjunto de datos con el que se evalúan, las métricas que cuantifican su rendimiento y el entorno tecnológico en el que operan. De este modo, los capítulos siguientes pueden centrarse exclusivamente en las decisiones de diseño y los detalles de implementación de cada enfoque, sin repetir el contexto experimental.
+
+\section{Descripción general del sistema}
+\label{sec:descripcion-sistema}
+
+El sistema Dixi transforma secuencias de pictogramas ARASAAC en oraciones naturales en español. Su arquitectura sigue un diseño modular donde la entrada ---una lista ordenada de etiquetas de pictogramas--- atraviesa un motor de generación de lenguaje natural y produce como salida una oración gramaticalmente correcta que, opcionalmente, un motor de síntesis de voz convierte en audio.
+
+El aspecto central de este trabajo es el motor de generación. En lugar de implementar un único enfoque, se han desarrollado tres motores independientes que resuelven el mismo problema con técnicas de complejidad creciente:
+
+\begin{itemize}
+    \item La \textit{Fase 1} emplea una gramática formal extendida con restricciones de selección semánticas. Opera mediante pattern-matching sobre categorías gramaticales y reglas deterministas de inferencia contextual, sin dependencias externas de aprendizaje automático.
+    \item La \textit{Fase 2} combina reglas gramaticales con embeddings de palabras. Utiliza vectores FastText para tomar decisiones semánticas ---como la predicción de preposiciones--- que una gramática puramente simbólica no puede resolver de forma general.
+    \item La \textit{Fase 3} delega la generación lingüística a modelos de lenguaje grandes (GPT-4o y GPT-4o-mini) mediante ingeniería de prompts, prescindiendo de reglas explícitas.
+\end{itemize}
+
+Los tres motores reciben exactamente la misma entrada y producen el mismo tipo de salida, lo que permite una comparación directa. Esta progresión ---de lo simbólico a lo neuronal, de lo determinista a lo probabilístico--- no es casual: cada fase surge de las limitaciones observadas en la anterior y representa un compromiso diferente entre control, cobertura, coste y flexibilidad.
+
+\section{Conjunto de datos de evaluación}
+\label{sec:dataset}
+
+La evaluación de los tres motores se realiza sobre un corpus de 115 casos de prueba diseñado específicamente para este proyecto. Cada caso consiste en una secuencia de pictogramas de entrada y la oración de referencia esperada como salida.
+
+\subsection{Estructura y categorías}
+
+Los 115 casos se distribuyen en ocho categorías semánticas que cubren los principales patrones comunicativos de un usuario de CAA:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l l r}
+\hline
+Categoría & Descripción & Casos \\
+\hline
+Necesidad & Expresiones de deseo o necesidad & 25 \\
+Movimiento & Desplazamiento a lugares & 15 \\
+Estado & Estados físicos o emocionales & 15 \\
+Descripción & Atributos de personas u objetos & 15 \\
+Negativa & Oraciones con negación & 10 \\
+Interrogativa & Preguntas con partícula interrogativa & 15 \\
+Compuesta & Coordinación de elementos & 10 \\
+Concordancia & Concordancia de género y número & 10 \\
+\hline
+\textit{Total} & & \textit{115} \\
+\hline
+\end{tabular}
+\caption{Distribución de los casos de prueba por categoría semántica.}
+\label{tab:dataset-categorias}
+\end{table}
+
+Cada categoría presenta desafíos lingüísticos específicos. Las oraciones de necesidad requieren inferir el verbo modal \textit{querer} cuando el usuario omite la intención; las de movimiento exigen seleccionar la preposición correcta según el lugar de destino; las interrogativas demandan invertir el orden sujeto-verbo; y las compuestas necesitan coordinación con conjunciones.
+
+\subsection{Formato de los casos}
+
+Cada caso de prueba se define como un par (entrada, referencia). La entrada es una lista de cadenas que representan las etiquetas de los pictogramas seleccionados por el usuario, y la referencia es la oración esperada en español natural. Por ejemplo:
+
+\begin{lstlisting}[language={},caption={Ejemplo de caso de prueba del corpus de evaluación.}]
+Entrada:    ["agua"]
+Referencia: "Quiero agua"
+
+Entrada:    ["yo", "querer", "comer", "manzana"]
+Referencia: "Yo quiero comer una manzana"
+
+Entrada:    ["donde", "estar", "mama"]
+Referencia: "¿Donde esta mama?"
+\end{lstlisting}
+
+Nótese que la entrada puede variar en longitud desde un solo pictograma ---caso en el que el sistema debe inferir elementos omitidos--- hasta secuencias de cuatro o más pictogramas donde la tarea consiste principalmente en añadir los elementos funcionales (artículos, preposiciones, conjugaciones) que los pictogramas no codifican.
+
+\subsection{Criterios de diseño del corpus}
+
+El corpus se ha construido siguiendo tres criterios. En primer lugar, representatividad: las categorías reflejan las necesidades comunicativas más frecuentes de los usuarios de CAA, priorizando las expresiones de necesidad y deseo que constituyen la base de la comunicación funcional. En segundo lugar, gradualidad: dentro de cada categoría se incluyen casos de complejidad creciente, desde entradas mínimas que exigen máxima inferencia hasta secuencias completas donde el sistema solo debe aplicar morfología. En tercer lugar, cobertura gramatical: el conjunto abarca los principales fenómenos del español relevantes para CAA ---concordancia de género, contracciones, selección de preposiciones, interrogativas, negación y coordinación.
+
+\section{Métricas de evaluación}
+\label{sec:metricas}
+
+Se emplean cinco métricas principales para evaluar la calidad de las oraciones generadas, complementadas con medidas de rendimiento operativo.
+
+\subsection{Exact Match}
+
+La métrica más estricta: compara la predicción con la referencia carácter a carácter, tras normalizar a minúsculas y eliminar espacios sobrantes. Devuelve 1 si la oración generada es idéntica a la referencia y 0 en cualquier otro caso. Su valor reside en que una coincidencia exacta garantiza corrección completa, pero su limitación es que penaliza por igual una variación menor (un artículo de más) y una oración completamente incorrecta.
+
+$$\text{EM}(p, r) = \begin{cases} 1 & \text{si } \text{lower}(\text{strip}(p)) = \text{lower}(\text{strip}(r)) \\ 0 & \text{en otro caso} \end{cases}$$
+
+\subsection{BLEU}
+
+BLEU (\textit{Bilingual Evaluation Understudy}) mide la precisión de n-gramas entre la predicción y la referencia. Se calculan BLEU-1 (unigramas) y BLEU-4 (hasta 4-gramas), este último con suavizado +1 para evitar valores nulos en oraciones cortas donde no existen coincidencias de n-gramas de orden alto.
+
+La precisión para n-gramas de orden $n$ se define como:
+
+$$\text{precisión}_n = \frac{\text{coincidencias}_n + 1}{|\text{ngramas\_pred}_n| + 1}$$
+
+El suavizado aditivo es necesario porque las oraciones de CAA son típicamente cortas (3-7 palabras), lo que hace frecuente la ausencia de 4-gramas compartidos incluso entre predicciones razonables.
+
+BLEU-1 captura la adecuación léxica ---si las palabras correctas están presentes---, mientras que BLEU-4, al considerar secuencias más largas, refleja también la fluidez y el orden de las palabras. Ambas métricas se complementan: una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto.
+
+\subsection{ROUGE-L}
+
+ROUGE-L se basa en la subsecuencia común más larga (\textit{Longest Common Subsequence}, LCS) entre la predicción y la referencia. A diferencia de BLEU, que requiere n-gramas consecutivos, ROUGE-L permite omisiones entre las palabras coincidentes, lo que la hace más tolerante con variaciones en el orden.
+
+A partir de la longitud de la LCS se calculan precisión, recall y su media armónica $F_1$:
+
+$$\text{precisión} = \frac{\text{LCS}}{|\text{pred}|}, \quad \text{recall} = \frac{\text{LCS}}{|\text{ref}|}$$
+
+$$F_1 = \frac{2 \cdot \text{precisión} \cdot \text{recall}}{\text{precisión} + \text{recall}}$$
+
+ROUGE-L resulta especialmente útil en este contexto porque captura la estructura secuencial de la oración sin penalizar la inserción de elementos adicionales (como artículos que el sistema añade correctamente pero que no figuran en la referencia de la misma forma).
+
+\subsection{Cobertura}
+
+La cobertura mide el porcentaje de casos del corpus para los que el sistema produce una salida válida, frente a los que rechaza o falla. Esta métrica es relevante porque la Fase 1, al operar con pattern-matching, solo puede procesar secuencias que coincidan con alguno de sus patrones sintácticos predefinidos, rechazando el resto.
+
+$$\text{Cobertura} = \frac{\text{casos con salida válida}}{\text{total de casos}} \times 100$$
+
+Las Fases 2 y 3, por su diseño, alcanzan cobertura del 100\%: la Fase 2 dispone de un mecanismo de fallback y la Fase 3 delega al LLM, que siempre genera alguna respuesta.
+
+\subsection{BERTScore}
+
+BERTScore evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT. A diferencia de las métricas anteriores, que operan a nivel de tokens o n-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que \textit{deseo} y \textit{quiero} expresan significados cercanos aunque no compartan tokens.
+
+Esta métrica se emplea exclusivamente en la evaluación de la Fase 3, donde el modelo de lenguaje puede generar paráfrasis válidas que las métricas de coincidencia exacta penalizarían. Para las Fases 1 y 2, cuyas salidas son deterministas y predecibles, las métricas de n-gramas resultan suficientes.
+
+\subsection{Métricas operativas}
+
+Además de la calidad lingüística, se miden dos aspectos operativos relevantes para un sistema de CAA:
+
+\begin{itemize}
+    \item \textit{Latencia}: tiempo de procesamiento por consulta, medido con temporizadores de alta resolución. En un sistema de comunicación, la latencia percibida por el usuario afecta directamente la fluidez de la interacción.
+    \item \textit{Coste}: aplicable únicamente a la Fase 3, que utiliza una API comercial de pago. Se estima a partir del número de tokens procesados por consulta y las tarifas del proveedor.
+\end{itemize}
+
+\section{Entorno tecnológico}
+\label{sec:entorno}
+
+Los tres motores se implementan en Python 3.10+ y comparten la estructura de evaluación, pero difieren sustancialmente en sus dependencias:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l l l}
+\hline
+Fase & Dependencias principales & Requisitos de hardware \\
+\hline
+Fase 1 & Ninguna (biblioteca estándar) & CPU \\
+Fase 2 & FastText (modelo cc.es.300.bin, 4 GB) & CPU, 6 GB RAM \\
+Fase 3 & API OpenAI (GPT-4o / GPT-4o-mini) & Conexión a Internet \\
+\hline
+\end{tabular}
+\caption{Dependencias y requisitos por fase.}
+\label{tab:dependencias}
+\end{table}
+
+La progresión en dependencias refleja un compromiso recurrente en el diseño del sistema: la Fase 1 funciona en cualquier entorno con Python instalado, la Fase 2 requiere descargar un modelo de embeddings de 4 GB y disponer de memoria suficiente para cargarlo, y la Fase 3 necesita conexión a Internet y una clave de API con coste asociado. Esta gradación en requisitos es relevante para el despliegue real en dispositivos de CAA, donde la conectividad no siempre está garantizada.
+
+La evaluación se ejecuta en un entorno unificado para garantizar la comparabilidad: un equipo con procesador Apple M1, 16 GB de RAM y macOS, utilizando Python 3.12. Las mediciones de latencia se realizan en condiciones equivalentes, con la salvedad de que la Fase 3 incluye el tiempo de red de la llamada a la API.

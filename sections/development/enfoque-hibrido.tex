@@ -1,0 +1,143 @@
+La segunda técnica surge de una limitación concreta de la gramática formal: su cobertura del 88,46\% implica que una de cada nueve entradas no produce salida alguna. Este capítulo describe un enfoque híbrido que combina reglas gramaticales con embeddings de palabras para superar ese techo sin abandonar el control sobre la generación.
+
+\section{Planteamiento del enfoque}
+\label{sec:f2-planteamiento}
+
+La motivación para esta segunda fase es precisa: la gramática formal alcanza el 100\% de Exact Match en los casos que reconoce, pero rechaza toda entrada cuya secuencia de categorías no coincida con alguno de sus 46 patrones predefinidos. Ampliar la cobertura añadiendo más patrones es posible pero no escalable ---cada nuevo patrón comunicativo exige definir explícitamente su regla, y la combinatoria de posibles secuencias crece rápidamente---.
+
+La solución adoptada es una arquitectura híbrida que asigna cada decisión lingüística al mecanismo más adecuado para ella. Las reglas gramaticales se encargan de las operaciones deterministas: conjugación verbal, selección de artículos, contracciones y concordancia de género. Los embeddings semánticos intervienen en las decisiones que dependen del significado y que una gramática simbólica no puede resolver de forma general: la predicción de preposiciones (¿\textit{ir al colegio} o \textit{ir en el colegio}?), la validación de combinaciones verbo-argumento y la clasificación de roles semánticos.
+
+Antes de llegar a este diseño se exploró y descartó un enfoque de recuperación semántica (\textit{retrieval}). Dado un conjunto de pictogramas, el sistema buscaba en el corpus de referencia la frase cuya representación vectorial fuese más similar a la composición de los embeddings de entrada. Este enfoque fue abandonado porque el corpus de evaluación era la misma fuente de la que se recuperaban las frases, produciendo métricas artificialmente infladas que no reflejaban capacidad real de generalización: el sistema no generaba frases sino que las copiaba.
+
+\section{Modelo de embeddings}
+\label{sec:f2-embeddings}
+
+El sistema utiliza el modelo preentrenado FastText \texttt{cc.es.300.bin}, entrenado sobre Common Crawl en español. Cada palabra se representa como un vector de 300 dimensiones, y la similitud entre palabras se mide mediante similitud coseno.
+
+La elección de FastText frente a alternativas como Word2Vec, GloVe o BERT responde a una ventaja crítica para el español: el manejo nativo de palabras fuera de vocabulario (\textit{out-of-vocabulary}, OOV). FastText representa cada palabra como la suma de los vectores de sus n-gramas de caracteres, lo que permite generar embeddings razonables para formas morfológicas no vistas durante el entrenamiento ---conjugaciones, diminutivos, formas de género--- sin necesidad de un vocabulario exhaustivo. Word2Vec y GloVe carecen de esta capacidad, devolviendo un vector nulo para cualquier palabra no presente en su vocabulario. BERT ofrece embeddings contextuales superiores pero su latencia ($\sim$50 ms por consulta frente a $\sim$0,01 ms de FastText) y sus dependencias (PyTorch, GPU recomendada) no se justifican para un sistema de consulta puntual sobre palabras individuales.
+
+Para representar una secuencia de pictogramas como un único vector, el sistema implementa tres estrategias de composición vectorial: promedio simple, promedio ponderado ---donde las palabras de contenido reciben peso 1,0 y las palabras funcionales 0,3--- y SIF (\textit{Smooth Inverse Frequency}), que pondera cada palabra inversamente a su frecuencia estimada en el idioma. La estrategia utilizada por defecto es el promedio ponderado, que equilibra sencillez y sensibilidad al contenido semántico relevante.
+
+\section{Léxico}
+\label{sec:f2-lexico}
+
+El léxico de esta fase contiene 355 entradas exportadas directamente desde la Fase 1 mediante un script de conversión. Cada entrada se almacena como un objeto JSON con campos que varían según la categoría: los verbos incluyen conjugaciones completas por pronombre, los lugares incluyen preposiciones de movimiento y ubicación, los adjetivos incluyen formas de género, y los objetos incluyen rasgos como \texttt{uncountable} y \texttt{definite\_article}.
+
+La decisión de reutilizar el léxico de la Fase 1 ---en lugar de construir uno independiente--- responde a tres razones: la información lingüística ya estaba validada, se garantiza consistencia entre ambas fases al evaluar sobre el mismo conjunto de conceptos, y se evita duplicar un esfuerzo considerable de etiquetado manual. El script de exportación (\texttt{export\_lexicon.py}) importa las clases de la Fase 1, itera sobre todas las categorías de palabras, genera las conjugaciones verbales y enriquece las entradas con información adicional del postprocesador (sustantivos incontables, artículos definidos, preposiciones por lugar). La diferencia fundamental con el léxico de la Fase 1 es el formato: mientras que aquella lo codifica como estructuras Python en memoria, esta fase lo serializa a JSON para independizar el léxico del código.
+
+\section{Analizador semántico}
+\label{sec:f2-analizador}
+
+El analizador semántico es el módulo central del sistema, con 608 líneas que constituyen el componente más complejo. Su función es transformar una lista de etiquetas de pictogramas en un análisis estructurado que contenga el sujeto, los verbos, los argumentos con sus roles semánticos, las preposiciones predichas y los modificadores.
+
+El análisis se realiza en ocho pasadas secuenciales sobre la entrada.
+
+\subsection{Clasificación de pictogramas}
+
+La primera pasada clasifica cada pictograma consultando el léxico y los índices de búsqueda. El sistema mantiene tres índices: un mapa directo palabra $\rightarrow$ entrada léxica, un mapa de formas de género (\textit{bonita} $\rightarrow$ \textit{bonito}) y un mapa inverso de conjugaciones (\textit{quiero} $\rightarrow$ \textit{querer}). Para palabras ambiguas ---como \textit{cocina}, que puede ser verbo o lugar, o \textit{ayuda}, que puede ser verbo o sustantivo--- el sistema aplica conjuntos de \textit{overrides} que fuerzan la clasificación correcta según el contexto de CAA.
+
+\subsection{Detección de sujetos}
+
+La segunda pasada identifica el sujeto de la oración. Los pronombres se reconocen directamente; para sujetos no pronominales (personas como \textit{mamá} o \textit{papá}), el sistema verifica que la palabra preceda a un verbo copulativo o de estado, lo que indica función de sujeto y no de complemento.
+
+\subsection{Inferencia de elementos implícitos}
+
+La tercera pasada implementa la inferencia de elementos que el usuario omite. Cuando la entrada contiene solo objetos o lugares sin verbos, el sistema inserta \textit{querer} y, si hay lugares, también \textit{ir}. Esta inferencia opera exclusivamente en primera persona y se desactiva en oraciones interrogativas, evitando asumir la intención del usuario cuando pregunta sobre terceros. La lógica es más conservadora que la de la Fase 1: al disponer de embeddings para resolver ambigüedades, el sistema puede permitirse inferir menos elementos y delegar más decisiones al análisis semántico.
+
+\subsection{Asignación de roles verbales y clasificación de argumentos}
+
+Las pasadas cuarta a sexta determinan la categoría del verbo principal, identifican la persona gramatical en interrogativas, y clasifican los argumentos restantes (sustantivos, adjetivos, lugares) según su función sintáctica. La clasificación de argumentos distingue entre objetos directos, complementos de lugar, adjetivos atributivos y sustantivos de estado, utilizando tanto la categoría léxica como, cuando es ambigua, la similitud de embeddings entre el verbo y el argumento candidato.
+
+\subsection{Desambiguación de roles y predicción de preposiciones}
+
+La séptima pasada resuelve las asignaciones ambiguas de roles y predice las preposiciones. Para cada argumento clasificado como complemento, el sistema aplica un predictor de preposiciones de tres niveles (descrito en la sección siguiente). Para la desambiguación de roles, compara la similitud coseno entre el verbo y cada argumento candidato, asignando el rol de objeto directo al más similar y los restantes como complementos preposicionales.
+
+\subsection{Coordinación}
+
+La octava pasada detecta y procesa la coordinación de elementos: objetos coordinados (\textit{agua y pan}), verbos coordinados (\textit{comer y beber}) y adjetivos coordinados. La presencia de una conjunción en la entrada activa esta pasada, que agrupa los elementos coordinados para que la plantilla los trate como una unidad.
+
+\section{Predicción de preposiciones}
+\label{sec:f2-preposiciones}
+
+La predicción de preposiciones es una de las contribuciones principales del componente de embeddings. El sistema implementa un predictor de tres niveles con degradación progresiva de confianza.
+
+\subsection{Nivel 1: reglas por lugar}
+
+Cuando el sustantivo es un lugar con preposiciones codificadas en el léxico, el sistema aplica directamente la regla. Si el verbo es de movimiento, utiliza la preposición de movimiento del lugar (\textit{ir al colegio}); si no lo es, utiliza la de ubicación (\textit{estar en el colegio}). La confianza de este nivel es 1,0.
+
+\subsection{Nivel 2: prototipos vectoriales}
+
+Si no existe regla de lugar, el sistema recurre a prototipos vectoriales construidos offline a partir del corpus SBWCE (\textit{Spanish Billion Word Corpus and Embeddings}). Para cada preposición, el prototipo es la media de los vectores de contexto (suma de embedding del verbo y del sustantivo) extraídos de las tripletas \textit{(palabra\_antes, preposición, palabra\_después)} del corpus:
+
+$$\vec{p}_k = \frac{1}{|C_k|} \sum_{(w_a, w_d) \in C_k} (\vec{w}_a + \vec{w}_d)$$
+
+En tiempo de ejecución, dado un par (verbo, sustantivo), se calcula el vector de contexto $\vec{c} = \vec{v} + \vec{n}$ y se selecciona la preposición cuyo prototipo tiene mayor similitud coseno con $\vec{c}$, siempre que supere un umbral mínimo de confianza (0,15). Los prototipos se calculan una sola vez y se almacenan en caché como un archivo JSON.
+
+\subsection{Nivel 3: reglas por verbo}
+
+Como fallback final, si los prototipos no superan el umbral, el sistema consulta la preposición por defecto del verbo codificada en el léxico (\textit{ir} $\rightarrow$ \textit{a}, \textit{venir} $\rightarrow$ \textit{de}).
+
+Este diseño de tres niveles ejemplifica la filosofía híbrida del sistema: las reglas codificadas cubren los casos conocidos con certeza, los embeddings extienden la cobertura a combinaciones no anticipadas, y un fallback determinista garantiza que siempre se produce alguna salida.
+
+\section{Selector de plantillas y realizador morfológico}
+\label{sec:f2-plantillas}
+
+Una vez completado el análisis semántico, el selector de plantillas evalúa el resultado contra 15 plantillas sintácticas y selecciona la más específica que se ajusta a los elementos presentes. Las plantillas están ordenadas por especificidad descendente: \texttt{S\_Vmodal\_Vinf\_OD} (sujeto + verbo modal + infinitivo + objeto directo, como \textit{Yo quiero comer una manzana}) tiene prioridad sobre \texttt{SVO} (sujeto + verbo + objeto, como \textit{Yo como una manzana}), que a su vez tiene prioridad sobre \texttt{VO} (verbo + objeto, como \textit{Quiero agua}). La plantilla \texttt{FALLBACK} actúa como último recurso, concatenando las palabras sin estructura sintáctica.
+
+El realizador morfológico rellena los slots de la plantilla seleccionada con las formas flexionadas correctas. Conjuga el verbo principal según la persona del sujeto, selecciona el artículo apropiado para cada sustantivo (indefinido, definido o ausente según las propiedades del léxico), aplica las contracciones (\textit{a el} $\rightarrow$ \textit{al}), resuelve la concordancia de género de los adjetivos y capitaliza la primera letra. Para interrogativas, invierte el orden sujeto-verbo y envuelve la oración con los signos \textit{¿...?}.
+
+\section{Organización del código}
+\label{sec:f2-codigo}
+
+El sistema se implementa en nueve módulos Python, con FastText como única dependencia de aprendizaje automático.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r l}
+\hline
+Módulo & Líneas & Propósito \\
+\hline
+\texttt{semantic\_analyzer.py} & 608 & Análisis semántico en 8 pasadas \\
+\texttt{vector\_composer.py} & 181 & 3 estrategias de composición vectorial \\
+\texttt{morphological\_realizer.py} & 170 & Conjugación, artículos, concordancia \\
+\texttt{preposition\_builder.py} & 154 & Prototipos vectoriales desde corpus \\
+\texttt{hybrid\_generator.py} & 139 & Orquestador del pipeline \\
+\texttt{template\_selector.py} & 130 & 15 plantillas sintácticas \\
+\texttt{text\_preprocessor.py} & 107 & Normalización y tokenización \\
+\texttt{config.py} & 65 & Constantes y umbrales \\
+\texttt{embedding\_loader.py} & 48 & Interfaz con FastText \\
+\texttt{similarity\_engine.py} & 55 & Similitud coseno individual y batch \\
+\hline
+\end{tabular}
+\caption{Estructura del código del motor híbrido.}
+\label{tab:f2-codigo}
+\end{table}
+
+Las dependencias fluyen de arriba hacia abajo: \texttt{config.py} proporciona constantes globales, \texttt{embedding\_loader.py} encapsula el acceso a FastText, \texttt{semantic\_analyzer.py} es el módulo central que combina léxico y embeddings, y \texttt{hybrid\_generator.py} orquesta todos los componentes. La separación entre análisis semántico, selección de plantilla y realización morfológica permite modificar cualquiera de las tres etapas de forma independiente.
+
+\section{Resultados}
+\label{sec:f2-resultados}
+
+La evaluación sobre el corpus de 115 casos arroja los resultados que muestra la Tabla~\ref{tab:f2-resultados}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r}
+\hline
+Métrica & Valor \\
+\hline
+Cobertura & 100\% (115 de 115) \\
+Exact Match global & Variable por categoría \\
+BLEU-1 corpus & 0,8846 \\
+BLEU-4 corpus & 0,6653 \\
+ROUGE-L $F_1$ & 0,9035 \\
+Latencia media & $<$1 ms (sin carga de modelo) \\
+\hline
+\end{tabular}
+\caption{Resultados del motor híbrido con embeddings.}
+\label{tab:f2-resultados}
+\end{table}
+
+El resultado más significativo es la cobertura del 100\%: todas las entradas producen una salida, frente al 88,46\% de la Fase 1. Este salto se debe al mecanismo de fallback y a la capacidad del analizador semántico de procesar secuencias que no encajan en patrones rígidos. Sin embargo, la cobertura total no implica corrección total ---el Exact Match varía según la categoría, siendo más bajo en casos donde la predicción de preposiciones o la asignación de roles introduce variaciones respecto a la referencia---.
+
+La comparación directa con la Fase 1 revela un compromiso entre cobertura y precisión puntual. La gramática formal era perfecta dentro de su dominio (100\% EM en casos parseables) pero rechazaba el 11,54\% de las entradas; el enfoque híbrido cubre todas las entradas pero comete errores en algunas de ellas. Esta tensión entre cobertura y exactitud motiva la exploración de una tercera vía ---los modelos de lenguaje--- que promete combinar la cobertura total con una capacidad de generalización lingüística que ni las reglas ni los embeddings alcanzan por sí solos.
