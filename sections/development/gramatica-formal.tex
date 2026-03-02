@@ -66,7 +66,7 @@ El sistema soporta cuatro valores de género: \texttt{masculino}, \texttt{femeni
 \section{Análisis de patrones sintácticos}
 \label{sec:f1-patrones}
 
-El parser define 46 patrones sintácticos organizados en seis grupos, ordenados por prioridad descendente. Cuando una secuencia de entrada coincide con varios patrones, se selecciona el de mayor prioridad; a igualdad de prioridad, se prefiere el de mayor longitud.
+El parser define 48 patrones sintácticos organizados en seis grupos, ordenados por prioridad descendente. Cuando una secuencia de entrada coincide con varios patrones, se selecciona el de mayor prioridad; a igualdad de prioridad, se prefiere el de mayor longitud.
 
 \subsection{Patrones compuestos (prioridad 9-10)}
 
@@ -124,7 +124,7 @@ Las tres últimas etapas aplican transformaciones de superficie. Las contraccion
 \section{Organización del código}
 \label{sec:f1-codigo}
 
-El motor se implementa en 4.330 líneas distribuidas en siete archivos, cada uno con una responsabilidad delimitada.
+El motor se implementa en 4.354 líneas distribuidas en siete archivos, cada uno con una responsabilidad delimitada.
 
 \begin{table}[H]
 \centering
@@ -134,13 +134,13 @@ Archivo & Líneas & Propósito \\
 \hline
 \texttt{models.py} & 355 & Modelos de datos, enumeraciones y excepciones \\
 \texttt{lexicon.py} & 1.208 & Léxico categorizado e índice invertido \\
-\texttt{parser.py} & 727 & 46 patrones sintácticos y tokenización \\
+\texttt{parser.py} & 741 & 48 patrones sintácticos y tokenización \\
 \texttt{conjugation.py} & 482 & Motor de conjugación (24 irregulares + regulares) \\
-\texttt{postprocessor.py} & 1.148 & Pipeline de 9 etapas de postprocesamiento \\
+\texttt{postprocessor.py} & 1.158 & Pipeline de 9 etapas de postprocesamiento \\
 \texttt{generator.py} & 353 & Orquestador principal y alternativas \\
 \texttt{\_\_init\_\_.py} & 57 & API pública del módulo \\
 \hline
-\textit{Total} & \textit{4.330} & \\
+\textit{Total} & \textit{4.354} & \\
 \hline
 \end{tabular}
 \caption{Estructura del código del motor de gramática formal.}
@@ -172,6 +172,6 @@ Latencia media & $<$1 ms \\
 \label{tab:f1-resultados}
 \end{table}
 
-El dato más destacado es la combinación de cobertura limitada con precisión perfecta: para todo caso que el sistema logra parsear, la oración generada coincide exactamente con la referencia. Las 15 entradas que el sistema rechaza corresponden a patrones no contemplados en los 46 patrones definidos ---secuencias cuya estructura categorial no coincide con ningún patrón conocido---.
+El dato más destacado es la combinación de cobertura limitada con precisión perfecta: para todo caso que el sistema logra parsear, la oración generada coincide exactamente con la referencia. Las 15 entradas que el sistema rechaza corresponden a patrones no contemplados en los 48 patrones definidos ---secuencias cuya estructura categorial no coincide con ningún patrón conocido---.
 
 Esta dualidad revela tanto la fortaleza como la limitación fundamental del enfoque. La gramática ofrece garantías absolutas de corrección dentro de su dominio de cobertura, pero cada nuevo patrón comunicativo requiere definir explícitamente la regla correspondiente. La barrera de cobertura del 88,46\% constituye la motivación directa para la Fase 2, que busca superar este techo sin abandonar completamente el control gramatical.
