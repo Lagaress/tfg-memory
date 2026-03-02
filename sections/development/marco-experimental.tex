@@ -72,7 +72,7 @@ El corpus se ha construido siguiendo tres criterios. En primer lugar, representa
 \section{Métricas de evaluación}
 \label{sec:metricas}
 
-Se emplean cinco métricas principales para evaluar la calidad de las oraciones generadas, complementadas con medidas de rendimiento operativo.
+La evaluación emplea un conjunto amplio de métricas organizadas en tres categorías: métricas con referencia, que comparan la predicción contra la oración gold standard; métricas sin referencia, que evalúan la calidad intrínseca del texto generado; y métricas específicas de CAA, que miden la fidelidad al contenido pictográfico de entrada. Además, se registran medidas de rendimiento operativo.
 
 \subsection{Exact Match}
 
@@ -104,19 +104,73 @@ $$F_1 = \frac{2 \cdot \text{precisión} \cdot \text{recall}}{\text{precisión} +
 
 ROUGE-L resulta especialmente útil en este contexto porque captura la estructura secuencial de la oración sin penalizar la inserción de elementos adicionales (como artículos que el sistema añade correctamente pero que no figuran en la referencia de la misma forma).
 
-\subsection{Cobertura}
+\subsection{METEOR}
 
-La cobertura mide el porcentaje de casos del corpus para los que el sistema produce una salida válida, frente a los que rechaza o falla. Esta métrica es relevante porque la Fase 1, al operar con pattern-matching, solo puede procesar secuencias que coincidan con alguno de sus patrones sintácticos predefinidos, rechazando el resto.
+METEOR (\textit{Metric for Evaluation of Translation with Explicit ORdering}) calcula la media armónica de la precisión de unigramas y el recall, aplicando después una penalización por fragmentación que castiga las coincidencias dispersas frente a las contiguas. A diferencia de BLEU, que solo mide precisión, METEOR incorpora el recall directamente en su formulación, lo que la hace más sensible a omisiones.
 
-$$\text{Cobertura} = \frac{\text{casos con salida válida}}{\text{total de casos}} \times 100$$
+$$\text{METEOR} = F_\text{mean} \cdot (1 - \text{penalty})$$
 
-Las Fases 2 y 3, por su diseño, alcanzan cobertura del 100\%: la Fase 2 dispone de un mecanismo de fallback y la Fase 3 delega al LLM, que siempre genera alguna respuesta.
+donde $F_\text{mean}$ es la media armónica ponderada de precisión y recall de unigramas, y la penalización crece con el número de fragmentos no contiguos en la alineación. La implementación utiliza la librería NLTK con tokenización por espacios, apropiada para el español donde los tokens están bien delimitados por espacios en blanco.
+
+METEOR resulta complementaria a BLEU porque captura tanto la presencia de las palabras correctas como su contigüidad en la oración generada. Su valor ligeramente inferior a 1,0 incluso en coincidencias exactas (típicamente $\sim$0,97) se debe al mecanismo de penalización por fragmentación, que no otorga un score perfecto incluso cuando todos los unigramas coinciden.
+
+\subsection{chrF++}
+
+chrF++ evalúa la similitud entre predicción y referencia combinando n-gramas de caracteres con bigramas de palabras. Los n-gramas de caracteres capturan coincidencias parciales a nivel morfológico ---por ejemplo, reconocen la similitud entre \textit{quiero} y \textit{quiere} aunque difieran en su terminación---, mientras que los bigramas de palabras incorporan información sobre el orden.
+
+$$\text{chrF++} = (1 + \beta^2) \cdot \frac{\text{chrP} \cdot \text{chrR}}{\beta^2 \cdot \text{chrP} + \text{chrR}}$$
+
+donde chrP y chrR son la precisión y recall calculadas sobre n-gramas de caracteres y bigramas de palabras conjuntamente, con $\beta = 2$ por defecto. Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente ---como la diferencia entre \textit{come} y \textit{comer}--- representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
+
+\subsection{Cobertura de pictogramas}
+
+La cobertura mide la fracción de pictogramas de entrada que se encuentran representados en la oración generada. Para determinar si un pictograma está cubierto, se comparan sus lemas ---obtenidos mediante el modelo de lematización de spaCy para español--- con los lemas de las palabras de la oración de salida. Si existe al menos un lema en común, el pictograma se considera cubierto.
+
+$$\text{Cobertura} = \frac{|\text{pictogramas cubiertos}|}{|\text{pictogramas de entrada}|}$$
+
+Por ejemplo, dado el pictograma \textit{comer} (lema: \textit{comer}) y la oración generada \textit{Yo como pan} (lemas: \textit{yo}, \textit{comer}, \textit{pan}), el pictograma se considera cubierto porque el lema \textit{comer} aparece en ambos conjuntos. Esta métrica es específica del dominio de CAA y complementa las métricas de coincidencia con la referencia: mientras que BLEU o ROUGE-L comparan contra una oración gold standard, la cobertura verifica directamente que el contenido pictográfico se preserve en la salida, independientemente de la formulación exacta.
 
 \subsection{BERTScore}
 
-BERTScore evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT. A diferencia de las métricas anteriores, que operan a nivel de tokens o n-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que \textit{deseo} y \textit{quiero} expresan significados cercanos aunque no compartan tokens.
+BERTScore evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o n-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que \textit{deseo} y \textit{quiero} expresan significados cercanos aunque no compartan tokens.
 
-Esta métrica se emplea exclusivamente en la evaluación de la Fase 3, donde el modelo de lenguaje puede generar paráfrasis válidas que las métricas de coincidencia exacta penalizarían. Para las Fases 1 y 2, cuyas salidas son deterministas y predecibles, las métricas de n-gramas resultan suficientes.
+El cálculo alinea cada token de la predicción con su token más similar en la referencia mediante similitud coseno en el espacio de embeddings, y obtiene precisión, recall y $F_1$. Se utiliza un modelo BERT preentrenado en español en lugar del modelo por defecto en inglés, lo que mejora la captura de matices semánticos propios del castellano. Esta métrica se aplica a los seis motores de generación, siendo especialmente informativa cuando los motores producen paráfrasis válidas que las métricas de coincidencia exacta penalizarían.
+
+\subsection{Fidelidad de contenido}
+
+La fidelidad de contenido mide la proporción de palabras de contenido en la oración generada que provienen efectivamente de los pictogramas de entrada, detectando así las \textit{alucinaciones}: palabras que el motor introduce sin que exista un pictograma que las justifique.
+
+$$\text{Fidelidad} = 1 - \frac{|\text{palabras alucinadas}|}{|\text{palabras de contenido generadas}|}$$
+
+Se excluyen del cálculo las \textit{stop words} ---artículos, preposiciones, pronombres, conectores y verbos auxiliares--- para evitar penalizar los elementos funcionales que el sistema añade legítimamente al construir la oración a partir de los pictogramas.
+
+La fidelidad complementa la cobertura: mientras la cobertura detecta omisiones (pictogramas de entrada que no aparecen en la salida), la fidelidad detecta adiciones (palabras de contenido en la salida que no provienen de la entrada). Un motor ideal obtendría cobertura y fidelidad de 1,0 simultáneamente.
+
+\subsection{Perplejidad y pseudo-perplejidad}
+
+La perplejidad y la pseudo-perplejidad son métricas sin referencia que evalúan la naturalidad del texto generado sin necesidad de compararlo contra una oración gold standard. Ambas miden cuán probable considera un modelo de lenguaje preentrenado la oración generada: valores menores indican texto más natural y fluido.
+
+La perplejidad se calcula con un modelo GPT-2 entrenado en español (\texttt{DeepESP/gpt2-spanish}), un modelo autoregresivo que estima la probabilidad de cada palabra condicionada a las anteriores:
+
+$$\text{PPL}(s) = 2^{-\frac{1}{N} \sum_{i=1}^{N} \log_2 P(w_i \mid w_1, \ldots, w_{i-1})}$$
+
+La pseudo-perplejidad utiliza un modelo BERT enmascarado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}), que evalúa la probabilidad de cada token dado su contexto bidireccional. Para ello, se enmascara cada token de la oración y se mide la probabilidad de reconstruirlo a partir del resto.
+
+Estas métricas son especialmente relevantes en el contexto de CAA porque capturan la fluidez percibida del texto independientemente de la referencia. Un motor puede generar una oración semánticamente correcta pero con una estructura gramatical poco natural, algo que las métricas de coincidencia con la referencia no detectan pero que la perplejidad sí penaliza.
+
+\subsection{Análisis de errores}
+
+El análisis de errores clasifica cada caso en una de cinco categorías mediante heurísticas basadas en los valores de cobertura y fidelidad ya calculados:
+
+\begin{itemize}
+    \item \textit{Ninguno}: la generación coincide con la referencia o no presenta errores detectables.
+    \item \textit{Omisión}: uno o más pictogramas de entrada no se reflejan en la salida (cobertura inferior a 1,0).
+    \item \textit{Alucinación}: la oración contiene palabras de contenido no justificadas por los pictogramas (fidelidad inferior a 0,8).
+    \item \textit{Morfológico}: las palabras correctas aparecen pero con forma flexiva diferente ---conjugación, género o número incorrectos--- (solapamiento léxico superior al 50\% sin coincidencia exacta).
+    \item \textit{Léxico}: el motor elige palabras diferentes para expresar el mismo concepto (solapamiento léxico inferior al 50\% con cobertura parcial).
+\end{itemize}
+
+Esta clasificación no es mutuamente excluyente: un mismo caso puede presentar simultáneamente omisión y alucinación. El análisis de errores proporciona una visión cualitativa que complementa las métricas numéricas, permitiendo identificar no solo cuánto se equivoca cada motor sino cómo se equivoca.
 
 \subsection{Métricas operativas}
 
