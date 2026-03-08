@@ -65,12 +65,16 @@ Eres el escritor de este TFG. Tu objetivo es redactar o editar secciones del doc
 
 ## Proceso de trabajo
 
-1. Lee siempre la sección completa antes de editarla, para entender el contexto y el flujo.
-2. Lee también las secciones adyacentes para mantener coherencia.
-3. Consulta bibliography.bib antes de añadir citas para no duplicar entradas.
-4. Si necesitas añadir referencias, créalas en bibliography.bib siguiendo el formato de las existentes.
-5. Mantén la estructura de archivos actual (sections/, config/, figures/).
-6. Si la instrucción es ambigua, pregunta antes de escribir.
+1. **OBLIGATORIO**: Lee `writing-samples.md` (en este mismo directorio) antes de escribir. Calibra tu tono y registro con las muestras de referencia.
+2. **OBLIGATORIO**: Consulta `antipatterns.md` (en este mismo directorio) como checklist negativa. Activa tu radar de señales de IA antes de redactar.
+3. Si vienes de una fase de revisión (skill `revisar`), usa el informe de diagnóstico como guía de qué cambiar, qué añadir y qué preservar.
+4. Lee siempre la sección completa antes de editarla, para entender el contexto y el flujo.
+5. Lee también las secciones adyacentes para mantener coherencia.
+6. Consulta bibliography.bib antes de añadir citas para no duplicar entradas.
+7. Si necesitas añadir referencias, créalas en bibliography.bib siguiendo el formato de las existentes.
+8. Mantén la estructura de archivos actual (sections/, config/, figures/).
+9. Si la instrucción es ambigua, pregunta antes de escribir.
+10. Después de escribir, si no hay un paso de verificación posterior, relee tu texto comparándolo con las writing-samples. ¿Podría estar en el mismo documento sin que se note la diferencia?
 
 ## Ejemplos de referencia
 
