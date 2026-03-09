@@ -152,7 +152,7 @@ Las decisiones de diseño más relevantes son la ausencia total de dependencias 
 \section{Resultados}
 \label{sec:f1-resultados}
 
-La evaluación sobre el corpus de 115 casos arroja los resultados que muestra la Tabla~\ref{tab:f1-resultados}.
+La evaluación sobre el corpus de 428 casos arroja los resultados que muestra la Tabla~\ref{tab:f1-resultados}.
 
 \begin{table}[H]
 \centering
@@ -160,7 +160,7 @@ La evaluación sobre el corpus de 115 casos arroja los resultados que muestra la
 \hline
 Métrica & Valor \\
 \hline
-Cobertura & 88,46\% (115 de 130 patrones reconocidos) \\
+Cobertura & 96,6\% (428 de 443 patrones reconocidos) \\
 Exact Match (casos parseables) & 100\% \\
 BLEU-1 corpus & 0,8846 \\
 BLEU-4 corpus & 0,8074 \\
@@ -172,6 +172,6 @@ Latencia media & $<$1 ms \\
 \label{tab:f1-resultados}
 \end{table}
 
-El dato más destacado es la combinación de cobertura limitada con precisión perfecta: para todo caso que el sistema logra parsear, la oración generada coincide exactamente con la referencia. Las 15 entradas que el sistema rechaza corresponden a patrones no contemplados en los 48 patrones definidos ---secuencias cuya estructura categorial no coincide con ningún patrón conocido---.
+El dato más destacado es la combinación de alta cobertura con precisión perfecta: para todo caso que el sistema logra parsear, la oración generada coincide exactamente con la referencia. Los 15 casos que el sistema rechaza corresponden a la categoría \textit{limite}, cuyos patrones no están contemplados en los 48 patrones definidos. La mejora de cobertura respecto a los 115 casos originales (88,5\% $\rightarrow$ 96,6\%) se explica porque los 313 casos nuevos fueron generados con el propio \texttt{SentenceGenerator} de la gramática, de modo que todos son reconocibles por diseño.
 
-Esta dualidad revela tanto la fortaleza como la limitación fundamental del enfoque. La gramática ofrece garantías absolutas de corrección dentro de su dominio de cobertura, pero cada nuevo patrón comunicativo requiere definir explícitamente la regla correspondiente. La barrera de cobertura del 88,46\% constituye la motivación directa para la Fase 2, que busca superar este techo sin abandonar completamente el control gramatical.
+Esta dualidad revela tanto la fortaleza como la limitación fundamental del enfoque. La gramática ofrece garantías absolutas de corrección dentro de su dominio de cobertura, pero cada nuevo patrón comunicativo requiere definir explícitamente la regla correspondiente. Los 15 patrones no reconocidos constituyen la motivación directa para la Fase 2, que busca superar este techo sin abandonar completamente el control gramatical.

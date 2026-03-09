@@ -18,11 +18,11 @@ Los tres motores reciben exactamente la misma entrada y producen el mismo tipo d
 \section{Conjunto de datos de evaluación}
 \label{sec:dataset}
 
-La evaluación de los tres motores se realiza sobre un corpus de 115 casos de prueba diseñado específicamente para este proyecto. Cada caso consiste en una secuencia de pictogramas de entrada y la oración de referencia esperada como salida.
+La evaluación de los tres motores se realiza sobre un corpus de 428 casos de prueba diseñado específicamente para este proyecto. Cada caso consiste en una secuencia de pictogramas de entrada y la oración de referencia esperada como salida.
 
 \subsection{Estructura y categorías}
 
-Los 115 casos se distribuyen en ocho categorías semánticas que cubren los principales patrones comunicativos de un usuario de CAA:
+Los 428 casos se distribuyen en ocho categorías semánticas que cubren los principales patrones comunicativos de un usuario de CAA:
 
 \begin{table}[H]
 \centering
@@ -30,21 +30,23 @@ Los 115 casos se distribuyen en ocho categorías semánticas que cubren los prin
 \hline
 Categoría & Descripción & Casos \\
 \hline
-Necesidad & Expresiones de deseo o necesidad & 25 \\
-Movimiento & Desplazamiento a lugares & 15 \\
-Estado & Estados físicos o emocionales & 15 \\
-Descripción & Atributos de personas u objetos & 15 \\
-Negativa & Oraciones con negación & 10 \\
-Interrogativa & Preguntas con partícula interrogativa & 15 \\
-Compuesta & Coordinación de elementos & 10 \\
-Concordancia & Concordancia de género y número & 10 \\
+Necesidad & Expresiones de deseo o necesidad & 73 \\
+Compuesta & Coordinación de elementos & 61 \\
+Interrogativa & Preguntas con partícula interrogativa & 61 \\
+Estado & Estados físicos o emocionales & 55 \\
+Negativa & Oraciones con negación & 52 \\
+Movimiento & Desplazamiento a lugares & 50 \\
+Descripción & Atributos de personas u objetos & 41 \\
+Concordancia & Concordancia de género y número & 35 \\
 \hline
-\textit{Total} & & \textit{115} \\
+\textit{Total} & & \textit{428} \\
 \hline
 \end{tabular}
 \caption{Distribución de los casos de prueba por categoría semántica.}
 \label{tab:dataset-categorias}
 \end{table}
+
+El corpus fue ampliado desde los 115 casos originales ---diseñados manualmente--- mediante generación sistemática de combinaciones de pictogramas con el script \texttt{generate\_cases.py}, que utiliza el propio \texttt{SentenceGenerator} de la gramática formal para producir pares (entrada, referencia) adicionales. Los 313 casos nuevos cubren más tipos gramaticales y niveles de complejidad: el dataset resultante contiene 192 casos simples, 181 de complejidad media y 55 complejos, con longitudes de entrada que van desde un solo pictograma (17 casos) hasta cinco pictogramas (12 casos), siendo las secuencias de tres pictogramas las más frecuentes (239 casos).
 
 Cada categoría presenta desafíos lingüísticos específicos. Las oraciones de necesidad requieren inferir el verbo modal \textit{querer} cuando el usuario omite la intención; las de movimiento exigen seleccionar la preposición correcta según el lugar de destino; las interrogativas demandan invertir el orden sujeto-verbo; y las compuestas necesitan coordinación con conjunciones.
 
@@ -154,7 +156,7 @@ La perplejidad se calcula con un modelo GPT-2 entrenado en español (\texttt{Dee
 
 $$\text{PPL}(s) = 2^{-\frac{1}{N} \sum_{i=1}^{N} \log_2 P(w_i \mid w_1, \ldots, w_{i-1})}$$
 
-La pseudo-perplejidad utiliza un modelo BERT enmascarado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}), que evalúa la probabilidad de cada token dado su contexto bidireccional. Para ello, se enmascara cada token de la oración y se mide la probabilidad de reconstruirlo a partir del resto.
+La pseudo-perplejidad utiliza un modelo BERT enmascarado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}), que evalúa la probabilidad de cada token dado su contexto bidireccional. Para ello, se enmascara cada token de la oración y se mide la probabilidad de reconstruirlo a partir del resto. Este modelo es el mismo que se emplea para el cálculo de BERTScore, lo que permite reutilizar la carga del modelo y reducir el tiempo total de evaluación.
 
 Estas métricas son especialmente relevantes en el contexto de CAA porque capturan la fluidez percibida del texto independientemente de la referencia. Un motor puede generar una oración semánticamente correcta pero con una estructura gramatical poco natural, algo que las métricas de coincidencia con la referencia no detectan pero que la perplejidad sí penaliza.
 
