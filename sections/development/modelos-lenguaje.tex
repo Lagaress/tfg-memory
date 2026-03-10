@@ -132,7 +132,7 @@ La dependencia principal es la librería \texttt{openai} para las llamadas a la 
 \section{Resultados}
 \label{sec:f3-resultados}
 
-La evaluación de ambos modelos sobre los 115 casos originales del dataset ---los que disponen de llamadas reales a la API--- arroja los resultados que muestran las Tablas~\ref{tab:f3-resultados-global} y~\ref{tab:f3-resultados-categoria}. Estos resultados corresponden a los 115 casos evaluados con salidas reales del LLM. El dataset ampliado a 428 casos se emplea en la evaluación comparativa del capítulo siguiente, donde los 313 casos sin salida cacheada se tratan como predicciones vacías.
+La evaluación de ambos modelos sobre los 115 casos originales del dataset arroja los resultados que muestran las Tablas~\ref{tab:f3-resultados-global} y~\ref{tab:f3-resultados-categoria}. Estos resultados corresponden a la evaluación individual del motor LLM con las métricas internas del subproyecto. La evaluación comparativa del capítulo siguiente emplea el dataset completo de 428 casos, donde GPT-4o generó salidas para la totalidad del corpus.
 
 \begin{table}[H]
 \centering
@@ -148,6 +148,7 @@ Cobertura de conceptos & 99,5\% & 100,0\% \\
 Latencia media & 1.032 ms & 1.397 ms \\
 Coste por caso & \$0,00018 & \$0,00305 \\
 Coste total (115 casos) & \$0,021 & \$0,351 \\
+Coste total (428 casos) & --- & \$1,28 \\
 \hline
 \end{tabular}
 \caption{Resultados globales del motor de modelos de lenguaje.}
