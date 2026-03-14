@@ -46,7 +46,7 @@ Concordancia & Concordancia de género y número & 35 \\
 \label{tab:dataset-categorias}
 \end{table}
 
-El corpus fue ampliado desde los 115 casos originales ---diseñados manualmente--- mediante generación sistemática de combinaciones de pictogramas con el script \texttt{generate\_cases.py}, que utiliza el propio \texttt{SentenceGenerator} de la gramática formal para producir pares (entrada, referencia) adicionales. Los 313 casos nuevos cubren más tipos gramaticales y niveles de complejidad: el dataset resultante contiene 192 casos simples, 181 de complejidad media y 55 complejos, con longitudes de entrada que van desde un solo pictograma (17 casos) hasta cinco pictogramas (12 casos), siendo las secuencias de tres pictogramas las más frecuentes (239 casos).
+El corpus fue ampliado desde los 115 casos originales ---diseñados manualmente--- mediante generación sistemática de combinaciones de pictogramas con el script \texttt{generate\_cases.py}, que utiliza el propio \texttt{SentenceGenerator} de la gramática formal para producir pares (entrada, referencia) adicionales. Los 313 casos nuevos cubren más tipos gramaticales y niveles de complejidad: el dataset resultante contiene 192 casos simples, 181 de complejidad media y 55 complejos, con longitudes de entrada que van desde un solo pictograma (17 casos) hasta cinco pictogramas (12 casos), pasando por dos pictogramas (102 casos), tres pictogramas (239 casos) y cuatro pictogramas (58 casos).
 
 Cada categoría presenta desafíos lingüísticos específicos. Las oraciones de necesidad requieren inferir el verbo modal \textit{querer} cuando el usuario omite la intención; las de movimiento exigen seleccionar la preposición correcta según el lugar de destino; las interrogativas demandan invertir el orden sujeto-verbo; y las compuestas necesitan coordinación con conjunciones.
 
@@ -84,13 +84,7 @@ $$\text{EM}(p, r) = \begin{cases} 1 & \text{si } \text{lower}(\text{strip}(p)) =
 
 \subsection{BLEU}
 
-BLEU (\textit{Bilingual Evaluation Understudy}) mide la precisión de n-gramas entre la predicción y la referencia. Se calculan BLEU-1 (unigramas) y BLEU-4 (hasta 4-gramas), este último con suavizado +1 para evitar valores nulos en oraciones cortas donde no existen coincidencias de n-gramas de orden alto.
-
-La precisión para n-gramas de orden $n$ se define como:
-
-$$\text{precisión}_n = \frac{\text{coincidencias}_n + 1}{|\text{ngramas\_pred}_n| + 1}$$
-
-El suavizado aditivo es necesario porque las oraciones de CAA son típicamente cortas (3-7 palabras), lo que hace frecuente la ausencia de 4-gramas compartidos incluso entre predicciones razonables.
+BLEU (\textit{Bilingual Evaluation Understudy}) mide la precisión de n-gramas entre la predicción y la referencia. Se calculan BLEU-1 (unigramas) y BLEU-4 (hasta 4-gramas) mediante sacreBLEU con el parámetro \texttt{effective\_order=True}, que ajusta el orden efectivo de n-gramas para oraciones cortas: en lugar de aplicar un suavizado artificial, calcula la media geométrica solo sobre los órdenes de n-gramas que existen en la oración. Así, una oración de tres palabras se evalúa con BLEU-3 efectivo en lugar de recibir un cero en 4-gramas que penalizaría artificialmente el resultado.
 
 BLEU-1 captura la adecuación léxica ---si las palabras correctas están presentes---, mientras que BLEU-4, al considerar secuencias más largas, refleja también la fluidez y el orden de las palabras. Ambas métricas se complementan: una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto.
 
@@ -137,6 +131,10 @@ Por ejemplo, dado el pictograma \textit{comer} (lema: \textit{comer}) y la oraci
 BERTScore evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o n-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que \textit{deseo} y \textit{quiero} expresan significados cercanos aunque no compartan tokens.
 
 El cálculo alinea cada token de la predicción con su token más similar en la referencia mediante similitud coseno en el espacio de embeddings, y obtiene precisión, recall y $F_1$. Se utiliza un modelo BERT preentrenado en español en lugar del modelo por defecto en inglés, lo que mejora la captura de matices semánticos propios del castellano. Esta métrica se aplica a los seis motores de generación, siendo especialmente informativa cuando los motores producen paráfrasis válidas que las métricas de coincidencia exacta penalizarían.
+
+\subsection{Normalización previa al cálculo}
+
+Antes de calcular las métricas con referencia ---Exact Match, BLEU, ROUGE-L, METEOR, chrF++ y BERTScore---, el pipeline normaliza la puntuación terminal de hipótesis y referencia eliminando los signos de puntuación terminal ---punto final, signos de exclamación e interrogación tanto de apertura como de cierre---. Esta normalización responde a un efecto observado en los motores híbridos: el post-editor GPT-4o añade sistemáticamente un punto final a las frases que genera, mientras que las referencias del corpus no incluyen puntuación terminal. Sin la normalización, los híbridos recibirían una penalización artificial en todas las métricas de coincidencia por un carácter de puntuación irrelevante para la calidad lingüística. La normalización no se aplica a la perplejidad ni a las métricas específicas de CAA (cobertura, fidelidad), que operan sobre el texto tal como lo produce cada motor.
 
 \subsection{Fidelidad de contenido}
 

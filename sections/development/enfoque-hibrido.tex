@@ -1,4 +1,4 @@
-La segunda técnica surge de una limitación concreta de la gramática formal: su cobertura del 88,46\% implica que una de cada nueve entradas no produce salida alguna. Este capítulo describe un enfoque híbrido que combina reglas gramaticales con embeddings de palabras para superar ese techo sin abandonar el control sobre la generación.
+La segunda técnica surge de una limitación concreta de la gramática formal: sobre el corpus original de 130 casos, su cobertura del 88,46\% implica que una de cada nueve entradas no produce salida alguna. Este capítulo describe un enfoque híbrido que combina reglas gramaticales con embeddings de palabras para superar ese techo sin abandonar el control sobre la generación.
 
 \section{Planteamiento del enfoque}
 \label{sec:f2-planteamiento}
@@ -7,7 +7,7 @@ La motivación para esta segunda fase es precisa: la gramática formal alcanza e
 
 La solución adoptada es una arquitectura híbrida que reutiliza íntegramente la gramática formal de la Fase 1 como motor estructural y añade una capa de refinamiento basada en embeddings semánticos. La CFG se encarga de todas las operaciones deterministas ---detección de patrón sintáctico, inferencia de elementos implícitos, conjugación verbal, selección de artículos, preposiciones, contracciones y concordancia de género--- a través de los mismos 48 patrones y el mismo pipeline de nueve etapas descritos en el capítulo anterior. Los embeddings intervienen en un segundo plano: cuando la CFG genera múltiples candidatos, los rankean por coherencia semántica; cuando una preposición se asignó con una regla genérica, pueden refinarla con prototipos vectoriales; y para cada combinación verbo-argumento, calculan un score de preferencia seleccional que informa sobre la compatibilidad semántica de la frase.
 
-Esta decisión de reutilizar la CFG ---en lugar de reimplementar la lógica gramatical--- responde a un principio de no duplicación: el motor de la Fase 1 contiene 4.354 líneas de reglas lingüísticas validadas. Importarlo como dependencia permite que las mejoras en la gramática se propaguen automáticamente al sistema híbrido sin intervención manual.
+Esta decisión de reutilizar la CFG ---en lugar de reimplementar la lógica gramatical--- responde a un principio de no duplicación: el motor de la Fase 1 contiene 4.355 líneas de reglas lingüísticas validadas. Importarlo como dependencia permite que las mejoras en la gramática se propaguen automáticamente al sistema híbrido sin intervención manual.
 
 Antes de llegar a este diseño se exploró y descartó un enfoque de recuperación semántica (\textit{retrieval}). Dado un conjunto de pictogramas, el sistema buscaba en el corpus de referencia la frase cuya representación vectorial fuese más similar a la composición de los embeddings de entrada. Este enfoque fue abandonado porque el corpus de evaluación era la misma fuente de la que se recuperaban las frases, produciendo métricas artificialmente infladas que no reflejaban capacidad real de generalización: el sistema no generaba frases sino que las copiaba.
 
@@ -98,8 +98,8 @@ El sistema se implementa en nueve módulos Python, con FastText como única depe
 \hline
 Módulo & Líneas & Propósito \\
 \hline
-\texttt{hybrid\_generator.py} & 235 & Orquestador del pipeline \\
-\texttt{semantic\_scorer.py} & 205 & Ranking, preposiciones y preferencias seleccionales \\
+\texttt{hybrid\_generator.py} & 240 & Orquestador del pipeline \\
+\texttt{semantic\_scorer.py} & 222 & Ranking, preposiciones y preferencias seleccionales \\
 \texttt{vector\_composer.py} & 180 & 3 estrategias de composición vectorial \\
 \texttt{preposition\_builder.py} & 153 & Prototipos vectoriales desde corpus \\
 \texttt{text\_preprocessor.py} & 106 & Normalización, tokenización y frecuencias \\
@@ -108,7 +108,7 @@ Módulo & Líneas & Propósito \\
 \texttt{embedding\_loader.py} & 47 & Interfaz con FastText \\
 \texttt{config.py} & 25 & Constantes y umbrales \\
 \hline
-\textit{Total} & \textit{1.061} & \\
+\textit{Total} & \textit{1.083} & \\
 \hline
 \end{tabular}
 \caption{Estructura del código del motor híbrido.}
@@ -128,11 +128,11 @@ La evaluación sobre el corpus de 428 casos arroja los resultados que muestra la
 \hline
 Métrica & Valor \\
 \hline
-Cobertura & 100\% (428 de 428) \\
-Exact Match global & Variable por categoría \\
-BLEU-1 corpus & 0,8846 \\
-BLEU-4 corpus & 0,6653 \\
-ROUGE-L $F_1$ & 0,9035 \\
+Cobertura (éxito de generación) & 100\% (428 de 428) \\
+Exact Match & 99,53\% \\
+BLEU-1 & 0,9984 \\
+BLEU-4 & 0,9970 \\
+ROUGE-L $F_1$ & 0,9989 \\
 Latencia media & $<$1 ms (sin carga de modelo) \\
 \hline
 \end{tabular}
@@ -140,6 +140,6 @@ Latencia media & $<$1 ms (sin carga de modelo) \\
 \label{tab:f2-resultados}
 \end{table}
 
-El resultado más significativo es la cobertura del 100\%: todas las entradas producen una salida, frente al 88,46\% de la Fase 1. Este salto se debe al mecanismo de fallback del orquestador, que garantiza una respuesta incluso cuando la CFG no reconoce la secuencia de entrada. Sin embargo, la cobertura total no implica corrección total ---el Exact Match varía según la categoría, siendo más bajo en casos donde el refinamiento de preposiciones o el fallback introducen variaciones respecto a la referencia---.
+El resultado más significativo es la cobertura del 100\%: todas las entradas producen una salida, frente al 88,46\% del corpus original de la Fase 1. Este salto se debe al mecanismo de fallback del orquestador, que garantiza una respuesta incluso cuando la CFG no reconoce la secuencia de entrada. El Exact Match del 99,53\% refleja que la práctica totalidad de las salidas coincide con la referencia; los escasos errores se concentran en casos donde el fallback por concatenación introduce variaciones respecto a la frase esperada.
 
-La comparación directa con la Fase 1 revela un compromiso entre cobertura y precisión puntual. La gramática formal era perfecta dentro de su dominio (100\% EM en casos parseables) pero rechazaba el 11,54\% de las entradas; el enfoque híbrido cubre todas las entradas pero comete errores en algunas de ellas. Esta tensión entre cobertura y exactitud motiva la exploración de una tercera vía ---los modelos de lenguaje--- que promete combinar la cobertura total con una capacidad de generalización lingüística que ni las reglas ni los embeddings alcanzan por sí solos.
+La comparación directa con la Fase 1 revela un compromiso entre cobertura y precisión puntual. La gramática formal era perfecta dentro de su dominio (100\% EM en casos parseables) pero rechazaba el 11,54\% de las entradas del corpus original; el enfoque híbrido cubre todas las entradas pero comete errores en algunas de ellas. Esta tensión entre cobertura y exactitud motiva la exploración de una tercera vía ---los modelos de lenguaje--- que promete combinar la cobertura total con una capacidad de generalización lingüística que ni las reglas ni los embeddings alcanzan por sí solos.

@@ -134,13 +134,13 @@ Archivo & Líneas & Propósito \\
 \hline
 \texttt{models.py} & 355 & Modelos de datos, enumeraciones y excepciones \\
 \texttt{lexicon.py} & 1.208 & Léxico categorizado e índice invertido \\
-\texttt{parser.py} & 741 & 48 patrones sintácticos y tokenización \\
+\texttt{parser.py} & 742 & 48 patrones sintácticos y tokenización \\
 \texttt{conjugation.py} & 482 & Motor de conjugación (24 irregulares + regulares) \\
 \texttt{postprocessor.py} & 1.158 & Pipeline de 9 etapas de postprocesamiento \\
 \texttt{generator.py} & 353 & Orquestador principal y alternativas \\
 \texttt{\_\_init\_\_.py} & 57 & API pública del módulo \\
 \hline
-\textit{Total} & \textit{4.354} & \\
+\textit{Total} & \textit{4.355} & \\
 \hline
 \end{tabular}
 \caption{Estructura del código del motor de gramática formal.}
@@ -152,7 +152,7 @@ Las decisiones de diseño más relevantes son la ausencia total de dependencias 
 \section{Resultados}
 \label{sec:f1-resultados}
 
-La evaluación sobre el corpus de 428 casos arroja los resultados que muestra la Tabla~\ref{tab:f1-resultados}.
+La evaluación sobre el corpus de 443 casos ---los 428 del corpus unificado más 15 casos de la categoría \textit{limite}, excluida del corpus compartido por requerir patrones no contemplados en la gramática--- arroja los resultados que muestra la Tabla~\ref{tab:f1-resultados}.
 
 \begin{table}[H]
 \centering
@@ -162,9 +162,8 @@ Métrica & Valor \\
 \hline
 Cobertura & 96,6\% (428 de 443 patrones reconocidos) \\
 Exact Match (casos parseables) & 100\% \\
-BLEU-1 corpus & 0,8846 \\
-BLEU-4 corpus & 0,8074 \\
-ROUGE-L $F_1$ & 0,9211 \\
+BLEU-4 (casos parseables) & 1,0000 \\
+ROUGE-L $F_1$ (casos parseables) & 1,0000 \\
 Latencia media & $<$1 ms \\
 \hline
 \end{tabular}
@@ -172,6 +171,6 @@ Latencia media & $<$1 ms \\
 \label{tab:f1-resultados}
 \end{table}
 
-El dato más destacado es la combinación de alta cobertura con precisión perfecta: para todo caso que el sistema logra parsear, la oración generada coincide exactamente con la referencia. Los 15 casos que el sistema rechaza corresponden a la categoría \textit{limite}, cuyos patrones no están contemplados en los 48 patrones definidos. La mejora de cobertura respecto a los 115 casos originales (88,5\% $\rightarrow$ 96,6\%) se explica porque los 313 casos nuevos fueron generados con el propio \texttt{SentenceGenerator} de la gramática, de modo que todos son reconocibles por diseño.
+El dato más destacado es la combinación de alta cobertura con precisión perfecta: para todo caso que el sistema logra parsear, la oración generada coincide exactamente con la referencia, lo que produce puntuaciones perfectas en todas las métricas de similitud textual. Los 15 casos que el sistema rechaza corresponden a la categoría \textit{limite}, cuyos patrones no están contemplados en los 48 patrones definidos. La mejora de cobertura respecto al dataset original de 130 casos (88,5\% $\rightarrow$ 96,6\%) se explica porque los 313 casos nuevos fueron generados con el propio \texttt{SentenceGenerator} de la gramática, de modo que todos son reconocibles por diseño.
 
 Esta dualidad revela tanto la fortaleza como la limitación fundamental del enfoque. La gramática ofrece garantías absolutas de corrección dentro de su dominio de cobertura, pero cada nuevo patrón comunicativo requiere definir explícitamente la regla correspondiente. Los 15 patrones no reconocidos constituyen la motivación directa para la Fase 2, que busca superar este techo sin abandonar completamente el control gramatical.

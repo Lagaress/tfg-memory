@@ -11,16 +11,16 @@ La motivación para hibridar los motores se resume en una tabla de fortalezas y 
 \hline
 Motor & Fidelidad & Naturalidad & Cobertura & Latencia \\
 \hline
-Gramática formal (CFG) & Alta & Baja & 88,46\% & $<$1 ms \\
+Gramática formal (CFG) & Alta & Baja & 96,6\% & $<$1 ms \\
 Embeddings (CFG + FastText) & Alta & Media & 100\% & $<$1 ms \\
-LLM (GPT-4o) & Alta & Alta & 100\% & 500--1500 ms \\
+LLM (GPT-4o) & Alta & Alta & 100\% & $\sim$1600 ms \\
 \hline
 \end{tabular}
 \caption{Perfil de cada motor en las dimensiones relevantes para CAA.}
 \label{tab:h-motores-dimensiones}
 \end{table}
 
-Ningún motor individual alcanza el máximo en todas las dimensiones. La gramática garantiza fidelidad perfecta dentro de su dominio pero rechaza el 11,54\% de las entradas y produce frases que, aunque correctas, suenan rígidas. Los embeddings resuelven la cobertura pero heredan la rigidez estructural de la CFG. El LLM alcanza naturalidad y cobertura máximas pero depende de una API externa con latencia y coste por llamada. La pregunta que motiva esta fase es si existen combinaciones de motores que produzcan frases mejores que las de cualquier motor individual.
+Ningún motor individual alcanza el máximo en todas las dimensiones. La gramática garantiza fidelidad perfecta dentro de su dominio pero rechaza el 3,4\% de las entradas y produce frases que, aunque correctas, suenan rígidas. Los embeddings resuelven la cobertura pero heredan la rigidez estructural de la CFG. El LLM alcanza naturalidad y cobertura máximas pero depende de una API externa con latencia y coste por llamada. La pregunta que motiva esta fase es si existen combinaciones de motores que produzcan frases mejores que las de cualquier motor individual.
 
 Se implementan tres estrategias de hibridación con objetivos experimentales diferenciados. La primera, H1, conecta la gramática formal con un LLM que actúa como post-editor: la CFG genera una frase estructurada y el LLM la refina para mejorar su naturalidad. La segunda, H2, sustituye la gramática pura por el motor híbrido de embeddings como fuente upstream y aplica el mismo post-editor LLM. La tercera, H3, implementa un paradigma de sobregeneración y ranking: los cinco motores disponibles generan candidatas en paralelo conceptual, un filtro de fidelidad descarta las que omiten pictogramas y un modelo de perplejidad selecciona la más natural.
 
@@ -57,7 +57,7 @@ $$PPL(w_1, \ldots, w_N) = \exp\left(-\frac{1}{N} \sum_{i=1}^{N} \log P(w_i \mid 
 
 Intuitivamente, la perplejidad mide cuánto sorprende la secuencia al modelo: una frase natural y frecuente tendrá baja perplejidad, mientras que una frase agramatical o inusual tendrá alta perplejidad. En el contexto de la Hibridación 3, la perplejidad se usa como función de ranking: dado un conjunto de frases que cubren los mismos pictogramas, se selecciona aquella que el modelo de lenguaje considera más probable.
 
-El modelo utilizado es MarIA GPT-2-BNE (\texttt{PlanTL-GOB-ES/gpt2-base-bne})~\cite{gutierrez2022maria}, un modelo GPT-2 entrenado sobre el corpus de la Biblioteca Nacional de España. Se eligió por ser el único modelo autoregresivo entrenado específicamente para español con tamaño manejable ($\sim$500 MB, ejecutable en CPU), y por estar ya integrado en el framework de comparación del TFG, lo que evita cargar un modelo adicional.
+El modelo utilizado es \texttt{DeepESP/gpt2-spanish}, un GPT-2 entrenado sobre 11,5 GB de texto en español de dominio general. Su naturaleza autoregresiva permite calcular la perplejidad de forma directa ---a diferencia de modelos bidireccionales como BERT, donde la perplejidad no se define de forma natural---, y su tamaño manejable ($\sim$500 MB) lo hace ejecutable en CPU sin necesidad de GPU.
 
 \subsection{Cobertura de pictogramas como restricción de fidelidad}
 
@@ -67,7 +67,7 @@ La cobertura de pictogramas se define como la proporción de pictogramas de entr
 
 $$\text{cobertura}(pictos, frase) = \frac{|\{p \in pictos : \text{representado}(p, frase)\}|}{|pictos|}$$
 
-La función $\text{representado}(p, frase)$ verifica si el pictograma $p$ aparece en la frase mediante cuatro niveles: subcadena exacta, raíz de cuatro caracteres, raíz irregular para doce verbos comunes, o raíz de tres caracteres a nivel de palabra. Se excluyen 36 palabras funcionales ---artículos, preposiciones, conjunciones--- que no son conceptos semánticos del usuario. En la Hibridación 3, el umbral de fidelidad es 1,0: solo pasan al ranking las frases que cubren el 100\% de los pictogramas.
+La función $\text{representado}(p, frase)$ compara los lemas del pictograma con los lemas de las palabras de la frase, utilizando el modelo de lematización de spaCy para español (\texttt{es\_core\_news\_sm}). Si al menos un lema coincide, el pictograma se considera cubierto ---por ejemplo, el pictograma \textit{comer} (lema: \textit{comer}) se detecta en la frase \textit{Yo como pan} porque el token \textit{como} tiene el mismo lema---. Este mecanismo es idéntico al empleado en la métrica de cobertura del framework de evaluación descrito en el capítulo de marco experimental. En la Hibridación 3, el umbral de fidelidad es 1,0: solo pasan al ranking las frases que cubren el 100\% de los pictogramas.
 
 \subsection{Patrones descartados}
 
@@ -111,7 +111,7 @@ Las tres hibridaciones comparten una arquitectura modular que reutiliza los moto
 \label{fig:h-pipelines}
 \end{figure}
 
-El módulo completo consta de 1.305 líneas de código distribuidas en diez archivos Python. La Tabla~\ref{tab:h-codigo} muestra la distribución del código por componente.
+El módulo completo consta de 1.312 líneas de código distribuidas en diez archivos Python. La Tabla~\ref{tab:h-codigo} muestra la distribución del código por componente.
 
 \begin{table}[H]
 \centering
@@ -119,18 +119,18 @@ El módulo completo consta de 1.305 líneas de código distribuidas en diez arch
 \hline
 Componente & Archivo & Líneas & Propósito \\
 \hline
-Post-editor & \texttt{prompt.py} & 64 & Prompt del sistema y constructor de mensajes \\
-Post-editor & \texttt{post\_editor.py} & 143 & Post-edición y generación directa \\
-Hybrid 1 & \texttt{grammar\_llm.py} & 138 & Pipeline gramática + LLM \\
-Hybrid 2 & \texttt{embeddings\_llm.py} & 136 & Pipeline embeddings + LLM \\
-Hybrid 3 & \texttt{fidelity\_filter.py} & 103 & Filtro de cobertura de pictogramas \\
-Hybrid 3 & \texttt{ranker.py} & 100 & Ranking por perplejidad \\
-Hybrid 3 & \texttt{overgenerate\_rank.py} & 281 & Orquestador de sobregeneración \\
-Adapters & \texttt{hybrid1\_adapter.py} & 113 & Integración con el framework \\
-Adapters & \texttt{hybrid2\_adapter.py} & 106 & Integración con el framework \\
-Adapters & \texttt{hybrid3\_adapter.py} & 121 & Integración con el framework \\
+Post-editor & \texttt{prompt.py} & 72 & Prompt del sistema y constructor de mensajes \\
+Post-editor & \texttt{post\_editor.py} & 142 & Post-edición y generación directa \\
+Hybrid 1 & \texttt{grammar\_llm.py} & 137 & Pipeline gramática + LLM \\
+Hybrid 2 & \texttt{embeddings\_llm.py} & 135 & Pipeline embeddings + LLM \\
+Hybrid 3 & \texttt{fidelity\_filter.py} & 102 & Filtro de cobertura de pictogramas \\
+Hybrid 3 & \texttt{ranker.py} & 107 & Ranking por perplejidad \\
+Hybrid 3 & \texttt{overgenerate\_rank.py} & 280 & Orquestador de sobregeneración \\
+Adapters & \texttt{hybrid1\_adapter.py} & 112 & Integración con el framework \\
+Adapters & \texttt{hybrid2\_adapter.py} & 105 & Integración con el framework \\
+Adapters & \texttt{hybrid3\_adapter.py} & 120 & Integración con el framework \\
 \hline
-\textit{Total} & \textit{10 archivos} & \textit{1.305} & \\
+\textit{Total} & \textit{10 archivos} & \textit{1.312} & \\
 \hline
 \end{tabular}
 \caption{Estructura del código del módulo de hibridación.}
@@ -141,7 +141,7 @@ Ninguno de estos archivos reimplementa lógica de generación: el módulo import
 
 \subsection{Post-editor compartido}
 
-El post-editor es el componente central que comparten las Hibridaciones 1 y 2. Su diseño refleja la restricción fundamental del sistema: el LLM debe mejorar la naturalidad de la frase sin alterar su contenido semántico. El prompt define siete reglas estrictas, resumidas en la Tabla~\ref{tab:h-reglas-prompt}.
+El post-editor es el componente central que comparten las Hibridaciones 1 y 2. Su diseño refleja la restricción fundamental del sistema: el LLM debe mejorar la naturalidad de la frase sin alterar su contenido semántico. El prompt define ocho reglas estrictas, resumidas en la Tabla~\ref{tab:h-reglas-prompt}.
 
 \begin{table}[H]
 \centering
@@ -156,19 +156,20 @@ El post-editor es el componente central que comparten las Hibridaciones 1 y 2. S
 5 & Si ya es correcta, repetirla & Evitar ediciones innecesarias \\
 6 & Una sola oración & Consistencia con el formato CAA \\
 7 & Registro coloquial-neutro & Apropiado para comunicación cotidiana \\
+8 & Preservar modalidad verbal & No eliminar modales ni cambiar tiempo/modo verbal \\
 \hline
 \end{tabular}
-\caption{Las siete reglas del prompt de post-edición compartido por H1 y H2.}
+\caption{Las ocho reglas del prompt de post-edición compartido por H1 y H2.}
 \label{tab:h-reglas-prompt}
 \end{table}
 
-El post-editor ofrece dos modos de operación. El primero, \texttt{post\_edit}, recibe una frase candidata y los pictogramas originales, construye un mensaje que combina ambos y envía al LLM el prompt de siete reglas para que refine la frase. El segundo, \texttt{generate\_direct}, se activa como fallback cuando el motor upstream falla: reutiliza el prompt completo de la Fase 3 ---once reglas más quince ejemplos \textit{few-shot}--- para generar la frase desde cero. La diferencia entre ambos modos es fundamental: \texttt{post\_edit} instruye al LLM como realizador que mejora una frase existente, mientras que \texttt{generate\_direct} lo instruye como generador autónomo idéntico al motor LLM de la Fase 3.
+El post-editor ofrece dos modos de operación. El primero, \texttt{post\_edit}, recibe una frase candidata y los pictogramas originales, construye un mensaje que combina ambos y envía al LLM el prompt de ocho reglas para que refine la frase. El segundo, \texttt{generate\_direct}, se activa como fallback cuando el motor upstream falla: reutiliza el prompt completo de la Fase 3 ---once reglas más quince ejemplos \textit{few-shot}--- para generar la frase desde cero. La diferencia entre ambos modos es fundamental: \texttt{post\_edit} instruye al LLM como realizador que mejora una frase existente, mientras que \texttt{generate\_direct} lo instruye como generador autónomo idéntico al motor LLM de la Fase 3.
 
 Un campo del resultado, \texttt{was\_modified}, indica si el LLM alteró la frase candidata. La detección se realiza con una comparación insensible a mayúsculas. Este campo es importante para el análisis experimental: permite calcular la tasa de modificación del post-editor, es decir, con qué frecuencia el LLM considera necesario editar la salida del motor upstream. Una tasa baja sugiere que el motor ya produce frases de alta calidad; una tasa alta sugiere que la post-edición aporta valor significativo.
 
 \subsection{Inicialización perezosa}
 
-Todos los componentes del módulo siguen el patrón de inicialización perezosa: los motores externos ---\texttt{SentenceGenerator}, \texttt{HybridGenerator}, \texttt{LLMClient}, \texttt{PerplexityScorer}--- no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}. Dado que la carga de FastText ($\sim$4,2 GB) y MarIA GPT-2-BNE ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
+Todos los componentes del módulo siguen el patrón de inicialización perezosa: los motores externos ---\texttt{SentenceGenerator}, \texttt{HybridGenerator}, \texttt{LLMClient}, \texttt{PerplexityScorer}--- no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}. Dado que la carga de FastText ($\sim$4,2 GB) y el modelo GPT-2 en español ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
 
 \section{Hibridación 1: Gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
@@ -177,7 +178,7 @@ La primera hibridación conecta la gramática formal de la Fase 1 con el LLM de 
 
 El campo \texttt{method} del resultado discrimina entre ambos caminos. Cuando la gramática funciona, el método es \texttt{grammar\_post\_edit}; cuando se activa el fallback, es \texttt{fallback\_llm\_direct}. Esta distinción permite desagregar las métricas por ruta de ejecución: las frases del camino exitoso reflejan la calidad de la combinación gramática + post-editor, mientras que las del fallback son idénticas a las del motor LLM independiente.
 
-Un ejemplo ilustra el camino exitoso. Para la entrada \texttt{[quiero, agua]}, la gramática detecta el patrón de necesidad simple, aplica las reglas de postprocesamiento y produce \textit{Quiero agua}. El post-editor recibe esta frase junto con los pictogramas originales, evalúa que ya es correcta según sus siete reglas y la devuelve sin modificar. El campo \texttt{was\_modified} queda en falso. La latencia total es de aproximadamente 450 ms, dominada por la llamada a la API; la gramática contribuye menos de 1 ms.
+Un ejemplo ilustra el camino exitoso. Para la entrada \texttt{[quiero, agua]}, la gramática detecta el patrón de necesidad simple, aplica las reglas de postprocesamiento y produce \textit{Quiero agua}. El post-editor recibe esta frase junto con los pictogramas originales, evalúa que ya es correcta según sus ocho reglas y la devuelve sin modificar. El campo \texttt{was\_modified} queda en falso. La latencia total es de aproximadamente 450 ms, dominada por la llamada a la API; la gramática contribuye menos de 1 ms.
 
 El fallback se activa en un ejemplo como \texttt{[ayer, abuelo, contar, cuento]}, donde la combinación de un marcador temporal con cuatro palabras no encaja en ningún patrón de la CFG. La gramática lanza una excepción, el pipeline la captura y delega al post-editor en modo \texttt{generate\_direct}. El LLM, con el prompt completo de la Fase 3, produce \textit{Ayer el abuelo contó un cuento}. El resultado es idéntico al que produciría el motor LLM de forma independiente, ya que reutiliza exactamente el mismo prompt y modelo.
 
@@ -208,7 +209,7 @@ Fallback & \texttt{generate\_direct} & \texttt{generate\_direct} \\
 \label{tab:h-h1-vs-h2}
 \end{table}
 
-Un ejemplo representativo es la entrada \texttt{[ir, colegio]}. El motor de embeddings detecta el patrón de movimiento, genera la frase \textit{Quiero ir al colegio} con la preposición contraída correcta ---gracias a la regla de lugar codificada en el léxico---, y reporta el método como \texttt{hybrid}. El post-editor recibe esta frase, la evalúa según las siete reglas y la devuelve sin modificar. El resultado es idéntico al del camino exitoso de H1 para esta misma entrada, lo que sugiere que, para frases dentro de la cobertura de la gramática, los embeddings no aportan una diferencia que el post-editor pueda explotar.
+Un ejemplo representativo es la entrada \texttt{[ir, colegio]}. El motor de embeddings detecta el patrón de movimiento, genera la frase \textit{Quiero ir al colegio} con la preposición contraída correcta ---gracias a la regla de lugar codificada en el léxico---, y reporta el método como \texttt{hybrid}. El post-editor recibe esta frase, la evalúa según las ocho reglas y la devuelve sin modificar. El resultado es idéntico al del camino exitoso de H1 para esta misma entrada, lo que sugiere que, para frases dentro de la cobertura de la gramática, los embeddings no aportan una diferencia que el post-editor pueda explotar.
 
 La identidad deliberada de la capa LLM convierte la comparación H1 versus H2 en un experimento controlado. Cualquier diferencia en métricas se atribuye exclusivamente a la frase intermedia que recibe el post-editor. Si los embeddings aportan preposiciones más precisas o un orden de palabras más natural, el post-editor partirá de una base mejor y el resultado final debería reflejarlo. El análisis por categoría es particularmente relevante: se espera mayor contribución de los embeddings en frases con preposiciones ---categorías de movimiento y acción con objeto--- donde el refinamiento vectorial es más activo.
 
@@ -227,13 +228,13 @@ Si todos los motores fallan, el pipeline retorna un resultado con error. En la p
 
 \subsection{Fase 2: Filtro de fidelidad}
 
-La segunda fase evalúa la cobertura de pictogramas de cada candidata mediante \texttt{PictogramCoverageScorer}, el mismo componente utilizado en el framework de comparación. Para cada candidata, el scorer verifica cuántos pictogramas de entrada están representados en la frase generada, aplicando los cuatro niveles de detección descritos en la sección de fundamentos.
+La segunda fase evalúa la cobertura de pictogramas de cada candidata mediante \texttt{PictogramCoverageScorer}, el mismo componente utilizado en el framework de comparación. Para cada candidata, el scorer verifica cuántos pictogramas de entrada están representados en la frase generada, aplicando la lematización con spaCy descrita en la sección de fundamentos.
 
 El umbral es 1,0: solo pasan al ranking las candidatas que cubren el 100\% de los pictogramas. Este umbral estricto prioriza la fidelidad del sistema CAA sobre la naturalidad. Si ninguna candidata alcanza el umbral, se aplica un fallback: todas las candidatas pasan al ranking, garantizando que el pipeline siempre produce un resultado aunque ningún motor logre cobertura perfecta.
 
 \subsection{Fase 3: Ranking por perplejidad}
 
-La tercera fase calcula la perplejidad de cada candidata que pasó el filtro de fidelidad mediante MarIA GPT-2-BNE y las ordena de menor a mayor. La candidata con menor perplejidad ---la que el modelo de lenguaje considera más probable y, por tanto, más natural--- se selecciona como resultado final. El campo \texttt{best\_source} del resultado identifica el motor que generó la frase ganadora, lo que permite analizar qué motor produce las candidatas más naturales con mayor frecuencia.
+La tercera fase calcula la perplejidad de cada candidata que pasó el filtro de fidelidad mediante el modelo GPT-2 en español (\texttt{DeepESP/gpt2-spanish}) y las ordena de menor a mayor. La candidata con menor perplejidad ---la que el modelo de lenguaje considera más probable y, por tanto, más natural--- se selecciona como resultado final. El campo \texttt{best\_source} del resultado identifica el motor que generó la frase ganadora, lo que permite analizar qué motor produce las candidatas más naturales con mayor frecuencia.
 
 \subsection{Ejemplo con convergencia}
 
@@ -258,7 +259,7 @@ La elección de GPT-4o como modelo para la post-edición mantiene consistencia c
 
 El umbral de fidelidad de 1,0 en la Hibridación 3 refleja la prioridad absoluta de la fidelidad en un sistema CAA. Un umbral relajado de 0,8 permitiría frases que omiten un pictograma de cada cinco, lo que en comunicación aumentativa puede cambiar completamente el significado. El fallback ---usar todas las candidatas si ninguna alcanza cobertura perfecta--- mitiga el riesgo de que el umbral estricto produzca un error cuando ningún motor logra representar todos los pictogramas.
 
-La selección de MarIA GPT-2-BNE para el ranking responde a una combinación de requisitos: es el único modelo autoregresivo entrenado específicamente para español disponible con tamaño manejable, su naturaleza autoregresiva permite calcular la perplejidad de forma directa ---a diferencia de modelos bidireccionales como RoBERTa o BERT, donde la perplejidad no se define de forma natural---, y su integración previa en el framework de comparación evita cargar un modelo adicional.
+La selección de \texttt{DeepESP/gpt2-spanish} para el ranking responde a una decisión pragmática. El modelo originalmente previsto era MarIA GPT-2-BNE (\texttt{PlanTL-GOB-ES/gpt2-base-bne}), entrenado sobre el corpus de la Biblioteca Nacional de España, pero el BSC eliminó todos los modelos del namespace \texttt{PlanTL-GOB-ES} de HuggingFace durante el desarrollo del proyecto. El modelo de DeepESP, entrenado sobre 11,5 GB de texto en español de dominio general, constituye la alternativa más directa: su naturaleza autoregresiva permite calcular la perplejidad de forma directa ---a diferencia de modelos bidireccionales como BERT, donde la perplejidad no se define de forma natural---, y su tamaño manejable lo hace ejecutable en CPU. Al formar parte del framework de comparación como métrica de evaluación, reutilizarlo en el ranking evita cargar un modelo adicional.
 
 La generación secuencial de candidatas en H3 sacrifica latencia a cambio de simplicidad. Los tres motores que llaman a la API de OpenAI comparten la misma fuente, y la paralelización podría provocar limitaciones de tasa. En un sistema de producción con múltiples proveedores de API o con modelos locales, la paralelización reduciría la latencia significativamente; para un TFG con 428 evaluaciones en modo batch, la diferencia no es relevante.
 
