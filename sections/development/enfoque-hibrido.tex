@@ -24,7 +24,7 @@ La elección de FastText frente a alternativas como Word2Vec~\cite{mikolov2013wo
 
 Word2Vec y GloVe carecen de esta capacidad, devolviendo un vector nulo para cualquier palabra no presente en su vocabulario. BERT ofrece embeddings contextuales superiores pero su latencia ($\sim$50 ms por consulta frente a $\sim$0,01 ms de FastText) y sus dependencias (PyTorch, GPU recomendada) no se justifican para un sistema de consulta puntual sobre palabras individuales.
 
-Para representar una secuencia de pictogramas como un único vector, el sistema implementa tres estrategias de composición vectorial: promedio simple, promedio ponderado (donde las palabras de contenido reciben peso 1,0 y las funcionales 0,3) y SIF (\textit{Smooth Inverse Frequency})~\cite{arora2017simple}, que pondera cada palabra inversamente a su frecuencia estimada en el idioma. La estrategia utilizada por defecto es el promedio ponderado, que equilibra sencillez y sensibilidad al contenido semántico relevante.
+Para representar una secuencia de pictogramas como un único vector, el sistema implementa tres estrategias de composición vectorial (véase Extracto de código~\ref{lst:weighted-average} del Anexo~\ref{anx:codigo}): promedio simple, promedio ponderado (donde las palabras de contenido reciben peso 1,0 y las funcionales 0,3) y SIF (\textit{Smooth Inverse Frequency})~\cite{arora2017simple}, que pondera cada palabra inversamente a su frecuencia estimada en el idioma. La estrategia utilizada por defecto es el promedio ponderado, que equilibra sencillez y sensibilidad al contenido semántico relevante.
 
 \section{Léxico}
 \label{sec:f2-lexico}
@@ -44,7 +44,7 @@ El sistema procesa cada secuencia de pictogramas a través de un pipeline de tre
 
 \subsection{Generación estructural vía CFG}
 
-El módulo \texttt{cfg\_bridge.py} encapsula la comunicación con el motor de gramática formal. Durante la inicialización, importa la clase \texttt{SentenceGenerator} añadiendo su ruta al \texttt{sys.path}.
+El módulo \texttt{cfg\_bridge.py} encapsula la comunicación con el motor de gramática formal (véase Extracto de código~\ref{lst:cfg-bridge} del Anexo~\ref{anx:codigo}). Durante la inicialización, importa la clase \texttt{SentenceGenerator} añadiendo su ruta al \texttt{sys.path}.
 
 Para cada secuencia de pictogramas, el bridge invoca \texttt{SentenceGenerator.generate()}, que ejecuta el pipeline completo descrito en la sección~\ref{sec:f1-postprocesamiento}. Cada candidato se convierte en un diccionario plano con los campos \texttt{sentence} (la frase generada), \texttt{tipo\_oracion}, \texttt{confianza}, \texttt{patron} e \texttt{inferencias}.
 
@@ -52,7 +52,7 @@ Si la CFG no reconoce la secuencia (por ejemplo, ante una palabra desconocida o 
 
 \subsection{Ranking semántico de candidatos}
 
-Cuando la CFG genera múltiples candidatos para una misma entrada, como \textit{Quiero ir al colegio} y \textit{Voy al colegio} para la secuencia \texttt{[ir, colegio]}, el módulo \texttt{semantic\_scorer.py} los ordena mediante un score combinado que pondera la confianza gramatical y la coherencia semántica:
+Cuando la CFG genera múltiples candidatos para una misma entrada, como \textit{Quiero ir al colegio} y \textit{Voy al colegio} para la secuencia \texttt{[ir, colegio]}, el módulo \texttt{semantic\_scorer.py} los ordena mediante un score combinado que pondera la confianza gramatical y la coherencia semántica (véase Extracto de código~\ref{lst:ranking-candidatos} del Anexo~\ref{anx:codigo}):
 
 $$\text{score} = \text{confianza}_{\text{CFG}} \times 0{,}6 + \text{score}_{\text{embedding}} \times 0{,}4$$
 
@@ -62,7 +62,7 @@ Los pesos 0,6/0,4 entre CFG y embeddings reflejan una decisión deliberada: la e
 
 \subsection{Validación de preferencias seleccionales}
 
-El scorer implementa una verificación de preferencia seleccional basada en la hipótesis distribucional: la similitud coseno entre el embedding de un verbo y el de su argumento aproxima la compatibilidad semántica de la combinación. Si la similitud supera un umbral de 0,10, la combinación se considera coherente. El umbral es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes: \textit{querer juguete} tiene menor similitud que \textit{querer agua}, pero ambas son correctas en el contexto de CAA.
+El scorer implementa una verificación de preferencia seleccional basada en la hipótesis distribucional (véase Extracto de código~\ref{lst:selectional-preference} del Anexo~\ref{anx:codigo}): la similitud coseno entre el embedding de un verbo y el de su argumento aproxima la compatibilidad semántica de la combinación. Si la similitud supera un umbral de 0,10, la combinación se considera coherente. El umbral es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes: \textit{querer juguete} tiene menor similitud que \textit{querer agua}, pero ambas son correctas en el contexto de CAA.
 
 Esta información se reporta como metadato en el resultado pero no bloquea la generación: su propósito es informativo, no restrictivo, a diferencia de las restricciones de seguridad del motor de gramática (sección~\ref{sec:f1-limitaciones}) que sí reducen la confianza.
 
@@ -85,7 +85,7 @@ Cuando el sustantivo es un lugar con preposiciones codificadas en el léxico, la
 
 \subsection{Nivel 2: prototipos vectoriales}
 
-Si no existe regla de lugar, el scorer recurre a prototipos vectoriales construidos offline a partir del corpus SBWCE~\cite{cardellino2019sbwce} (\textit{Spanish Billion Word Corpus and Embeddings}).
+Si no existe regla de lugar, el scorer recurre a prototipos vectoriales construidos offline (véase Extracto de código~\ref{lst:predict-preposition} del Anexo~\ref{anx:codigo}) a partir del corpus SBWCE~\cite{cardellino2019sbwce} (\textit{Spanish Billion Word Corpus and Embeddings}).
 
 Para cada preposición, el prototipo es la media de los vectores de contexto (suma de embedding del verbo y del sustantivo) extraídos de las tripletas \textit{(palabra\_antes, preposición, palabra\_después)} del corpus:
 

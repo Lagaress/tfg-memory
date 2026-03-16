@@ -1,4 +1,4 @@
-Este anexo recoge los extractos de código más representativos del motor de gramática formal descrito en el capítulo correspondiente. Los fragmentos se presentan en el orden en que intervienen en el pipeline de generación, desde las estructuras de datos hasta la lógica de transformación.
+Este anexo recoge los extractos de código más representativos de los motores de gramática formal y de embeddings semánticos descritos en los capítulos correspondientes. Los fragmentos se presentan en el orden en que intervienen en cada pipeline de generación, desde las estructuras de datos hasta la lógica de transformación.
 
 \section{Estructuras de datos}
 
@@ -261,4 +261,192 @@ def _conjugar_regular(self, infinitivo, clave):
             if sufijo:
                 return raiz + sufijo
     return None
+\end{lstlisting}
+
+\section{Adaptador CFG}
+
+El módulo \texttt{cfg\_bridge.py} encapsula toda la comunicación con el motor de gramática formal (sección~\ref{sec:f2-pipeline}). Su método \texttt{generate\_candidates()} invoca el generador de la gramática, captura posibles errores y convierte cada opción de frase en un diccionario plano con campos normalizados. El acoplamiento entre ambos motores se limita a este único archivo.
+
+\begin{lstlisting}[language=Python,caption={Adaptador al motor de gramática (\texttt{cfg\_bridge.py}).},label={lst:cfg-bridge},basicstyle=\ttfamily\small,xleftmargin=1cm]
+class CFGBridge:
+    def __init__(self):
+        src_path = str(FORMAL_GRAMMAR_SRC)
+        if src_path not in sys.path:
+            sys.path.insert(0, src_path)
+        from grammar.generator import SentenceGenerator
+        self._generator = SentenceGenerator()
+
+    def generate_candidates(self, pictogram_labels):
+        try:
+            resultado = self._generator.generate(
+                pictogram_labels
+            )
+        except Exception:
+            return []
+
+        if resultado.error or not resultado.opciones:
+            return []
+
+        candidates = []
+        for opcion in resultado.opciones:
+            meta = opcion.metadata or {}
+            candidates.append({
+                "sentence": opcion.frase,
+                "tipo_oracion": opcion.tipo_oracion,
+                "confianza": opcion.confianza,
+                "inferencias": list(opcion.inferencias),
+                "patron": meta.get("patron", ""),
+            })
+        return candidates
+\end{lstlisting}
+
+\section{Composición vectorial ponderada}
+
+La estrategia de composición vectorial por defecto (sección~\ref{sec:f2-embeddings}) pondera las palabras según su tipo: las de contenido (sustantivos, verbos, adjetivos) reciben peso 1,0 y las funcionales (artículos, preposiciones) reciben peso 0,3. Esta ponderación refleja que en CAA el usuario selecciona deliberadamente las palabras de contenido, mientras que las funcionales las infiere el sistema.
+
+\begin{lstlisting}[language=Python,caption={Composición vectorial ponderada (\texttt{vector\_composer.py}).},label={lst:weighted-average},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def weighted_average(self, tokens):
+    token_vectors = self._get_token_vectors(tokens)
+    if not token_vectors:
+        return np.zeros(self.dim)
+
+    CONTENT_WEIGHT = 1.0
+    STOPWORD_WEIGHT = 0.3
+
+    weighted_sum = np.zeros(self.dim)
+    total_weight = 0.0
+
+    for token, vec in token_vectors:
+        weight = (STOPWORD_WEIGHT
+                  if is_stopword(token)
+                  else CONTENT_WEIGHT)
+        weighted_sum += weight * vec
+        total_weight += weight
+
+    if total_weight == 0:
+        return np.zeros(self.dim)
+    return weighted_sum / total_weight
+\end{lstlisting}
+
+\section{Ranking semántico de candidatos}
+
+El método \texttt{score\_candidate()} (sección~\ref{sec:f2-pipeline}) calcula el score de embeddings combinando preferencia seleccional (60\%) y similitud vectorial a nivel de oración (40\%). El método \texttt{rank\_candidates()} aplica la fórmula de score combinado con la confianza de la CFG y ordena los candidatos.
+
+\begin{lstlisting}[language=Python,caption={Scoring y ranking de candidatos (\texttt{semantic\_scorer.py}).},label={lst:ranking-candidatos},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def score_candidate(self, candidate, pictogram_labels):
+    sentence_tokens = tokenize_sentence(
+        candidate["sentence"]
+    )
+    verbs, nouns = self._find_verbs_and_nouns(
+        sentence_tokens
+    )
+
+    # Preferencia seleccional (60%)
+    sel_score = 0.0
+    if verbs and nouns:
+        scores = []
+        for verb in verbs:
+            inf = self._resolve_infinitive(verb) or verb
+            for noun in nouns:
+                scores.append(
+                    self.compute_selectional_preference(
+                        inf, noun
+                    )
+                )
+        sel_score = float(np.mean(scores))
+
+    # Similitud vectorial oracion (40%)
+    vec_score = 0.0
+    input_vec = self.vector_composer.weighted_average(
+        pictogram_labels
+    )
+    sent_vec = self.vector_composer.weighted_average(
+        sentence_tokens
+    )
+    if np.any(input_vec) and np.any(sent_vec):
+        vec_score = float(
+            cosine_similarity(input_vec, sent_vec)
+        )
+
+    return sel_score * 0.6 + vec_score * 0.4
+
+def rank_candidates(self, candidates, pictogram_labels):
+    for candidate in candidates:
+        emb_score = self.score_candidate(
+            candidate, pictogram_labels
+        )
+        candidate["embedding_score"] = emb_score
+        candidate["combined_score"] = (
+            candidate["confianza"] * 0.6
+            + emb_score * 0.4
+        )
+    candidates.sort(
+        key=lambda c: c["combined_score"], reverse=True
+    )
+    return candidates
+\end{lstlisting}
+
+\section{Predicción de preposiciones por prototipos vectoriales}
+
+El predictor de preposiciones (sección~\ref{sec:f2-preposiciones}) calcula el vector de contexto sumando los embeddings del verbo y el sustantivo, y selecciona la preposición cuyo prototipo tiene mayor similitud coseno. Si ningún prototipo supera el umbral mínimo, recurre a la preposición por defecto del verbo.
+
+\begin{lstlisting}[language=Python,caption={Predicción de preposiciones (\texttt{semantic\_scorer.py}).},label={lst:predict-preposition},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def predict_preposition(self, verb, noun):
+    verb_inf = self._resolve_infinitive(verb) or verb
+
+    if not self.preposition_prototypes:
+        if verb_inf in self._verb_prepositions:
+            return (self._verb_prepositions[verb_inf],
+                    0.8, "rule_verb")
+        return (None, 0.0, "none")
+
+    verb_emb = self.embedding_loader.get_word_vector(
+        verb_inf
+    )
+    noun_emb = self.embedding_loader.get_word_vector(
+        noun.lower()
+    )
+
+    if verb_emb is not None and noun_emb is not None:
+        context_vector = verb_emb + noun_emb
+        best_prep, best_score = None, -1.0
+
+        for prep, prototype in \
+                self.preposition_prototypes.items():
+            score = cosine_similarity(
+                context_vector, prototype
+            )
+            if score > best_score:
+                best_score = score
+                best_prep = prep
+
+        if best_prep and best_score >= 0.15:
+            return (best_prep, best_score, "embedding")
+
+    # Fallback: regla por verbo
+    if verb_inf in self._verb_prepositions:
+        return (self._verb_prepositions[verb_inf],
+                0.8, "rule_verb")
+    return (None, 0.0, "none")
+\end{lstlisting}
+
+\section{Preferencia seleccional con embeddings}
+
+La preferencia seleccional (sección~\ref{sec:f2-pipeline}) mide la compatibilidad semántica entre un verbo y su argumento mediante la similitud coseno de sus embeddings. El umbral de 0,10 es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes en el contexto de CAA.
+
+\begin{lstlisting}[language=Python,caption={Preferencia seleccional (\texttt{semantic\_scorer.py}).},label={lst:selectional-preference},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def compute_selectional_preference(self, verb, argument):
+    verb_emb = self.embedding_loader.get_word_vector(verb)
+    arg_emb = self.embedding_loader.get_word_vector(
+        argument
+    )
+    if verb_emb is None or arg_emb is None:
+        return 0.0
+    return cosine_similarity(verb_emb, arg_emb)
+
+def validate_combination(self, verb, argument):
+    score = self.compute_selectional_preference(
+        verb, argument
+    )
+    return score >= self.selectional_threshold  # 0.10
 \end{lstlisting}
