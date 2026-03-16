@@ -1,66 +1,70 @@
-La segunda técnica surge de una limitación concreta de la gramática formal: sobre el corpus original de 130 casos, su cobertura del 88,46\% implica que una de cada nueve entradas no produce salida alguna. Este capítulo describe un enfoque híbrido que combina reglas gramaticales con embeddings de palabras para superar ese techo sin abandonar el control sobre la generación.
+La segunda técnica surge de una limitación concreta de la gramática formal: el motor rechaza toda entrada cuya secuencia de categorías no coincida con alguno de sus 48 patrones predefinidos. Este capítulo describe un enfoque híbrido que combina las reglas gramaticales del capítulo anterior con embeddings semánticos para superar ese techo sin abandonar el control sobre la generación.
 
 \section{Planteamiento del enfoque}
 \label{sec:f2-planteamiento}
 
-La motivación para esta segunda fase es precisa: la gramática formal alcanza el 100\% de Exact Match en los casos que reconoce, pero rechaza toda entrada cuya secuencia de categorías no coincida con alguno de sus 48 patrones predefinidos. Ampliar la cobertura añadiendo más patrones es posible pero no escalable ---cada nuevo patrón comunicativo exige definir explícitamente su regla, y la combinatoria de posibles secuencias crece rápidamente---.
+La motivación para esta segunda técnica es precisa: la gramática formal alcanza el 100\% de Exact Match en los casos que reconoce, pero rechaza toda entrada fuera de sus patrones. Ampliar la cobertura añadiendo más patrones es posible pero no escalable, ya que cada nuevo patrón comunicativo exige definir explícitamente su regla y la combinatoria de posibles secuencias crece con rapidez.
 
-La solución adoptada es una arquitectura híbrida que reutiliza íntegramente la gramática formal de la Fase 1 como motor estructural y añade una capa de refinamiento basada en embeddings semánticos. La CFG se encarga de todas las operaciones deterministas ---detección de patrón sintáctico, inferencia de elementos implícitos, conjugación verbal, selección de artículos, preposiciones, contracciones y concordancia de género--- a través de los mismos 48 patrones y el mismo pipeline de nueve etapas descritos en el capítulo anterior. Los embeddings intervienen en un segundo plano: cuando la CFG genera múltiples candidatos, los rankean por coherencia semántica; cuando una preposición se asignó con una regla genérica, pueden refinarla con prototipos vectoriales; y para cada combinación verbo-argumento, calculan un score de preferencia seleccional que informa sobre la compatibilidad semántica de la frase.
+La solución adoptada es una arquitectura híbrida que reutiliza íntegramente la gramática formal como motor estructural y añade una capa de refinamiento basada en embeddings semánticos. La CFG se encarga de todas las operaciones deterministas (detección de patrón sintáctico, inferencia de elementos implícitos, conjugación verbal, selección de artículos, preposiciones, contracciones y concordancia de género) a través de los mismos 48 patrones y el pipeline de nueve etapas descritos en el capítulo anterior.
 
-Esta decisión de reutilizar la CFG ---en lugar de reimplementar la lógica gramatical--- responde a un principio de no duplicación: el motor de la Fase 1 contiene 4.355 líneas de reglas lingüísticas validadas. Importarlo como dependencia permite que las mejoras en la gramática se propaguen automáticamente al sistema híbrido sin intervención manual.
+Los embeddings intervienen en un segundo plano: cuando la CFG genera múltiples candidatos, los rankean por coherencia semántica; cuando una preposición se asignó con una regla genérica, pueden refinarla con prototipos vectoriales; y para cada combinación verbo-argumento, calculan un score de preferencia seleccional que informa sobre la compatibilidad semántica de la frase.
+
+Esta decisión de reutilizar la CFG, en lugar de reimplementar la lógica gramatical, responde a un principio de no duplicación: el motor de gramática contiene 4.355 líneas de reglas lingüísticas validadas. Importarlo como dependencia permite que las mejoras en la gramática se propaguen automáticamente al sistema híbrido sin intervención manual.
 
 Antes de llegar a este diseño se exploró y descartó un enfoque de recuperación semántica (\textit{retrieval}). Dado un conjunto de pictogramas, el sistema buscaba en el corpus de referencia la frase cuya representación vectorial fuese más similar a la composición de los embeddings de entrada. Este enfoque fue abandonado porque el corpus de evaluación era la misma fuente de la que se recuperaban las frases, produciendo métricas artificialmente infladas que no reflejaban capacidad real de generalización: el sistema no generaba frases sino que las copiaba.
 
 \section{Modelo de embeddings}
 \label{sec:f2-embeddings}
 
-El sistema utiliza el modelo preentrenado FastText \texttt{cc.es.300.bin}, entrenado sobre Common Crawl en español. Cada palabra se representa como un vector de 300 dimensiones, y la similitud entre palabras se mide mediante similitud coseno.
+El sistema utiliza el modelo preentrenado FastText~\cite{bojanowski2017fasttext} \texttt{cc.es.300.bin}, entrenado sobre Common Crawl en español. Cada palabra se representa como un vector de 300 dimensiones, y la similitud entre palabras se mide mediante similitud coseno. Se optó por utilizar un modelo preentrenado en lugar de entrenar embeddings propios porque el volumen de datos del proyecto es insuficiente para producir representaciones de calidad, y hacerlo contaminaría la evaluación de la técnica con la baja calidad del recurso base.
 
-La elección de FastText frente a alternativas como Word2Vec, GloVe o BERT responde a una ventaja crítica para el español: el manejo nativo de palabras fuera de vocabulario (\textit{out-of-vocabulary}, OOV). FastText representa cada palabra como la suma de los vectores de sus n-gramas de caracteres, lo que permite generar embeddings razonables para formas morfológicas no vistas durante el entrenamiento ---conjugaciones, diminutivos, formas de género--- sin necesidad de un vocabulario exhaustivo. Word2Vec y GloVe carecen de esta capacidad, devolviendo un vector nulo para cualquier palabra no presente en su vocabulario. BERT ofrece embeddings contextuales superiores pero su latencia ($\sim$50 ms por consulta frente a $\sim$0,01 ms de FastText) y sus dependencias (PyTorch, GPU recomendada) no se justifican para un sistema de consulta puntual sobre palabras individuales.
+La elección de FastText frente a alternativas como Word2Vec~\cite{mikolov2013word2vec}, GloVe o BERT responde a una ventaja determinante para el español: el manejo nativo de palabras fuera de vocabulario (\textit{out-of-vocabulary}, OOV). FastText representa cada palabra como la suma de los vectores de sus n-gramas de caracteres, lo que permite generar embeddings razonables para formas morfológicas no vistas durante el entrenamiento (conjugaciones, diminutivos, formas de género) sin necesidad de un vocabulario exhaustivo.
 
-Para representar una secuencia de pictogramas como un único vector, el sistema implementa tres estrategias de composición vectorial: promedio simple, promedio ponderado ---donde las palabras de contenido reciben peso 1,0 y las palabras funcionales 0,3--- y SIF (\textit{Smooth Inverse Frequency}), que pondera cada palabra inversamente a su frecuencia estimada en el idioma. La estrategia utilizada por defecto es el promedio ponderado, que equilibra sencillez y sensibilidad al contenido semántico relevante.
+Word2Vec y GloVe carecen de esta capacidad, devolviendo un vector nulo para cualquier palabra no presente en su vocabulario. BERT ofrece embeddings contextuales superiores pero su latencia ($\sim$50 ms por consulta frente a $\sim$0,01 ms de FastText) y sus dependencias (PyTorch, GPU recomendada) no se justifican para un sistema de consulta puntual sobre palabras individuales.
+
+Para representar una secuencia de pictogramas como un único vector, el sistema implementa tres estrategias de composición vectorial: promedio simple, promedio ponderado (donde las palabras de contenido reciben peso 1,0 y las funcionales 0,3) y SIF (\textit{Smooth Inverse Frequency})~\cite{arora2017simple}, que pondera cada palabra inversamente a su frecuencia estimada en el idioma. La estrategia utilizada por defecto es el promedio ponderado, que equilibra sencillez y sensibilidad al contenido semántico relevante.
 
 \section{Léxico}
 \label{sec:f2-lexico}
 
-El léxico de esta fase contiene 355 entradas exportadas directamente desde la Fase 1 mediante un script de conversión. Cada entrada se almacena como un objeto JSON con campos que varían según la categoría: los verbos incluyen conjugaciones completas por pronombre, los lugares incluyen preposiciones de movimiento y ubicación, los adjetivos incluyen formas de género, y los objetos incluyen rasgos como \texttt{uncountable} y \texttt{definite\_article}.
+El léxico de este motor contiene 355 entradas exportadas desde el motor de gramática formal mediante un script de conversión. Las 355 entradas son el resultado de filtrar las 646 del léxico original a formas base: los verbos se reducen a infinitivos (las conjugaciones las sigue manejando la CFG), los adjetivos fusionan pares de género (\textit{bonito}/\textit{bonita} se unifican en una sola entrada) y los pronombres eliminan duplicados de tilde. Al sistema de embeddings le interesa la similitud semántica entre conceptos, no entre formas flexionadas de un mismo concepto.
 
-La decisión de reutilizar el léxico de la Fase 1 ---en lugar de construir uno independiente--- responde a tres razones: la información lingüística ya estaba validada, se garantiza consistencia entre ambas fases al evaluar sobre el mismo conjunto de conceptos, y se evita duplicar un esfuerzo considerable de etiquetado manual. El script de exportación (\texttt{export\_lexicon.py}) importa las clases de la Fase 1, itera sobre todas las categorías de palabras, genera las conjugaciones verbales y enriquece las entradas con información adicional del postprocesador (sustantivos incontables, artículos definidos, preposiciones por lugar). La diferencia fundamental con el léxico de la Fase 1 es el formato: mientras que aquella lo codifica como estructuras Python en memoria, esta fase lo serializa a JSON para independizar el léxico del código.
+Cada entrada se almacena como un objeto JSON con campos que varían según la categoría: los verbos incluyen conjugaciones completas por pronombre, los lugares incluyen preposiciones de movimiento y ubicación, los adjetivos incluyen formas de género, y los objetos incluyen rasgos como \texttt{uncountable} y \texttt{definite\_article}.
+
+La decisión de reutilizar el léxico del motor de gramática, en lugar de construir uno independiente, responde a tres razones: la información lingüística ya estaba validada, se garantiza consistencia entre ambos motores al evaluar sobre el mismo conjunto de conceptos, y se evita duplicar un esfuerzo considerable de etiquetado manual. La diferencia fundamental es el formato: mientras que el motor de gramática codifica el léxico como estructuras Python en memoria, este motor lo serializa a JSON para independizar el léxico del código.
 
 \section{Arquitectura del pipeline}
 \label{sec:f2-pipeline}
 
-El sistema procesa cada secuencia de pictogramas a través de un pipeline de tres etapas: generación estructural, ranking y refinamiento semántico, y orquestación. La primera etapa delega toda la generación gramatical a la CFG de la Fase 1; la segunda aplica embeddings para desambiguar y refinar; la tercera coordina ambas y formatea el resultado.
+El sistema procesa cada secuencia de pictogramas a través de un pipeline de tres etapas: generación estructural, ranking y refinamiento semántico, y orquestación. La primera etapa delega toda la generación gramatical a la CFG del motor de gramática; la segunda aplica embeddings para desambiguar y refinar; la tercera coordina ambas y formatea el resultado.
 
 \subsection{Generación estructural vía CFG}
 
-El módulo \texttt{cfg\_bridge.py} encapsula la comunicación con el motor de gramática formal. Durante la inicialización, importa la clase \texttt{SentenceGenerator} de la Fase 1 añadiendo su ruta al \texttt{sys.path}, el mismo mecanismo que utiliza el script de exportación del léxico.
+El módulo \texttt{cfg\_bridge.py} encapsula la comunicación con el motor de gramática formal. Durante la inicialización, importa la clase \texttt{SentenceGenerator} añadiendo su ruta al \texttt{sys.path}. Para cada secuencia de pictogramas, el bridge invoca \texttt{SentenceGenerator.generate()}, que ejecuta el pipeline completo descrito en la sección~\ref{sec:f1-postprocesamiento}. Cada candidato se convierte en un diccionario plano con los campos \texttt{sentence} (la frase generada), \texttt{tipo\_oracion}, \texttt{confianza}, \texttt{patron} e \texttt{inferencias}.
 
-Para cada secuencia de pictogramas, el bridge invoca \texttt{SentenceGenerator.generate()}, que ejecuta el pipeline completo de la Fase 1: el parser detecta el patrón sintáctico entre los 48 disponibles, el postprocesador aplica sus nueve etapas ---inferencia, conjugación, determinantes, preposiciones, contracciones, concordancia--- y el generador produce uno o más candidatos de frase con metadatos. Cada candidato se convierte en un diccionario plano con los campos \texttt{sentence} (la frase generada), \texttt{tipo\_oracion}, \texttt{confianza} (1,0 por defecto, reducida si hay advertencias semánticas), \texttt{patron} (el nombre del patrón CFG detectado) e \texttt{inferencias} (la lista de elementos implícitos añadidos).
-
-Si la CFG no reconoce la secuencia ---por ejemplo, ante una palabra desconocida o una estructura que no coincide con ningún patrón---, el bridge devuelve una lista vacía y el orquestador gestiona el fallback.
+Si la CFG no reconoce la secuencia (por ejemplo, ante una palabra desconocida o una estructura fuera de los 48 patrones), el bridge devuelve una lista vacía y el orquestador gestiona el fallback.
 
 \subsection{Ranking semántico de candidatos}
 
-Cuando la CFG genera múltiples candidatos para una misma entrada ---por ejemplo, para \texttt{[ir, colegio]} puede producir tanto \textit{Quiero ir al colegio} como \textit{Voy al colegio}---, el módulo \texttt{semantic\_scorer.py} los ordena mediante un score combinado que pondera la confianza gramatical y la coherencia semántica:
+Cuando la CFG genera múltiples candidatos para una misma entrada, como \textit{Quiero ir al colegio} y \textit{Voy al colegio} para la secuencia \texttt{[ir, colegio]}, el módulo \texttt{semantic\_scorer.py} los ordena mediante un score combinado que pondera la confianza gramatical y la coherencia semántica:
 
 $$\text{score} = \text{confianza}_{\text{CFG}} \times 0{,}6 + \text{score}_{\text{embedding}} \times 0{,}4$$
 
-El score de embedding se calcula como la media de similitud coseno entre cada par verbo-argumento del input. Los pesos 0,6/0,4 reflejan una decisión deliberada: la estructura gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad.
+El score de embedding se compone a su vez de dos señales: la preferencia seleccional (60\%), que mide la similitud coseno entre cada par verbo-argumento, y la similitud vectorial a nivel de oración (40\%), que compara el vector compuesto de los pictogramas de entrada con el de la frase generada. La preferencia seleccional recibe mayor peso porque la coherencia de un par concreto como \textit{comer}--\textit{manzana} es una señal más directa que la similitud global de la oración, donde frases con casi las mismas palabras obtienen valores casi idénticos.
 
-El scorer mantiene tres índices de búsqueda: un mapa directo palabra $\rightarrow$ entrada léxica, un mapa inverso de conjugaciones (\textit{quiero} $\rightarrow$ \textit{querer}) y un diccionario de preposiciones por defecto de verbos de movimiento. Estos índices permiten identificar verbos y sustantivos en la secuencia de entrada independientemente de la forma superficial en que aparezcan.
+Los pesos 0,6/0,4 entre CFG y embeddings reflejan una decisión deliberada: la estructura gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
 
 \subsection{Validación de preferencias seleccionales}
 
-Además del ranking, el scorer implementa una verificación de preferencia seleccional basada en la hipótesis distribucional: la similitud coseno entre el embedding de un verbo y el de su argumento aproxima la compatibilidad semántica de la combinación. Si la similitud supera un umbral configurable de 0,10, la combinación se considera coherente. El umbral es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes ---\textit{querer juguete} tiene menor similitud que \textit{querer agua}, pero ambas son correctas---.
+El scorer implementa una verificación de preferencia seleccional basada en la hipótesis distribucional: la similitud coseno entre el embedding de un verbo y el de su argumento aproxima la compatibilidad semántica de la combinación. Si la similitud supera un umbral de 0,10, la combinación se considera coherente. El umbral es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes: \textit{querer juguete} tiene menor similitud que \textit{querer agua}, pero ambas son correctas en el contexto de CAA.
 
-Esta información se reporta como metadato en el resultado pero no bloquea la generación: su propósito es informativo, no restrictivo, a diferencia de las restricciones de seguridad de la Fase 1 que sí reducen la confianza.
+Esta información se reporta como metadato en el resultado pero no bloquea la generación: su propósito es informativo, no restrictivo, a diferencia de las restricciones de seguridad del motor de gramática (sección~\ref{sec:f1-limitaciones}) que sí reducen la confianza.
 
 \subsection{Orquestación}
 
-El módulo \texttt{hybrid\_generator.py} coordina el pipeline completo. Su método \texttt{generate()} sigue una secuencia fija: invoca el bridge para obtener candidatos de la CFG, si hay múltiples candidatos los ordena con el scorer, selecciona el mejor, intenta refinar sus preposiciones con embeddings, calcula los scores de preferencia seleccional y devuelve la frase junto con metadatos detallados ---patrón CFG utilizado, scores individuales y combinados, alternativas evaluadas, latencia y advertencias semánticas---.
+El módulo \texttt{hybrid\_generator.py} coordina el pipeline completo. Su método \texttt{generate()} sigue una secuencia fija: invoca el bridge para obtener candidatos de la CFG, si hay múltiples candidatos los ordena con el scorer, selecciona el mejor, intenta refinar sus preposiciones con embeddings, calcula los scores de preferencia seleccional y devuelve la frase junto con metadatos detallados (patrón CFG utilizado, scores individuales y combinados, alternativas evaluadas, latencia y advertencias semánticas).
 
-Si la CFG no genera ningún candidato, el orquestador aplica un fallback que concatena las palabras de entrada capitalizando la primera, marcando el método como \texttt{fallback}. Este mecanismo garantiza que toda entrada produce alguna salida, aunque sea de baja calidad, lo que explica la cobertura del 100\%.
+Si la CFG no genera ningún candidato, el orquestador aplica un fallback que concatena las palabras de entrada capitalizando la primera, marcando el método como \texttt{fallback}. Este mecanismo garantiza que toda entrada produce alguna salida, aunque sea de baja calidad. La diferencia de criterio respecto al motor de gramática es deliberada: en un contexto de CAA, que el usuario se quede sin respuesta es un problema de accesibilidad, y una concatenación como \textit{Ir baño} se entiende aunque no sea gramaticalmente perfecta.
 
 \section{Refinamiento de preposiciones}
 \label{sec:f2-preposiciones}
@@ -73,13 +77,13 @@ Cuando el sustantivo es un lugar con preposiciones codificadas en el léxico, la
 
 \subsection{Nivel 2: prototipos vectoriales}
 
-Si no existe regla de lugar, el scorer recurre a prototipos vectoriales construidos offline a partir del corpus SBWCE (\textit{Spanish Billion Word Corpus and Embeddings}). Para cada preposición, el prototipo es la media de los vectores de contexto (suma de embedding del verbo y del sustantivo) extraídos de las tripletas \textit{(palabra\_antes, preposición, palabra\_después)} del corpus:
+Si no existe regla de lugar, el scorer recurre a prototipos vectoriales construidos offline a partir del corpus SBWCE~\cite{cardellino2019sbwce} (\textit{Spanish Billion Word Corpus and Embeddings}). Para cada preposición, el prototipo es la media de los vectores de contexto (suma de embedding del verbo y del sustantivo) extraídos de las tripletas \textit{(palabra\_antes, preposición, palabra\_después)} del corpus:
 
 $$\vec{p}_k = \frac{1}{|C_k|} \sum_{(w_a, w_d) \in C_k} (\vec{w}_a + \vec{w}_d)$$
 
 En tiempo de ejecución, dado un par (verbo, sustantivo), se calcula el vector de contexto $\vec{c} = \vec{v} + \vec{n}$ y se selecciona la preposición cuyo prototipo tiene mayor similitud coseno con $\vec{c}$, siempre que supere un umbral mínimo de confianza (0,15). Los prototipos se calculan una sola vez y se almacenan en caché como un archivo JSON.
 
-El refinamiento solo sobrescribe la preposición de la CFG si se cumplen tres condiciones: la confianza del embedding supera 0,3, la preposición predicha difiere de la generada por la CFG, y la CFG no utilizó una regla específica por lugar. En la práctica, las preposiciones de la CFG son correctas para los aproximadamente 35 lugares del vocabulario; los embeddings aportan valor para combinaciones nuevas o no cubiertas por el léxico.
+El refinamiento solo sobrescribe la preposición de la CFG si se cumplen tres condiciones: la confianza del embedding supera 0,3, la preposición predicha difiere de la generada por la CFG, y la CFG no utilizó una regla específica por lugar. En la práctica, las preposiciones de la CFG son correctas para los 35 lugares del vocabulario; los embeddings aportan valor para combinaciones nuevas o no cubiertas por el léxico.
 
 \subsection{Nivel 3: reglas por verbo}
 
@@ -87,32 +91,7 @@ Como fallback final, si los prototipos no superan el umbral, el sistema consulta
 
 Este diseño de tres niveles ejemplifica la filosofía híbrida del sistema: las reglas codificadas cubren los casos conocidos con certeza, los embeddings extienden la cobertura a combinaciones no anticipadas, y un fallback determinista garantiza que siempre se produce alguna salida.
 
-\section{Organización del código}
-\label{sec:f2-codigo}
+\section{Limitaciones}
+\label{sec:f2-limitaciones}
 
-El sistema se implementa en nueve módulos Python, con FastText como única dependencia de aprendizaje automático. La Tabla~\ref{tab:f2-codigo} muestra la distribución del código.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l r l}
-\hline
-Módulo & Líneas & Propósito \\
-\hline
-\texttt{hybrid\_generator.py} & 240 & Orquestador del pipeline \\
-\texttt{semantic\_scorer.py} & 222 & Ranking, preposiciones y preferencias seleccionales \\
-\texttt{vector\_composer.py} & 180 & 3 estrategias de composición vectorial \\
-\texttt{preposition\_builder.py} & 153 & Prototipos vectoriales desde corpus \\
-\texttt{text\_preprocessor.py} & 106 & Normalización, tokenización y frecuencias \\
-\texttt{cfg\_bridge.py} & 56 & Adaptador a la CFG de Fase 1 \\
-\texttt{similarity\_engine.py} & 54 & Similitud coseno individual y batch \\
-\texttt{embedding\_loader.py} & 47 & Interfaz con FastText \\
-\texttt{config.py} & 25 & Constantes y umbrales \\
-\hline
-\textit{Total} & \textit{1.083} & \\
-\hline
-\end{tabular}
-\caption{Estructura del código del motor híbrido.}
-\label{tab:f2-codigo}
-\end{table}
-
-Las dependencias fluyen de arriba hacia abajo: \texttt{config.py} proporciona constantes globales (incluyendo la ruta al proyecto de Fase 1), \texttt{embedding\_loader.py} encapsula el acceso a FastText, \texttt{cfg\_bridge.py} importa \texttt{SentenceGenerator} y genera candidatos estructurales, \texttt{semantic\_scorer.py} concentra todas las decisiones basadas en embeddings, y \texttt{hybrid\_generator.py} orquesta el pipeline completo. La separación entre generación estructural (delegada a la CFG) y refinamiento semántico (embeddings) permite evolucionar cada componente de forma independiente: mejorar la gramática beneficia automáticamente al sistema híbrido, y ajustar los umbrales de los embeddings no altera la corrección gramatical de las frases.
+Los pesos del scoring (0,6/0,4 entre CFG y embeddings, 0,6/0,4 entre preferencia seleccional y similitud oracional) y los umbrales de confianza (0,10 para preferencia seleccional, 0,15 para prototipos, 0,3 para refinamiento de preposiciones) se fijaron manualmente. No se realizó un proceso de optimización automática, y su ajuste empírico queda como posible mejora futura. La implementación de SIF~\cite{arora2017simple} incluye solo la ponderación por frecuencia inversa, sin la corrección PCA (eliminación del primer componente principal) del artículo original; para frases cortas de CAA el impacto es menor. Cuando la CFG no reconoce la entrada, el fallback se limita a concatenar los pictogramas sin procesamiento lingüístico. La calidad de las oraciones depende directamente de la cobertura de la gramática formal: patrones no contemplados activan este fallback. El sistema tampoco aprende de correcciones del usuario ni se adapta con el uso.
