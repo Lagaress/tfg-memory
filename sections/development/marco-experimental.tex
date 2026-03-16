@@ -61,16 +61,20 @@ Cada categoría presenta desafíos lingüísticos específicos:
 
 Cada caso de prueba se define como un par (entrada, referencia). La entrada es una lista de cadenas que representan las etiquetas de los pictogramas seleccionados por el usuario, y la referencia es la oración esperada en español natural. Por ejemplo:
 
-\begin{lstlisting}[language={},caption={Ejemplo de caso de prueba del corpus de evaluación.}]
-Entrada:    ["agua"]
-Referencia: "Quiero agua"
-
-Entrada:    ["yo", "querer", "comer", "manzana"]
-Referencia: "Yo quiero comer una manzana"
-
-Entrada:    ["donde", "estar", "mama"]
-Referencia: "¿Donde esta mama?"
-\end{lstlisting}
+\begin{table}[H]
+\centering
+\begin{tabular}{l l l}
+\hline
+Entrada & Referencia \\
+\hline
+\texttt{[agua]} & Quiero agua \\
+\texttt{[yo, querer, comer, manzana]} & Yo quiero comer una manzana \\
+\texttt{[donde, estar, mama]} & ¿Dónde está mamá? \\
+\hline
+\end{tabular}
+\caption{Ejemplos de casos de prueba del corpus de evaluación.}
+\label{tab:ejemplos-corpus}
+\end{table}
 
 Nótese que la entrada puede variar en longitud desde un solo pictograma ---caso en el que el sistema debe inferir elementos omitidos--- hasta secuencias de cuatro o más pictogramas donde la tarea consiste principalmente en añadir los elementos funcionales (artículos, preposiciones, conjugaciones) que los pictogramas no codifican.
 
