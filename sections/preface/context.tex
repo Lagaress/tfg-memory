@@ -8,21 +8,25 @@ Existen más de una decena de colecciones de pictogramas para CAA, que se difere
 
 Las colecciones con mayor volumen de símbolos son propietarias. PCS (\textit{Picture Communication Symbols})~\cite{tobiidynavox2024pcs}, propiedad de Tobii Dynavox, es el conjunto más extendido comercialmente, con más de 85.000 símbolos presentes en más de 100 países a través de Boardmaker y TD Snap. SymbolStix PRIME~\cite{n2y2024symbolstix}, de n2y/Everway, alcanza una escala similar con un estilo de figuras estilizadas y personalizable en tono de piel y género. Widgit Symbols~\cite{widgit2024}, con más de 20.000 símbolos, tiene fuerte presencia en el sistema educativo británico y soporte para 17 idiomas.
 
-Las tres requieren licencia comercial y no ofrecen API pública, lo que impide construir pipelines de investigación reproducibles o redistribuir datasets que integren sus pictogramas.
+Las tres requieren licencia comercial y no ofrecen API pública, lo que impide construir pipelines de investigación reproducibles o redistribuir datasets que integren sus pictogramas. Las colecciones de acceso abierto eliminan esta barrera, aunque introducen limitaciones propias.
 
 \subsection{Colecciones libres}
 
 Entre las alternativas de acceso abierto, Mulberry Symbols~\cite{mulberry2024} ofrece unos 3.100 pictogramas bajo licencia CC BY-SA 2.0 con un enfoque diferenciado hacia adultos, aunque el proyecto está catalogado como no mantenido y su soporte multilingüe es limitado. Sclera Symbols~\cite{sclera2024}, creados por una ONG belga, proporciona unos 4.700 pictogramas en blanco sobre negro bajo licencia CC BY-NC, con cobertura limitada al neerlandés e inglés. Vandeghinste y Schuurman~\cite{vandeghinste2014sclera} vincularon 5.710 pictogramas de Sclera con synsets de Cornetto (WordNet neerlandés), un anclaje semántico que fundamentó el sistema Text2Picto para la traducción de texto a pictogramas. Blissymbolics~\cite{blissymbolics2024} ocupa un lugar aparte como sistema simbólico generativo: sus 900 caracteres base se combinan composicionalmente para formar más de 6.000 conceptos, aunque su naturaleza abstracta exige entrenamiento específico para interpretar los símbolos.
 
-Dos plataformas agregan pictogramas de múltiples fuentes. OpenSymbols~\cite{opensymbols2024} reúne más de 50.000 símbolos de ARASAAC, Mulberry y Sclera, entre otras colecciones, con una API REST documentada. Global Symbols~\cite{globalsymbols2024}, desarrollada por la Universidad de Southampton con financiación de UNICEF, conecta varias colecciones con ConceptNet y ofrece mapeos en más de 25 idiomas. Ninguna de estas colecciones ni plataformas reúne las condiciones que este proyecto requiere: Mulberry y Sclera carecen de soporte para español, Blissymbolics exige formación previa del usuario, y las plataformas agregadoras dependen de las licencias y limitaciones de cada colección subyacente sin ofrecer un catálogo propio con calidad y cobertura homogéneas.
+Dos plataformas agregan pictogramas de múltiples fuentes. OpenSymbols~\cite{opensymbols2024} reúne más de 50.000 símbolos de ARASAAC, Mulberry y Sclera, entre otras colecciones, con una API REST documentada. Global Symbols~\cite{globalsymbols2024}, desarrollada por la Universidad de Southampton con financiación de UNICEF, conecta varias colecciones con ConceptNet y ofrece mapeos en más de 25 idiomas.
+
+Ninguna de estas colecciones ni plataformas reúne las condiciones que este proyecto requiere: Mulberry y Sclera carecen de soporte para español, Blissymbolics exige formación previa del usuario, y las plataformas agregadoras dependen de las licencias y limitaciones de cada colección subyacente sin ofrecer un catálogo propio con calidad y cobertura homogéneas. ARASAAC, la colección restante, sí las cumple.
 
 \subsection{ARASAAC}
 
-ARASAAC~\cite{arasaac} (Portal Aragonés de la Comunicación Aumentativa y Alternativa) nació en 2007 como proyecto del Gobierno de Aragón. Su catálogo actual comprende unos 12.500 pictogramas únicos, diseñados por el ilustrador Sergio Palao y organizados siguiendo la clave de color Fitzgerald, un sistema cromático que asigna un color a cada categoría gramatical (verde para verbos, naranja para sustantivos, azul para adjetivos, entre otros). Esta codificación es la misma que adopta el sistema Dixi para organizar su vocabulario de 232 pictogramas.
+ARASAAC~\cite{arasaac} (Portal Aragonés de la Comunicación Aumentativa y Alternativa) nació en 2007 como proyecto del Gobierno de Aragón. Su catálogo actual comprende unos 12.500 pictogramas únicos, organizados siguiendo la clave de color Fitzgerald, un sistema cromático que asigna un color a cada categoría gramatical (verde para verbos, naranja para sustantivos, azul para adjetivos, entre otros). Esta codificación es la misma que adopta el sistema Dixi para organizar su vocabulario de 232 pictogramas.
 
-Los pictogramas se distribuyen bajo licencia CC BY-NC-SA 4.0, lo que permite redistribuir datasets y construir pipelines reproducibles. ARASAAC es, además, la única colección que ofrece una API REST pública sin autenticación, con soporte para más de 25 idiomas. Con 8 millones de usuarios anuales en más de 200 países y el reconocimiento del Congreso de los Diputados como sistema pictográfico de referencia para espacios públicos, es el recurso de CAA más utilizado en el mundo hispanohablante.
+Los pictogramas se distribuyen bajo licencia CC BY-NC-SA 4.0~\cite{ccbyncsa4} (atribución obligatoria, uso no comercial, obras derivadas bajo la misma licencia), lo que permite redistribuir datasets y construir pipelines reproducibles. ARASAAC es, además, la única colección que ofrece una API REST pública sin autenticación, con soporte para más de 25 idiomas. Con 8 millones de usuarios anuales en más de 200 países y el reconocimiento del Congreso de los Diputados como sistema pictográfico de referencia para espacios públicos~\cite{congreso2019arasaac}, es el recurso de CAA más utilizado en el mundo hispanohablante.
 
-La Tabla~\ref{tab:pictogram-databases} resume la comparación entre las principales bases de datos.
+\subsection{Justificación de la elección}
+
+La Tabla~\ref{tab:pictogram-databases} resume las diferencias entre las principales colecciones. La selección de ARASAAC para este proyecto responde a cuatro factores:
 
 \begin{table}[H]
 \centering
@@ -40,13 +44,10 @@ Sclera & 4.700 & CC BY-NC & 2 & No & Gratuito \\
 Blissymbolics & 6.000+ & CC BY-SA / dual & 19+ & No & Gratuito \\
 \hline
 \end{tabular}
+\vspace{0.3em}
 \caption{Comparación de las principales bases de datos de pictogramas para CAA.}
 \label{tab:pictogram-databases}
 \end{table}
-
-\subsection{Justificación de la elección}
-
-La selección de ARASAAC para este proyecto responde a cuatro factores:
 
 \begin{itemize}
     \item \textit{Acceso programático}: es la única colección con API REST pública, gratuita y sin autenticación, condición necesaria para automatizar la descarga y el procesamiento de pictogramas.
@@ -77,9 +78,7 @@ Algunos trabajos han aplicado estos principios al diseño de gramáticas especí
 
 \subsection{Técnicas basadas en aprendizaje automático}
 
-Las técnicas basadas en aprendizaje automático abordan la generación de texto desde una perspectiva diferente: en lugar de codificar reglas lingüísticas, aprenden patrones a partir de grandes volúmenes de texto.
-
-El concepto que sustenta muchas de estas técnicas es el de \textit{word embedding}, una representación que codifica cada palabra como un vector numérico en un espacio de cientos de dimensiones~\cite{mikolov2013word2vec}. Estas representaciones capturan relaciones semánticas de forma implícita: palabras con significados similares ---``perro'' y ``gato'', por ejemplo--- quedan próximas en el espacio vectorial, mientras que palabras no relacionadas quedan distantes. 
+Frente a las reglas explícitas, las técnicas de aprendizaje automático aprenden patrones de generación a partir de grandes volúmenes de texto. El concepto que sustenta muchas de ellas es el de \textit{word embedding}~\cite{mikolov2013word2vec}: una representación que codifica cada palabra como un vector numérico en un espacio de cientos de dimensiones, donde palabras con significados similares ---``perro'' y ``gato'', por ejemplo--- quedan próximas entre sí. 
 
 FastText~\cite{bojanowski2017fasttext} refinó este enfoque incorporando información a nivel de subpalabra, lo que permite generar vectores razonables incluso para palabras no vistas durante el entrenamiento ---una propiedad útil para la morfología del español, donde un mismo verbo puede adoptar decenas de formas.
 
