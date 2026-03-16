@@ -177,13 +177,15 @@ La fidelidad de contenido mide la proporción de palabras de contenido en la ora
 
 $$\text{Fidelidad} = 1 - \frac{|\text{palabras alucinadas}|}{|\text{palabras de contenido generadas}|}$$
 
-Se excluyen del cálculo las \textit{stop words} ---artículos, preposiciones, pronombres, conectores y verbos auxiliares--- para evitar penalizar los elementos funcionales que el sistema añade legítimamente al construir la oración a partir de los pictogramas.
+Se excluyen del cálculo las \textit{stop words} (artículos, preposiciones, pronombres, conectores y verbos auxiliares) para evitar penalizar los elementos funcionales que el sistema añade legítimamente al construir la oración a partir de los pictogramas.
 
 La fidelidad complementa la cobertura: mientras la cobertura detecta omisiones (pictogramas de entrada que no aparecen en la salida), la fidelidad detecta adiciones (palabras de contenido en la salida que no provienen de la entrada). Un motor ideal obtendría cobertura y fidelidad de 1,0 simultáneamente.
 
 \subsection{Fidelidad ajustada}
 
-La fidelidad de contenido descrita en la subsección anterior penaliza como alucinación toda palabra de contenido que no corresponda a un pictograma de entrada. Esta definición operativa produce falsos positivos en un caso recurrente en CAA: la inferencia pragmática. Cuando un usuario selecciona únicamente el pictograma \textit{agua}, el motor puede inferir legítimamente el verbo \textit{querer} y generar \textit{Quiero agua}. La palabra \textit{quiero} no aparece entre los pictogramas de entrada, de modo que la fidelidad estándar la contabiliza como alucinación, aunque se trata de una inferencia que cualquier interlocutor humano haría rutinariamente.
+La fidelidad de contenido descrita en la subsección anterior penaliza como alucinación toda palabra de contenido que no corresponda a un pictograma de entrada. Esta definición operativa produce falsos positivos en un caso recurrente en CAA: la inferencia pragmática.
+
+Cuando un usuario selecciona únicamente el pictograma \textit{agua}, el motor puede inferir legítimamente el verbo \textit{querer} y generar \textit{Quiero agua}. La palabra \textit{quiero} no aparece entre los pictogramas de entrada, de modo que la fidelidad estándar la contabiliza como alucinación, aunque se trata de una inferencia que cualquier interlocutor humano haría rutinariamente.
 
 La fidelidad ajustada corrige este efecto excluyendo del recuento de alucinaciones aquellas palabras que constituyen inferencias pragmáticas ---verbos modales como \textit{querer}, verbos de acción predecibles por el contexto y otros elementos que los usuarios de CAA omiten sistemáticamente por economía comunicativa---. El cálculo es idéntico al de la fidelidad estándar, pero el conjunto de palabras alucinadas se reduce al descontar las inferencias detectadas:
 
