@@ -26,7 +26,7 @@ El \textit{system prompt} define el rol del modelo como motor de lenguaje de una
 
 La \textit{fidelidad semántica} (regla 1) es la restricción más importante: la oración debe expresar exactamente el significado de los pictogramas proporcionados, sin añadir información ni conceptos ausentes en la entrada. En un contexto CAA, generar contenido no seleccionado por el usuario equivaldría a poner en su boca palabras que no ha elegido.
 
-Los \textit{elementos funcionales} (regla 2) especifican qué puede añadir el modelo: artículos, preposiciones de enlace, conjugación verbal y concordancia de género. Estas son las mismas operaciones que los motores anteriores resolvían con reglas explícitas; aquí se delegan al LLM mediante una instrucción textual.
+Los \textit{elementos funcionales} (regla 2) especifican qué puede añadir el modelo: artículos, preposiciones de enlace, conjugación verbal y concordancia de género. Estas son las mismas operaciones que los motores anteriores resolvían con reglas explícitas (sección~\ref{sec:f1-postprocesamiento}); aquí se delegan al LLM mediante una instrucción textual.
 
 El \textit{formato y registro} (reglas 3-5, 8, 10) restringe la salida a una única oración en registro coloquial-neutro, sin explicaciones ni alternativas. Sin estas restricciones, los LLMs frecuentemente producen texto adicional como \textit{Aquí tienes la oración:} o generan múltiples variantes.
 
@@ -102,7 +102,7 @@ El coste se estima a partir de los precios de la API: \$2,50/1M tokens de entrad
 \section{Validación post-generación}
 \label{sec:f3-validacion}
 
-A diferencia de los motores anteriores, donde la corrección de la salida está garantizada por las reglas, el motor de LLM requiere un sistema de validación que verifique la calidad de la respuesta generada. El validador implementa un sistema de dos niveles: errores (bloqueantes, que invalidan la respuesta) y advertencias (informativas).
+A diferencia de los motores anteriores, donde la corrección de la salida está garantizada por las reglas (secciones~\ref{sec:f1-postprocesamiento} y~\ref{sec:f2-pipeline}), el motor de LLM requiere un sistema de validación que verifique la calidad de la respuesta generada. El validador implementa un sistema de dos niveles: errores (bloqueantes, que invalidan la respuesta) y advertencias (informativas).
 
 Las verificaciones cubren tres aspectos. La respuesta vacía genera un error inmediato. El formato interrogativo comprueba que, si la entrada contiene un pictograma interrogativo, la respuesta incluya el signo \textit{?}. La cobertura de conceptos, la verificación más compleja, mide qué proporción de los pictogramas de entrada están representados en la oración generada.
 
