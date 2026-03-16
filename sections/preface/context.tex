@@ -2,9 +2,63 @@ Este capítulo revisa los antecedentes tecnológicos relevantes para el desarrol
 
 \section{Bases de datos de pictogramas}
 
-\textit{TODO: Esta sección requiere investigación adicional para comparar las bases de datos de pictogramas disponibles (ARASAAC, Mulberry, Sclera, etc.) y justificar la elección de ARASAAC.}
+Los sistemas de CAA dependen de colecciones de pictogramas que varían en escala, licencia y accesibilidad técnica. Pueden distinguirse tres categorías: colecciones propietarias de gran escala, colecciones libres especializadas y plataformas agregadoras. La elección de una u otra condiciona no solo las posibilidades de la aplicación final, sino también la reproducibilidad de cualquier investigación que se construya sobre ella.
 
-Desde la perspectiva de los recursos, varios trabajos han abordado la integración de pictogramas con recursos lingüísticos computacionales. Schwab et al.~\cite{schwab2020arasaac} propusieron vincular los pictogramas de ARASAAC con WordNet, creando una base de datos que relaciona símbolos con definiciones semánticas estructuradas. Este tipo de integración es fundamental para sistemas que necesitan razonar sobre el significado de los pictogramas, aunque los autores identificaron desafíos como la polisemia y la dependencia contextual de ciertas palabras.
+\subsection{Colecciones propietarias}
+
+Las colecciones con mayor volumen de símbolos son propietarias. PCS (\textit{Picture Communication Symbols}), propiedad de Tobii Dynavox, es el conjunto más extendido comercialmente: más de 85.000 símbolos distribuidos en cinco bibliotecas, presentes en más de 100 países a través de las aplicaciones Boardmaker y TD Snap. SymbolStix PRIME, de n2y/Everway, ofrece entre 90.000 y 100.000 símbolos con un estilo de figuras estilizadas y personalizable en tono de piel y género, integrado en más de 5.000 centros educativos estadounidenses. Widgit Symbols cuenta con más de 20.000 símbolos que cubren un vocabulario de 50.000 palabras, con fuerte presencia en el sistema educativo británico y soporte para 17 idiomas.
+
+Las tres comparten una limitación que las descarta para este proyecto: requieren licencia comercial y no ofrecen API pública. PCS exige suscripción a Boardmaker (desde 299 USD), SymbolStix funciona por suscripción anual y Widgit por licencia comercial. Esta restricción impide construir pipelines de investigación reproducibles, redistribuir datasets o compartir código que integre los pictogramas.
+
+\subsection{Colecciones libres}
+
+Entre las alternativas de acceso abierto, Mulberry Symbols ofrece unos 3.100 pictogramas bajo licencia CC BY-SA 2.0, con un enfoque diferenciado hacia adultos (incluye vocabulario sobre temas como vida nocturna o intimidad, ausentes en conjuntos infantiles). Su formato nativo es SVG, lo que facilita la escalabilidad, pero el proyecto está catalogado como no mantenido y su soporte multilingüe es limitado. Sclera Symbols, creados por una ONG belga, proporciona unos 4.700 pictogramas en blanco sobre negro bajo licencia CC BY-NC, diseñados para adultos con discapacidad intelectual. Su estilo de alto contraste los hace útiles en contextos de baja visión, aunque su cobertura lingüística se limita al neerlandés e inglés. Vandeghinste y Schuurman~\cite{vandeghinste2014sclera} vincularon 5.710 pictogramas de Sclera con synsets de Cornetto (WordNet neerlandés), proporcionándoles un anclaje semántico formal que fundamentó el sistema Text2Picto para la traducción de texto a pictogramas.
+
+Blissymbolics ocupa un lugar aparte como sistema simbólico generativo: sus 900 caracteres base se combinan composicionalmente para formar más de 6.000 conceptos, con licencia dual (CC BY-SA o propietaria). Su naturaleza abstracta lo hace expresivo, pero estudios de transparencia muestran que los usuarios necesitan entrenamiento específico para interpretar los símbolos.
+
+Dos plataformas agregadoras facilitan la interoperabilidad entre colecciones. OpenSymbols reúne más de 50.000 pictogramas de múltiples fuentes (ARASAAC, Mulberry, Sclera, entre otras) con una API REST documentada. Global Symbols, desarrollada por la Universidad de Southampton con financiación de UNICEF, conecta varias colecciones con ConceptNet y ofrece mapeos multilingües en más de 25 idiomas. Ambas dependen de las licencias individuales de cada colección subyacente.
+
+\subsection{ARASAAC}
+
+ARASAAC~\cite{arasaac} (Portal Aragonés de la Comunicación Aumentativa y Alternativa) nació en 2007 como iniciativa del CATEDU (Centro Aragonés de Tecnologías para la Educación) y el CPEE Alborada de Zaragoza, con colaboración de la Universidad de Zaragoza. Los pictogramas, diseñados por el ilustrador Sergio Palao, son propiedad del Gobierno de Aragón. El proyecto se consolidó institucionalmente con el Decreto 58/2019~\cite{decreto2019arasaac}, que creó formalmente el Centro Aragonés para la Comunicación Aumentativa y Alternativa.
+
+El catálogo actual comprende unos 12.500 pictogramas únicos, que se multiplican hasta más de 30.000 ficheros al incluir variantes de color, blanco y negro, género y estilo gráfico. Los pictogramas se organizan siguiendo la clave de color Fitzgerald, un sistema cromático que categoriza gramaticalmente los símbolos: amarillo para personas y pronombres, verde para verbos y acciones, naranja para sustantivos, azul para adjetivos, rosa para expresiones sociales, morado para lugares y blanco para artículos, preposiciones y conjunciones. Esta codificación facilita la construcción de frases visuales y es la misma que adopta el sistema Dixi para organizar su vocabulario de 232 pictogramas en nueve categorías.
+
+Los pictogramas se distribuyen bajo licencia Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0), lo que permite redistribuir datasets, construir pipelines reproducibles y compartir código que integre los pictogramas, siempre que se mantenga la atribución y el carácter no comercial. La API REST pública, alojada en \texttt{api.arasaac.org} y documentada con Swagger/OpenAPI, ofrece búsqueda por texto en cualquier idioma soportado, recuperación por identificador y acceso a imágenes estáticas. Las respuestas en JSON incluyen metadatos con palabras clave multilingües, categorías y referencias a synsets de WordNet. No requiere autenticación.
+
+ARASAAC registra 8 millones de usuarios anuales de más de 200 países, con España, Estados Unidos, Italia, Francia y varios países latinoamericanos como principales mercados. El Congreso de los Diputados aprobó una Proposición No de Ley reconociéndolo como sistema pictográfico de referencia para la CAA en espacios públicos, y sus pictogramas están integrados en más de 40 aplicaciones, entre ellas AraWord, AsTeRICS Grid, Cboard y Pictotraductor.
+
+La Tabla~\ref{tab:pictogram-databases} resume la comparación entre las principales bases de datos.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l r l r c l}
+\hline
+Base de datos & Pictogramas & Licencia & Idiomas & API & Coste \\
+\hline
+ARASAAC & 12.500 & CC BY-NC-SA 4.0 & 25+ & Sí & Gratuito \\
+PCS & 85.000+ & Propietaria & $\sim$14 & No & Desde 299 USD \\
+SymbolStix & 90.000+ & Propietaria & 11 & No & Suscripción \\
+Widgit & 20.000+ & Propietaria & 17 & No & Licencia \\
+Mulberry & 3.100 & CC BY-SA 2.0 & 1 & No & Gratuito \\
+Sclera & 4.700 & CC BY-NC & 2 & No & Gratuito \\
+Blissymbolics & 6.000+ & CC BY-SA / dual & 19+ & No & Gratuito \\
+\hline
+\end{tabular}
+\caption{Comparación de las principales bases de datos de pictogramas para CAA.}
+\label{tab:pictogram-databases}
+\end{table}
+
+\subsection{Justificación de la elección}
+
+La selección de ARASAAC para este proyecto responde a la convergencia de cuatro factores. El acceso programático: ARASAAC es la única base de datos con API REST pública y gratuita, condición necesaria para construir un pipeline de descarga, procesamiento y generación automatizado. La licencia abierta: la CC BY-NC-SA 4.0 permite la redistribución y la creación de obras derivadas sin restricciones económicas, frente a las alternativas propietarias que imponen barreras legales incompatibles con la investigación reproducible. El diseño nativo en español: las etiquetas originales de los pictogramas fueron creadas en español, lo que garantiza mayor calidad y relevancia cultural que las localizaciones desde el inglés de PCS o SymbolStix. Y la validación académica: la tesis doctoral de Bertola López~\cite{bertola2017} en la Universidad de Murcia demostró que ARASAAC exhibe mayor transparencia e iconicidad que PCS y Blissymbolics, y el estudio normativo de Díez et al.~\cite{diez2024pictograms} con 521 participantes y 1.525 pictogramas proporcionó datos psicométricos de acuerdo en la denominación, familiaridad y complejidad visual. Ninguna otra colección libre reúne esta combinación de accesibilidad técnica, respaldo institucional y validación empírica.
+
+\subsection{Integración con recursos semánticos}
+
+Los pictogramas, tomados como signos aislados, carecen de las relaciones léxico-semánticas que el procesamiento de lenguaje natural requiere. Varios trabajos han abordado esta limitación vinculando pictogramas con bases de conocimiento estructuradas. Schwab et al.~\cite{schwab2020arasaac} crearon Arasaac-WN, un recurso que asocia manualmente unos 800 pictogramas de ARASAAC con synsets de Princeton WordNet, estructurado en formato RDF y disponible libremente en GitHub. Al vincular a WordNet en inglés, se accede transitivamente a cualquier lengua con WordNet asociado. Los autores documentaron los desafíos del proceso de anotación: la polisemia (una misma palabra con decenas de sentidos en WordNet), la ambigüedad pictográfica (un pictograma de ``olvidar'' puede representar olvidar un objeto o sufrir un lapsus) y las distinciones de grano fino entre synsets casi sinónimos.
+
+La línea de investigación de KU Leuven extendió este enfoque. Vandeghinste y Schuurman~\cite{vandeghinste2014sclera} vincularon pictogramas de Sclera con Cornetto, y Norré et al.~\cite{norre2023wsd} ampliaron la cobertura a pictogramas ARASAAC vinculados a WordNet 3.1 para el sistema Text2Picto en francés, alcanzando una precisión del 83,7\% en un corpus médico. Estos recursos constituyen la infraestructura que permite a sistemas como PictoBERT~\cite{pereira2022pictobert} operar sobre sentidos semánticos en lugar de etiquetas textuales, conectando el mundo de los pictogramas con las herramientas del PLN.
 
 \section{Técnicas de generación de texto natural}
 
