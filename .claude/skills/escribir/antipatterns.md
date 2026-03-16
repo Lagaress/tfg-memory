@@ -275,15 +275,29 @@ Decir lo mismo con otras palabras, ya sea dentro de un párrafo, entre párrafos
 
 ## 8. Patrones de puntuación
 
-### Abuso de la raya (em dash)
+### Abuso de la raya (em dash) — SEÑAL DE IA MÁS DOCUMENTADA
 
-GPT-4o usa rayas 10 veces más que GPT-3.5. La IA usa rayas donde un humano pondría comas, paréntesis, dos puntos o punto y seguido.
+GPT-4o usa rayas **10 veces más** que GPT-3.5. Un escritor humano usa una raya cada ~500 palabras; los LLMs las insertan cada ~50-80 palabras. Un estudio de Carnegie Mellon (2025) confirmó que los patrones de puntuación, especialmente las rayas, permiten identificar texto generado por IA con alta fiabilidad. OpenAI reconoció el problema en noviembre de 2025 permitiendo a los usuarios pedir explícitamente que ChatGPT no use rayas. El término "GPT-ismo" se acuñó en 2025 para referirse a este abuso.
 
 **Mal**: "El sistema ---que fue diseñado para maximizar la cobertura--- genera oraciones ---en muchos casos correctas--- que los evaluadores ---tanto expertos como no expertos--- consideraron naturales."
 
 **Bien**: "El sistema, diseñado para maximizar la cobertura, genera oraciones que los evaluadores (tanto expertos como no expertos) consideraron naturales en la mayoría de los casos."
 
-**Regla**: Si hay más de una raya por párrafo, probablemente sobra al menos una. Considerar comas o paréntesis como alternativa.
+**Jerarquía de la RAE para incisos** (de menor a mayor aislamiento):
+
+| Signo | Nivel de aislamiento | Usar para |
+|---|---|---|
+| Comas (,) | Bajo | Aclaraciones breves, ligadas al hilo principal |
+| Rayas (---) | Medio | Incisos que merecen énfasis pero siguen siendo parte del argumento |
+| Paréntesis ( ) | Alto | Datos suplementarios, referencias, fechas, siglas |
+
+**Dos puntos (:)** son a menudo la mejor alternativa cuando se introduce una explicación, lista o consecuencia: justo donde la IA pondría una raya, los dos puntos son más naturales en español académico.
+
+**Reglas**:
+- Máximo **una raya (un par de rayas) por párrafo**. Si hay más de una, sustituir por comas o paréntesis.
+- Máximo **3 rayas en una sección de 500 palabras**. Por encima de eso, el texto suena a IA.
+- Antes de escribir una raya, preguntarse: ¿funcionaría mejor una coma, un paréntesis o dos puntos?
+- Las rayas son legítimas para incisos de longitud media que requieren más separación visual que una coma. No están prohibidas; están sobreusadas.
 
 ### Abuso de los dos puntos en títulos
 

@@ -189,7 +189,7 @@ El propósito experimental de esta hibridación es servir como línea base para 
 \section{Hibridación 2: (Gramática + Embeddings) + LLM como post-editor}
 \label{sec:h-hybrid2}
 
-La segunda hibridación replica la estructura de H1 pero sustituye la gramática pura por el motor híbrido de la Fase 2 ---que combina CFG con embeddings semánticos--- como fuente upstream. Los pictogramas se procesan con \texttt{HybridGenerator}, que ejecuta el pipeline completo de la Fase 2: generación estructural vía CFG, ranking semántico de candidatos, refinamiento de preposiciones y fallback por concatenación. Si el motor produce una frase válida ---es decir, con un método distinto de \texttt{fallback}---, la frase se envía al post-editor compartido. Si el motor cae a su propio fallback, la Hibridación 2 considera que la frase no es fiable y activa el mismo mecanismo de generación directa que H1.
+La segunda hibridación replica la estructura de H1 pero sustituye la gramática pura por el motor híbrido de la Fase 2, que combina CFG con embeddings semánticos, como fuente upstream. Los pictogramas se procesan con \texttt{HybridGenerator}, que ejecuta el pipeline completo de la Fase 2: generación estructural vía CFG, ranking semántico de candidatos, refinamiento de preposiciones y fallback por concatenación. Si el motor produce una frase válida (es decir, con un método distinto de \texttt{fallback}), la frase se envía al post-editor compartido. Si el motor cae a su propio fallback, la Hibridación 2 considera que la frase no es fiable y activa el mismo mecanismo de generación directa que H1.
 
 La detección de fallback difiere de la Hibridación 1. Mientras que la gramática formal lanza excepciones cuando no puede procesar una entrada, el motor de embeddings siempre produce una salida ---incluyendo una concatenación simple como último recurso--- y señala la ruta mediante el campo \texttt{method}. La Hibridación 2 verifica que este campo no sea \texttt{fallback} antes de considerar la frase como candidata válida para post-edición.
 
@@ -222,9 +222,9 @@ La tercera hibridación implementa el paradigma \textit{overgenerate-and-rank} c
 
 \subsection{Fase 1: Sobregeneración}
 
-La primera fase genera una candidata con cada uno de los cinco motores disponibles: gramática formal, embeddings, LLM, Hibridación 1 e Hibridación 2. Cada generador se invoca dentro de un bloque de captura de errores que transforma cualquier fallo en una candidata vacía. Tras la generación, se descartan las candidatas vacías ---aquellas donde el motor no produjo salida alguna---.
+La primera fase genera una candidata con cada uno de los cinco motores disponibles: gramática formal, embeddings, LLM, Hibridación 1 e Hibridación 2. Cada generador se invoca dentro de un bloque de captura de errores que transforma cualquier fallo en una candidata vacía. Tras la generación, se descartan las candidatas vacías (aquellas donde el motor no produjo salida alguna).
 
-La generación es secuencial: cada motor se invoca uno tras otro. Se descartó la generación paralela por razones de simplicidad y porque los tres motores que llaman a la API de OpenAI ---LLM, H1 y H2--- comparten la misma fuente, de modo que la paralelización podría provocar limitaciones de tasa. Los motores offline ---gramática y embeddings--- ejecutan en menos de 100 ms; el cuello de botella son las llamadas API, que acumulan aproximadamente 2.200 ms en total.
+La generación es secuencial: cada motor se invoca uno tras otro. Se descartó la generación paralela por razones de simplicidad y porque los tres motores que llaman a la API de OpenAI (LLM, H1 y H2) comparten la misma fuente, de modo que la paralelización podría provocar limitaciones de tasa. Los motores offline (gramática y embeddings) ejecutan en menos de 100 ms; el cuello de botella son las llamadas API, que acumulan aproximadamente 2.200 ms en total.
 
 Si todos los motores fallan, el pipeline retorna un resultado con error. En la práctica, esto no ocurre: al menos el LLM y los dos híbridos disponen de fallbacks propios que garantizan alguna salida.
 
@@ -255,7 +255,7 @@ En la práctica, para las frases que están dentro de la cobertura de la gramát
 
 Varias decisiones de diseño merecen una justificación explícita, ya que implican compromisos entre objetivos en tensión.
 
-La decisión de compartir el prompt de post-edición entre H1 y H2 prioriza la validez del experimento comparativo sobre la optimización individual de cada pipeline. Un prompt específico para H1 podría dar instrucciones más detalladas sobre preposiciones ---donde la CFG es más débil---, y uno para H2 podría enfocarse exclusivamente en naturalidad ---donde los embeddings ya resolvieron las preposiciones---. Sin embargo, cualquier diferencia en los prompts introduciría una variable confundente que impediría atribuir las diferencias de rendimiento a la contribución de los embeddings.
+La decisión de compartir el prompt de post-edición entre H1 y H2 prioriza la validez del experimento comparativo sobre la optimización individual de cada pipeline. Un prompt específico para H1 podría dar instrucciones más detalladas sobre preposiciones, donde la CFG es más débil, y uno para H2 podría enfocarse exclusivamente en naturalidad, donde los embeddings ya resolvieron las preposiciones. Sin embargo, cualquier diferencia en los prompts introduciría una variable confundente que impediría atribuir las diferencias de rendimiento a la contribución de los embeddings.
 
 La elección de GPT-4o como modelo para la post-edición mantiene consistencia con la evaluación de la Fase 3. El análisis de esa fase mostró que GPT-4o-mini supera ligeramente a GPT-4o en Exact Match y es 16,7 veces más barato; sin embargo, para la post-edición el modelo recibe una frase ya estructurada y solo necesita refinamientos menores. Se priorizó la consistencia con la Fase 3 sobre el ahorro de coste, que para un dataset de 428 casos es marginal.
 
