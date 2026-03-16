@@ -597,3 +597,129 @@ def _estimate_cost(self, input_tokens, output_tokens):
         + output_tokens * p["output"], 8
     )
 \end{lstlisting}
+
+\section{Pipeline de Hibridación 1}
+
+La Hibridación 1 (sección~\ref{sec:h-hybrid1}) conecta la gramática formal con el post-editor LLM en dos pasos. Si la gramática tiene éxito, la frase se post-edita; si falla, el post-editor genera desde cero. El campo \texttt{method} del resultado distingue ambos caminos.
+
+\begin{lstlisting}[language=Python,caption={Pipeline Gramática + LLM (\texttt{grammar\_llm.py}).},label={lst:hybrid1-pipeline},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def generate(self, pictograms):
+    self._ensure_setup()
+    total_start = time.perf_counter()
+
+    # Paso 1: generar con gramatica formal
+    try:
+        resultado = self._generator.generate(pictograms)
+        grammar_success = (
+            not resultado.error and bool(resultado.opciones)
+        )
+        grammar_sentence = (
+            resultado.opciones[0].frase
+            if grammar_success else ""
+        )
+    except Exception as e:
+        grammar_success = False
+        grammar_sentence = ""
+
+    # Paso 2: post-editar o fallback
+    if grammar_success:
+        pe_result = self._post_editor.post_edit(
+            grammar_sentence, pictograms
+        )
+        method = "grammar_post_edit"
+    else:
+        pe_result = self._post_editor.generate_direct(
+            pictograms
+        )
+        method = "fallback_llm_direct"
+
+    return Hybrid1Result(
+        sentence=pe_result.edited_sentence,
+        method=method,
+        grammar_sentence=grammar_sentence,
+        grammar_success=grammar_success,
+        llm_was_modified=pe_result.was_modified,
+        total_latency_ms=(
+            time.perf_counter() - total_start
+        ) * 1000,
+    )
+\end{lstlisting}
+
+\section{Pipeline de Hibridación 3}
+
+La Hibridación 3 (sección~\ref{sec:h-hybrid3}) implementa el paradigma \textit{overgenerate-and-rank}: genera cinco candidatas con los cinco motores, filtra por cobertura de pictogramas y selecciona la de menor perplejidad.
+
+\begin{lstlisting}[language=Python,caption={Pipeline Overgenerate-and-Rank (\texttt{overgenerate\_rank.py}).},label={lst:hybrid3-pipeline},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def generate(self, pictograms):
+    self._ensure_setup()
+
+    # Etapa 1: sobregeneracion (5 motores)
+    raw_candidates = [
+        self._generate_grammar(pictograms),
+        self._generate_embeddings(pictograms),
+        self._generate_llm(pictograms),
+        self._generate_hybrid1(pictograms),
+        self._generate_hybrid2(pictograms),
+    ]
+    candidates = [
+        c for c in raw_candidates if c["sentence"]
+    ]
+
+    # Etapa 2: filtro de fidelidad
+    scored = self._fidelity_filter.score_all(
+        candidates, pictograms
+    )
+    filtered = [
+        c for c in scored if c.fidelity_passed
+    ]
+
+    # Fallback: si ninguna pasa, rankear todas
+    to_rank = filtered if filtered else scored
+
+    # Etapa 3: ranking por perplejidad
+    ranked = self._ranker.rank(to_rank)
+    best = ranked[0]
+
+    return Hybrid3Result(
+        sentence=best.sentence,
+        best_source=best.source,
+        best_perplexity=best.perplexity,
+        all_candidates=scored,
+        ranked_candidates=ranked,
+    )
+\end{lstlisting}
+
+\section{Ranking por perplejidad con normalización}
+
+El ranker (sección~\ref{sec:h-hybrid3}) ordena las candidatas por perplejidad ascendente. GPT-2 asigna perplejidad menor a frases con punto final (por ejemplo, 70 frente a 181 para la misma frase), por lo que el ranker elimina la puntuación terminal antes del cálculo para evitar que las frases del post-editor, que siempre añaden punto, ganen automáticamente.
+
+\begin{lstlisting}[language=Python,caption={Ranking con normalización de puntuación (\texttt{ranker.py}).},label={lst:perplexity-ranker},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def rank(self, candidates):
+    self._ensure_scorer()
+    sentences = [c.sentence for c in candidates]
+
+    # Normalizar puntuacion terminal para el scoring.
+    # GPT-2 asigna perplejidad mucho menor a frases
+    # con punto final, sesgando el ranking.
+    normalized = [
+        re.sub(r'[.!?]+$', '', s).strip()
+        for s in sentences
+    ]
+
+    # Perplejidad en batch (frases normalizadas)
+    perplexities = self._scorer.score(normalized)
+
+    ranked = []
+    for i, c in enumerate(candidates):
+        ranked.append(RankedCandidate(
+            sentence=sentences[i],
+            source=c.source,
+            perplexity=perplexities[i],
+            coverage_score=c.coverage_score,
+        ))
+
+    ranked.sort(key=lambda r: r.perplexity)
+    for i, r in enumerate(ranked):
+        r.rank = i + 1
+    return ranked
+\end{lstlisting}

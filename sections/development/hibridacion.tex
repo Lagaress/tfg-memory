@@ -129,7 +129,7 @@ Todos los componentes del módulo siguen el patrón de inicialización perezosa:
 \section{Hibridación 1: Gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
 
-La primera hibridación conecta la gramática formal (sección~\ref{sec:f1-postprocesamiento}) con el motor de LLMs en un pipeline secuencial de dos pasos. Los pictogramas de entrada se procesan primero con la CFG, que intenta generar una frase estructurada según sus 48 patrones. Si la gramática tiene éxito, la frase resultante se envía al post-editor compartido para su refinamiento.
+La primera hibridación conecta la gramática formal (sección~\ref{sec:f1-postprocesamiento}) con el motor de LLMs en un pipeline secuencial de dos pasos (véase Extracto de código~\ref{lst:hybrid1-pipeline} del Anexo~\ref{anx:codigo}). Los pictogramas de entrada se procesan primero con la CFG, que intenta generar una frase estructurada según sus 48 patrones. Si la gramática tiene éxito, la frase resultante se envía al post-editor compartido para su refinamiento.
 
 Si falla (porque la secuencia contiene palabras fuera del léxico o no coincide con ningún patrón), se activa el fallback: el post-editor genera la frase desde cero usando el prompt completo del motor de LLMs (sección~\ref{sec:f3-prompt}).
 
@@ -177,7 +177,7 @@ La identidad deliberada de la capa LLM convierte la comparación H1 versus H2 en
 \section{Hibridación 3: Overgenerate-and-Rank multimotor}
 \label{sec:h-hybrid3}
 
-La tercera hibridación implementa el paradigma \textit{overgenerate-and-rank} con los cinco motores del proyecto como fuentes de candidatas. A diferencia de H1 y H2, que mejoran la salida de un motor individual, H3 busca la mejor frase entre todas las que los motores pueden producir. El pipeline se ejecuta en tres etapas secuenciales: sobregeneración, filtrado por fidelidad y ranking por perplejidad.
+La tercera hibridación implementa el paradigma \textit{overgenerate-and-rank} con los cinco motores del proyecto como fuentes de candidatas (véase Extracto de código~\ref{lst:hybrid3-pipeline} del Anexo~\ref{anx:codigo}). A diferencia de H1 y H2, que mejoran la salida de un motor individual, H3 busca la mejor frase entre todas las que los motores pueden producir. El pipeline se ejecuta en tres etapas secuenciales: sobregeneración, filtrado por fidelidad y ranking por perplejidad.
 
 \subsection{Sobregeneración}
 
@@ -195,7 +195,7 @@ El umbral es 1,0: solo pasan al ranking las candidatas que cubren el 100\% de lo
 
 La tercera etapa calcula la perplejidad de cada candidata que pasó el filtro de fidelidad mediante el modelo \texttt{DeepESP/gpt2-spanish}~\cite{deepesp2019gpt2spanish} y las ordena de menor a mayor. La candidata con menor perplejidad se selecciona como resultado final. El campo \texttt{best\_source} del resultado identifica el motor que generó la frase ganadora, lo que permite analizar qué motor produce las candidatas más naturales con mayor frecuencia.
 
-Un detalle técnico relevante es la normalización de puntuación: GPT-2 asigna perplejidad considerablemente menor a frases con punto final (por ejemplo, 70 frente a 181 para la misma frase). Sin normalizar, los candidatos del post-editor, que siempre añaden punto, ganarían el ranking independientemente de su calidad. El ranker elimina la puntuación terminal solo para el cálculo de perplejidad; la frase original se preserva intacta en la salida.
+Un detalle técnico relevante es la normalización de puntuación (véase Extracto de código~\ref{lst:perplexity-ranker} del Anexo~\ref{anx:codigo}): GPT-2 asigna perplejidad considerablemente menor a frases con punto final (por ejemplo, 70 frente a 181 para la misma frase). Sin normalizar, los candidatos del post-editor, que siempre añaden punto, ganarían el ranking independientemente de su calidad. El ranker elimina la puntuación terminal solo para el cálculo de perplejidad; la frase original se preserva intacta en la salida.
 
 \subsection{Ejemplo con convergencia}
 
