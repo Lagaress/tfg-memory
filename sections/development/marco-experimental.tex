@@ -197,11 +197,11 @@ La diferencia entre ambas métricas cuantifica el peso de las inferencias pragm�
 
 La perplejidad y la pseudo-perplejidad son métricas sin referencia que evalúan la naturalidad del texto generado sin necesidad de compararlo contra una oración gold standard. Ambas miden cuán probable considera un modelo de lenguaje preentrenado la oración generada: valores menores indican texto más natural y fluido.
 
-La perplejidad se calcula con un modelo GPT-2 entrenado en español (\texttt{DeepESP/gpt2-spanish}), un modelo autoregresivo que estima la probabilidad de cada palabra condicionada a las anteriores:
+La perplejidad se calcula con GPT-2 Spanish~\cite{deepesp2019gpt2spanish}, un modelo autoregresivo entrenado sobre 11,5 GB de texto en español que estima la probabilidad de cada palabra condicionada a las anteriores:
 
 $$\text{PPL}(s) = 2^{-\frac{1}{N} \sum_{i=1}^{N} \log_2 P(w_i \mid w_1, \ldots, w_{i-1})}$$
 
-La pseudo-perplejidad utiliza un modelo BERT enmascarado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}), que evalúa la probabilidad de cada token dado su contexto bidireccional. Para ello, se enmascara cada token de la oración y se mide la probabilidad de reconstruirlo a partir del resto. Este modelo es el mismo que se emplea para el cálculo de BERTScore, lo que permite reutilizar la carga del modelo y reducir el tiempo total de evaluación.
+La pseudo-perplejidad~\cite{salazar2020masked} utiliza un modelo BERT enmascarado en español (BETO), que evalúa la probabilidad de cada token dado su contexto bidireccional. Se enmascara cada token de la oración y se mide la probabilidad de reconstruirlo a partir del resto. Este modelo es el mismo que se emplea para el cálculo de BERTScore, lo que permite reutilizar la carga del modelo y reducir el tiempo total de evaluación.
 
 Estas métricas son especialmente relevantes en el contexto de CAA porque capturan la fluidez percibida del texto independientemente de la referencia. Un motor puede generar una oración semánticamente correcta pero con una estructura gramatical poco natural, algo que las métricas de coincidencia con la referencia no detectan pero que la perplejidad sí penaliza.
 
