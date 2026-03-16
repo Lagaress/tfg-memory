@@ -26,7 +26,9 @@ Ningún motor individual alcanza el máximo en todas las dimensiones. La gramát
 
 La pregunta que motiva esta técnica es si existen combinaciones de motores que produzcan frases mejores que las de cualquier motor individual.
 
-Se implementan tres estrategias de hibridación con objetivos experimentales diferenciados. La primera, H1, conecta la gramática formal con un LLM que actúa como post-editor: la CFG genera una frase estructurada y el LLM la refina para mejorar su naturalidad. La segunda, H2, sustituye la gramática pura por el motor de embeddings como fuente upstream y aplica el mismo post-editor LLM. La tercera, H3, implementa un paradigma de sobregeneración y ranking: los cinco motores disponibles generan candidatas, un filtro de fidelidad descarta las que omiten pictogramas y un modelo de perplejidad selecciona la más natural.
+Se implementan tres estrategias de hibridación con objetivos experimentales diferenciados. La primera, H1, conecta la gramática formal con un LLM que actúa como post-editor: la CFG genera una frase estructurada y el LLM la refina para mejorar su naturalidad.
+
+La segunda, H2, sustituye la gramática pura por el motor de embeddings como fuente upstream y aplica el mismo post-editor LLM. La tercera, H3, implementa un paradigma de sobregeneración y ranking: los cinco motores disponibles generan candidatas, un filtro de fidelidad descarta las que omiten pictogramas y un modelo de perplejidad selecciona la más natural.
 
 La comparación directa entre H1 y H2 constituye el experimento central de esta técnica. Ambas hibridaciones comparten exactamente el mismo post-editor (mismo prompt, mismo modelo, misma configuración) y difieren únicamente en si el motor upstream incluye embeddings semánticos. Cualquier diferencia en las métricas se atribuye directamente a la contribución de los embeddings: si H2 supera a H1, los embeddings aportan valor incluso cuando hay un LLM que refina la salida; si no, el LLM por sí solo ya suple lo que los embeddings proporcionan.
 
@@ -39,7 +41,9 @@ Las tres hibridaciones se apoyan en tres patrones establecidos en la literatura 
 
 Chen, Heininger, Schneider et al. de AX Semantics~\cite{chen2025axsemantics} describieron el uso de un LLM para control de calidad sobre texto generado por un sistema de reglas en producción. Su sistema genera noticias deportivas en alemán, francés y español mediante reglas, y el LLM identifica errores gramaticales y ortográficos en la salida, vinculando las correcciones a las reglas originales mediante identificadores únicos para que la corrección de una regla mejore todos los textos futuros.
 
-La idea clave que se adopta en este trabajo es la \textit{separación de responsabilidades}: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. En el contexto de Dixi, la gramática formal o el sistema de embeddings genera una frase estructuralmente correcta y el LLM la refina sin alterar el contenido semántico. La diferencia con el trabajo de AX Semantics es que aquí el LLM actúa en tiempo real sobre cada frase individual, no como herramienta offline de mejora de reglas, lo que introduce latencia y coste por llamada pero permite mejorar la naturalidad de cada frase de forma inmediata.
+La idea clave que se adopta en este trabajo es la \textit{separación de responsabilidades}: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. En el contexto de Dixi, la gramática formal o el sistema de embeddings genera una frase estructuralmente correcta y el LLM la refina sin alterar el contenido semántico.
+
+La diferencia con el trabajo de AX Semantics es que aquí el LLM actúa en tiempo real sobre cada frase individual, no como herramienta offline de mejora de reglas, lo que introduce latencia y coste por llamada pero permite mejorar la naturalidad de cada frase de forma inmediata.
 
 \subsection{Plan-then-realize}
 
@@ -61,7 +65,9 @@ $$PPL(w_1, \ldots, w_N) = \exp\left(-\frac{1}{N} \sum_{i=1}^{N} \log P(w_i \mid 
 
 Intuitivamente, la perplejidad mide cuánto sorprende la secuencia al modelo: una frase natural y frecuente tendrá baja perplejidad, mientras que una frase agramatical o inusual tendrá alta perplejidad. En el contexto de la Hibridación 3, la perplejidad se usa como función de ranking: dado un conjunto de frases que cubren los mismos pictogramas, se selecciona aquella que el modelo de lenguaje considera más probable.
 
-El modelo utilizado es \texttt{DeepESP/gpt2-spanish}~\cite{deepesp2019gpt2spanish}, un GPT-2 entrenado sobre 11,5 GB de texto en español de dominio general. Su naturaleza autoregresiva permite calcular la perplejidad de forma directa, a diferencia de modelos bidireccionales como BERT donde la perplejidad no se define de forma natural. Su tamaño ($\sim$500 MB) lo hace ejecutable en CPU sin necesidad de GPU. El modelo originalmente previsto era MarIA GPT-2-BNE, entrenado sobre el corpus de la Biblioteca Nacional de España, pero el BSC eliminó todos los modelos del namespace \texttt{PlanTL-GOB-ES} de HuggingFace durante el desarrollo del proyecto.
+El modelo utilizado es \texttt{DeepESP/gpt2-spanish}~\cite{deepesp2019gpt2spanish}, un GPT-2 entrenado sobre 11,5 GB de texto en español de dominio general. Su naturaleza autoregresiva permite calcular la perplejidad de forma directa, a diferencia de modelos bidireccionales como BERT donde la perplejidad no se define de forma natural. Su tamaño ($\sim$500 MB) lo hace ejecutable en CPU sin necesidad de GPU.
+
+El modelo originalmente previsto era MarIA GPT-2-BNE, entrenado sobre el corpus de la Biblioteca Nacional de España, pero el BSC eliminó todos los modelos del namespace \texttt{PlanTL-GOB-ES} de HuggingFace durante el desarrollo del proyecto.
 
 \subsection{Cobertura de pictogramas como restricción de fidelidad}
 
@@ -71,7 +77,9 @@ La cobertura de pictogramas se define como la proporción de pictogramas de entr
 
 $$\text{cobertura}(pictos, frase) = \frac{|\{p \in pictos : \text{representado}(p, frase)\}|}{|pictos|}$$
 
-La función $\text{representado}(p, frase)$ compara los lemas del pictograma con los lemas de las palabras de la frase, utilizando el modelo de lematización de spaCy para español (\texttt{es\_core\_news\_sm}). Si al menos un lema coincide, el pictograma se considera cubierto: el pictograma \textit{comer} (lema: \textit{comer}) se detecta en la frase \textit{Yo como pan} porque el token \textit{como} tiene el mismo lema. En la Hibridación 3, el umbral de fidelidad es 1,0: solo pasan al ranking las frases que cubren el 100\% de los pictogramas.
+La función $\text{representado}(p, frase)$ compara los lemas del pictograma con los lemas de las palabras de la frase, utilizando el modelo de lematización de spaCy para español (\texttt{es\_core\_news\_sm}). Si al menos un lema coincide, el pictograma se considera cubierto: el pictograma \textit{comer} (lema: \textit{comer}) se detecta en la frase \textit{Yo como pan} porque el token \textit{como} tiene el mismo lema.
+
+En la Hibridación 3, el umbral de fidelidad es 1,0: solo pasan al ranking las frases que cubren el 100\% de los pictogramas.
 
 \subsection{Patrones descartados}
 
@@ -80,7 +88,9 @@ Se analizaron ocho patrones híbridos de la literatura. Además de los tres impl
 \section{Arquitectura general y componentes compartidos}
 \label{sec:h-arquitectura}
 
-Las tres hibridaciones comparten una arquitectura modular que reutiliza los motores de los capítulos anteriores como componentes de un pipeline más amplio. Ningún módulo reimplementa lógica de generación: el sistema importa y orquesta los motores existentes en runtime, conectándolos mediante tres pipelines que explotan la complementariedad de las técnicas. Las dependencias externas se resuelven en tiempo de ejecución insertando las rutas de los proyectos hermanos en \texttt{sys.path}, el mismo mecanismo que ya utiliza el motor de embeddings para importar la gramática formal (sección~\ref{sec:f2-pipeline}).
+Las tres hibridaciones comparten una arquitectura modular que reutiliza los motores de los capítulos anteriores como componentes de un pipeline más amplio. Ningún módulo reimplementa lógica de generación: el sistema importa y orquesta los motores existentes en runtime, conectándolos mediante tres pipelines que explotan la complementariedad de las técnicas.
+
+Las dependencias externas se resuelven en tiempo de ejecución insertando las rutas de los proyectos hermanos en \texttt{sys.path}, el mismo mecanismo que ya utiliza el motor de embeddings para importar la gramática formal (sección~\ref{sec:f2-pipeline}).
 
 \subsection{Post-editor compartido}
 
@@ -119,7 +129,9 @@ Todos los componentes del módulo siguen el patrón de inicialización perezosa:
 \section{Hibridación 1: Gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
 
-La primera hibridación conecta la gramática formal (sección~\ref{sec:f1-postprocesamiento}) con el motor de LLMs en un pipeline secuencial de dos pasos. Los pictogramas de entrada se procesan primero con la CFG, que intenta generar una frase estructurada según sus 48 patrones. Si la gramática tiene éxito, la frase resultante se envía al post-editor compartido para su refinamiento. Si falla (porque la secuencia contiene palabras fuera del léxico o no coincide con ningún patrón), se activa el fallback: el post-editor genera la frase desde cero usando el prompt completo del motor de LLMs.
+La primera hibridación conecta la gramática formal (sección~\ref{sec:f1-postprocesamiento}) con el motor de LLMs en un pipeline secuencial de dos pasos. Los pictogramas de entrada se procesan primero con la CFG, que intenta generar una frase estructurada según sus 48 patrones. Si la gramática tiene éxito, la frase resultante se envía al post-editor compartido para su refinamiento.
+
+Si falla (porque la secuencia contiene palabras fuera del léxico o no coincide con ningún patrón), se activa el fallback: el post-editor genera la frase desde cero usando el prompt completo del motor de LLMs.
 
 El campo \texttt{method} del resultado discrimina entre ambos caminos. Cuando la gramática funciona, el método es \texttt{grammar\_post\_edit}; cuando se activa el fallback, es \texttt{fallback\_llm\_direct}. Esta distinción permite desagregar las métricas por ruta de ejecución.
 
@@ -132,7 +144,9 @@ El propósito experimental de esta hibridación es servir como línea base para 
 \section{Hibridación 2: (Gramática + Embeddings) + LLM como post-editor}
 \label{sec:h-hybrid2}
 
-La segunda hibridación replica la estructura de H1 pero sustituye la gramática pura por el motor de embeddings (sección~\ref{sec:f2-pipeline}), que combina CFG con embeddings semánticos, como fuente upstream. Los pictogramas se procesan con \texttt{HybridGenerator}, que ejecuta el pipeline completo descrito en el capítulo correspondiente: generación estructural vía CFG, ranking semántico de candidatos, refinamiento de preposiciones y fallback por concatenación.
+La segunda hibridación replica la estructura de H1 pero sustituye la gramática pura por el motor de embeddings (sección~\ref{sec:f2-pipeline}), que combina CFG con embeddings semánticos, como fuente upstream.
+
+Los pictogramas se procesan con \texttt{HybridGenerator}, que ejecuta el pipeline completo descrito en el capítulo correspondiente: generación estructural vía CFG, ranking semántico de candidatos, refinamiento de preposiciones y fallback por concatenación.
 
 Si el motor produce una frase válida (es decir, con un método distinto de \texttt{fallback}), la frase se envía al post-editor compartido. Si el motor cae a su propio fallback, la Hibridación 2 considera que la frase no es fiable y activa el mismo mecanismo de generación directa que H1.
 
