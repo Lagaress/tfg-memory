@@ -67,7 +67,7 @@ Los criterios de selección priorizan la cobertura de patrones que requieren inf
 
 \subsection{Construcción dinámica del prompt}
 
-La función \texttt{build\_messages()} ensambla el arreglo de mensajes en el formato de la API de OpenAI Chat Completions. La estructura resultante tiene 32 mensajes: 1 \textit{system}, 15 pares \textit{user/assistant} (30 mensajes de ejemplos \textit{few-shot}) y 1 \textit{user} final con la consulta.
+La función \texttt{build\_messages()} (véase Extracto de código~\ref{lst:prompt-builder} del Anexo~\ref{anx:codigo}) ensambla el arreglo de mensajes en el formato de la API de OpenAI Chat Completions. La estructura resultante tiene 32 mensajes: 1 \textit{system}, 15 pares \textit{user/assistant} (30 mensajes de ejemplos \textit{few-shot}) y 1 \textit{user} final con la consulta.
 
 Cada mensaje de usuario formatea los pictogramas incluyendo su categoría gramatical entre paréntesis (por ejemplo, \texttt{Pictogramas: quiero (verbo modal) + agua (sustantivo)}). Esta información desambiguadora procede del inventario de metadatos y ayuda al modelo a interpretar correctamente pictogramas polisémicos: \textit{como} puede ser verbo (primera persona de \textit{comer}) o interrogativo (\textit{¿cómo?}), y la categoría aclara la interpretación esperada.
 
@@ -95,7 +95,7 @@ La temperatura de 0,3 prioriza la consistencia sobre la creatividad: en CAA, la 
 
 El límite de 100 tokens es generoso para oraciones que promedian 4 tokens de salida, pero actúa como salvaguarda contra generaciones desbordadas. El timeout de 10 segundos refleja que, en una aplicación de comunicación asistida, el usuario espera activamente la respuesta.
 
-El cliente implementa reintentos diferenciados según el tipo de error: los errores de \textit{rate limit} se reintentan con backoff exponencial (2 y 4 segundos), los timeouts se reintentan inmediatamente, y los errores de servidor no se reintentan.
+El cliente implementa reintentos diferenciados según el tipo de error (véase Extracto de código~\ref{lst:llm-client} del Anexo~\ref{anx:codigo}): los errores de \textit{rate limit} se reintentan con backoff exponencial (2 y 4 segundos), los timeouts se reintentan inmediatamente, y los errores de servidor no se reintentan.
 
 El coste se estima a partir de los precios de la API: \$2,50/1M tokens de entrada y \$10,00/1M de salida para GPT-4o, frente a \$0,15/1M y \$0,60/1M para GPT-4o-mini. Con la media de 1.204 tokens de entrada y 4 de salida, cada consulta cuesta \$0,00018 con GPT-4o-mini y \$0,00305 con GPT-4o, una diferencia de factor 16,7$\times$.
 
@@ -108,7 +108,7 @@ Las verificaciones cubren tres aspectos. La respuesta vacía genera un error inm
 
 \subsection{Algoritmo de cobertura de conceptos}
 
-El algoritmo implementa cuatro niveles de matching aplicados secuencialmente. El primer nivel busca el pictograma como subcadena exacta del texto generado. El segundo extrae la raíz de 4 caracteres del pictograma y la busca en el texto, capturando variaciones morfológicas (\textit{querer} $\rightarrow$ raíz \textit{quer} $\rightarrow$ se encuentra en \textit{quiero}).
+El algoritmo implementa cuatro niveles de matching aplicados secuencialmente (véase Extracto de código~\ref{lst:concept-coverage} del Anexo~\ref{anx:codigo}). El primer nivel busca el pictograma como subcadena exacta del texto generado. El segundo extrae la raíz de 4 caracteres del pictograma y la busca en el texto, capturando variaciones morfológicas (\textit{querer} $\rightarrow$ raíz \textit{quer} $\rightarrow$ se encuentra en \textit{quiero}).
 
 El tercer nivel mantiene una tabla de raíces irregulares para 12 verbos frecuentes en CAA, como \textit{ir} con las raíces \textit{voy, vas, va, vamos, van}, que cubren diptongaciones y formas muy irregulares. El cuarto nivel, como fallback, busca la raíz de 3 caracteres a nivel de palabra.
 

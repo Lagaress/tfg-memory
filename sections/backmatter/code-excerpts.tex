@@ -450,3 +450,150 @@ def validate_combination(self, verb, argument):
     )
     return score >= self.selectional_threshold  # 0.10
 \end{lstlisting}
+
+\section{Constructor de mensajes para la API}
+
+El constructor de prompts (sección~\ref{sec:f3-prompt}) ensambla los 32 mensajes que se envían a la API de OpenAI: un \textit{system prompt} con las reglas, 15 pares usuario-asistente con los ejemplos \textit{few-shot}, y un mensaje final con la consulta del usuario. La función auxiliar enriquece cada pictograma con su categoría gramatical para desambiguar la entrada.
+
+\begin{lstlisting}[language=Python,caption={Construcción de mensajes para la API (\texttt{prompt\_builder.py}).},label={lst:prompt-builder},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def build_messages(pictograms):
+    messages = []
+
+    # 1. System prompt con las 11 reglas
+    messages.append({
+        "role": "system",
+        "content": SYSTEM_PROMPT
+    })
+
+    # 2. 15 ejemplos few-shot como pares user/assistant
+    for example in FEW_SHOT_EXAMPLES:
+        user_msg = _format_pictogram_sequence(
+            example["pictograms"]
+        )
+        messages.append(
+            {"role": "user", "content": user_msg}
+        )
+        messages.append(
+            {"role": "assistant",
+             "content": example["sentence"]}
+        )
+
+    # 3. Consulta actual
+    user_msg = _format_pictogram_sequence(pictograms)
+    messages.append(
+        {"role": "user", "content": user_msg}
+    )
+    return messages
+
+def _format_pictogram_sequence(pictograms):
+    parts = []
+    for p in pictograms:
+        meta = get_metadata(p)
+        parts.append(
+            f"{meta['display']} ({meta['category']})"
+        )
+    return f"Pictogramas: {' + '.join(parts)}"
+\end{lstlisting}
+
+\section{Algoritmo de cobertura de conceptos}
+
+El validador de respuestas (sección~\ref{sec:f3-validacion}) verifica qué proporción de los pictogramas de entrada están representados en la oración generada. El algoritmo aplica cuatro niveles de matching secuencialmente: subcadena exacta, raíz de 4 caracteres, raíces irregulares para 12 verbos frecuentes y raíz de 3 caracteres como fallback.
+
+\begin{lstlisting}[language=Python,caption={Cobertura de conceptos y raíces irregulares (\texttt{response\_validator.py}).},label={lst:concept-coverage},basicstyle=\ttfamily\small,xleftmargin=1cm]
+_IRREGULAR_STEMS = {
+    "querer": ["quier"],
+    "poder": ["pued"],
+    "tener": ["teng", "tien"],
+    "dormir": ["duerm"],
+    "jugar": ["jueg"],
+    "ir": ["voy", "vas", "va", "vamos", "van"],
+    "ser": ["soy", "eres", "es", "somos", "son"],
+    # ... (12 verbos irregulares)
+}
+
+def _matches_concept(pictogram, text, text_words):
+    # Nivel 1: subcadena exacta
+    if pictogram in text:
+        return True
+
+    # Nivel 2: raiz de 4 caracteres
+    if len(pictogram) >= 4:
+        if pictogram[:4] in text:
+            return True
+
+    # Nivel 3: raices irregulares
+    for alt in _IRREGULAR_STEMS.get(pictogram, []):
+        if alt in text:
+            return True
+
+    # Nivel 4: raiz de 3 caracteres (fallback)
+    if len(pictogram) >= 3:
+        stem3 = pictogram[:3]
+        if any(w.startswith(stem3) for w in text_words):
+            return True
+
+    return False
+\end{lstlisting}
+
+\section{Cliente de API con reintentos}
+
+El cliente de la API (sección~\ref{sec:f3-cliente}) gestiona los reintentos diferenciados según el tipo de error, mide la latencia con precisión de milisegundos y estima el coste de cada llamada a partir de los precios por token.
+
+\begin{lstlisting}[language=Python,caption={Cliente de API con reintentos y estimación de coste (\texttt{llm\_client.py}).},label={lst:llm-client},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def generate(self, messages):
+    start_time = time.perf_counter()
+
+    for attempt in range(self.config.max_retries + 1):
+        try:
+            response = self.client.chat.completions.create(
+                model=self.config.name,
+                messages=messages,
+                max_tokens=self.config.max_tokens,
+                temperature=self.config.temperature,
+                top_p=self.config.top_p,
+                timeout=self.config.timeout,
+            )
+            latency_ms = (
+                time.perf_counter() - start_time
+            ) * 1000
+            text = response.choices[0].message \
+                          .content.strip()
+            usage = response.usage
+
+            return {
+                "text": text,
+                "latency_ms": round(latency_ms, 2),
+                "tokens_input": usage.prompt_tokens,
+                "tokens_output": usage.completion_tokens,
+                "cost_usd": self._estimate_cost(
+                    usage.prompt_tokens,
+                    usage.completion_tokens
+                ),
+                "success": True,
+            }
+        except RateLimitError:
+            if attempt < self.config.max_retries:
+                wait = 2 ** (attempt + 1)
+                time.sleep(wait)
+                continue
+        except APITimeoutError:
+            if attempt < self.config.max_retries:
+                continue
+
+def _estimate_cost(self, input_tokens, output_tokens):
+    prices = {
+        "gpt-4o": {
+            "input": 2.50 / 1_000_000,
+            "output": 10.00 / 1_000_000
+        },
+        "gpt-4o-mini": {
+            "input": 0.15 / 1_000_000,
+            "output": 0.60 / 1_000_000
+        },
+    }
+    p = prices.get(self.config.name)
+    return round(
+        input_tokens * p["input"]
+        + output_tokens * p["output"], 8
+    )
+\end{lstlisting}
