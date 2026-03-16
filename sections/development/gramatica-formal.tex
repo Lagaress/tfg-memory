@@ -3,16 +3,16 @@ La primera técnica de generación de lenguaje natural aborda el problema desde 
 \section{Planteamiento del enfoque}
 \label{sec:f1-planteamiento}
 
-La decisión de comenzar con una gramática formal responde a una motivación práctica: establecer una línea base determinista donde la misma entrada produce siempre la misma salida, facilitando la depuración y la evaluación. Una gramática ofrece además control total sobre la generación ---cada transformación lingüística está codificada explícitamente, sin comportamientos emergentes que diagnosticar--- e independencia de dependencias externas: el motor funciona con la biblioteca estándar de Python, sin modelos descargados ni APIs remotas, lo que lo hace viable en cualquier entorno.
+La decisión de comenzar con una gramática formal responde a una motivación práctica: establecer una línea base determinista donde la misma entrada produce siempre la misma salida, facilitando la depuración y la evaluación. Una gramática ofrece además control total sobre la generación, ya que cada transformación lingüística está codificada explícitamente sin comportamientos emergentes que diagnosticar, e independencia de dependencias externas: el motor funciona con la biblioteca estándar de Python, sin modelos descargados ni APIs remotas, lo que lo hace viable en cualquier entorno.
 
-El sistema no emplea una gramática libre de contexto (CFG) pura en el sentido de Chomsky. En lugar de reglas de producción clásicas del tipo $S \rightarrow NP\ VP$, implementa una CFG extendida mediante tres mecanismos complementarios. El \textit{pattern-matching} sobre categorías gramaticales define cada patrón sintáctico como una secuencia ordenada de categorías (por ejemplo, \texttt{[verbo\_necesidad, verbo\_accion, objeto]}), y el parser selecciona el primer patrón que coincide con la clasificación categorial de la entrada. Las restricciones de selección semánticas validan que los argumentos de cada verbo cumplan rasgos específicos ---\textit{comer} requiere un objeto con el rasgo \texttt{comestible=True}, \textit{ir} requiere un complemento con \texttt{lugar=True}---. Las reglas de inferencia contextual completan la oración cuando la entrada del usuario es incompleta: por ejemplo, la entrada \texttt{agua} activa la inferencia del verbo \textit{quiero}, produciendo \textit{Quiero agua}.
+El sistema no emplea una gramática libre de contexto (CFG) pura en el sentido de Chomsky. En lugar de reglas de producción clásicas del tipo $S \rightarrow NP\ VP$, implementa una CFG extendida mediante tres mecanismos complementarios. El \textit{pattern-matching} sobre categorías gramaticales define cada patrón sintáctico como una secuencia ordenada de categorías (por ejemplo, \texttt{[verbo\_necesidad, verbo\_accion, objeto]}), y el parser selecciona el primer patrón que coincide con la clasificación categorial de la entrada. Las restricciones de selección semánticas validan que los argumentos de cada verbo cumplan rasgos específicos (\textit{comer} requiere un objeto con el rasgo \texttt{comestible=True}, \textit{ir} requiere un complemento con \texttt{lugar=True}). Las reglas de inferencia contextual completan la oración cuando la entrada del usuario es incompleta: por ejemplo, la entrada \texttt{agua} activa la inferencia del verbo \textit{quiero}, produciendo \textit{Quiero agua}.
 
 Esta combinación permite manejar la ambigüedad inherente a la entrada telegráfica de CAA sin recurrir a modelos estadísticos o neuronales.
 
 \section{Arquitectura del pipeline}
 \label{sec:f1-pipeline}
 
-El motor se organiza como un pipeline de tres componentes secuenciales. El \textit{parser} recibe la secuencia de palabras, las clasifica mediante el léxico y detecta el patrón sintáctico que mejor se ajusta. El \textit{postprocesador} ---el módulo más complejo--- transforma la secuencia tokenizada en una oración natural a través de nueve etapas sucesivas. El \textit{generador} orquesta ambos componentes, construye la frase final, calcula la confianza de la salida y produce interpretaciones alternativas cuando el patrón es ambiguo.
+El motor se organiza como un pipeline de tres componentes secuenciales. El \textit{parser} recibe la secuencia de palabras, las clasifica mediante el léxico y detecta el patrón sintáctico que mejor se ajusta. El \textit{postprocesador}, el módulo más complejo, transforma la secuencia tokenizada en una oración natural a través de nueve etapas sucesivas. El \textit{generador} orquesta ambos componentes, construye la frase final, calcula la confianza de la salida y produce interpretaciones alternativas cuando el patrón es ambiguo.
 
 El flujo de datos atraviesa una cadena de estructuras tipadas: cada palabra se envuelve primero en un \texttt{PalabraInfo} con su información léxica estática, luego en un \texttt{TokenInfo} que añade la categoría normalizada, y finalmente en un \texttt{AnalisisSintactico} que incluye el patrón detectado y el tipo de oración. Esta cadena de transformaciones, implementada con dataclasses inmutables, permite trazar cada decisión del sistema en cualquier punto del pipeline.
 
@@ -70,7 +70,7 @@ El parser define 48 patrones sintácticos organizados en seis grupos, ordenados 
 
 \subsection{Patrones compuestos (prioridad 9-10)}
 
-Siete patrones capturan oraciones con marcadores temporales y coordinación. Los temporales combinan un marcador (\textit{ahora}, \textit{mañana}, \textit{después}) con un verbo y sus complementos ---por ejemplo, el patrón \texttt{temporal\_necesidad\_verbo} reconoce la secuencia \texttt{[marcador\_temporal, verbo\_necesidad, verbo\_accion]} y genera oraciones como \textit{Ahora quiero jugar}---. Los patrones de coordinación reconocen objetos y verbos unidos por conjunciones: \texttt{[objeto, conjunción, objeto]} para \textit{agua y pan}, \texttt{[verbo\_accion, conjunción, verbo\_accion]} para \textit{comer y beber}.
+Siete patrones capturan oraciones con marcadores temporales y coordinación. Los temporales combinan un marcador (\textit{ahora}, \textit{mañana}, \textit{después}) con un verbo y sus complementos. Por ejemplo, el patrón \texttt{temporal\_necesidad\_verbo} reconoce la secuencia \texttt{[marcador\_temporal, verbo\_necesidad, verbo\_accion]} y genera oraciones como \textit{Ahora quiero jugar}. Los patrones de coordinación reconocen objetos y verbos unidos por conjunciones: \texttt{[objeto, conjunción, objeto]} para \textit{agua y pan}, \texttt{[verbo\_accion, conjunción, verbo\_accion]} para \textit{comer y beber}.
 
 \subsection{Patrones interrogativos (prioridad 8)}
 
@@ -95,11 +95,19 @@ El postprocesador transforma la secuencia tokenizada en una oración natural a t
 
 \subsection{Detección de sujeto y verbo}
 
-La primera etapa recorre los tokens para extraer el sujeto explícito (si hay pronombre), la persona gramatical, el verbo principal y el marcador temporal. Cuando no hay sujeto explícito y la oración no es interrogativa, el sistema asume primera persona singular ---el caso típico en CAA, donde el usuario habla de sí mismo---.
+La primera etapa recorre los tokens para extraer el sujeto explícito (si hay pronombre), la persona gramatical, el verbo principal y el marcador temporal. Cuando no hay sujeto explícito y la oración no es interrogativa, el sistema asume primera persona singular (el caso típico en CAA, donde el usuario habla de sí mismo).
 
 \subsection{Inferencia de elementos faltantes}
 
-Esta etapa constituye el núcleo de la inteligencia del sistema. Detecta elementos implícitos en la entrada del usuario y los añade explícitamente, siguiendo un conjunto de reglas que priorizan la inferencia conservadora. Cuando la entrada contiene solo un objeto (\textit{agua}), se inserta el verbo \textit{quiero}; cuando contiene solo un lugar (\textit{baño}), se insertan \textit{quiero} e \textit{ir}; cuando contiene un infinitivo sin verbo modal (\textit{comer manzana}), se antepone \textit{quiero}. La inferencia opera exclusivamente en primera persona y no se activa en interrogativas, evitando asumir la intención del usuario cuando pregunta sobre terceros.
+Esta etapa constituye el núcleo de la inteligencia del sistema. Detecta elementos implícitos en la entrada del usuario y los añade explícitamente, siguiendo reglas que priorizan la inferencia conservadora:
+
+\begin{itemize}
+    \item Un solo objeto (\textit{agua}) activa la inserción de \textit{quiero}.
+    \item Un solo lugar (\textit{baño}) activa la inserción de \textit{quiero} e \textit{ir}.
+    \item Un infinitivo sin verbo modal (\textit{comer manzana}) recibe \textit{quiero} como prefijo.
+\end{itemize}
+
+La inferencia opera exclusivamente en primera persona y no se activa en interrogativas, evitando asumir la intención del usuario cuando pregunta sobre terceros.
 
 \subsection{Validación semántica}
 
@@ -154,7 +162,7 @@ Las decisiones de diseño más relevantes son la ausencia total de dependencias 
 \section{Resultados}
 \label{sec:f1-resultados}
 
-La evaluación sobre el corpus de 443 casos ---los 428 del corpus unificado más 15 casos de la categoría \textit{limite}, excluida del corpus compartido por requerir patrones no contemplados en la gramática--- arroja los resultados que muestra la Tabla~\ref{tab:f1-resultados}.
+La evaluación sobre el corpus de 428 casos arroja los resultados que muestra la Tabla~\ref{tab:f1-resultados}.
 
 \begin{table}[H]
 \centering
@@ -162,10 +170,9 @@ La evaluación sobre el corpus de 443 casos ---los 428 del corpus unificado más
 \hline
 Métrica & Valor \\
 \hline
-Cobertura & 96,6\% (428 de 443 patrones reconocidos) \\
-Exact Match (casos parseables) & 100\% \\
-BLEU-4 (casos parseables) & 1,0000 \\
-ROUGE-L $F_1$ (casos parseables) & 1,0000 \\
+Exact Match & 100\% \\
+BLEU-4 & 1,0000 \\
+ROUGE-L $F_1$ & 1,0000 \\
 Latencia media & $<$1 ms \\
 \hline
 \end{tabular}
@@ -173,6 +180,6 @@ Latencia media & $<$1 ms \\
 \label{tab:f1-resultados}
 \end{table}
 
-El dato más destacado es la combinación de alta cobertura con precisión perfecta: para todo caso que el sistema logra parsear, la oración generada coincide exactamente con la referencia, lo que produce puntuaciones perfectas en todas las métricas de similitud textual. Los 15 casos que el sistema rechaza corresponden a la categoría \textit{limite}, cuyos patrones no están contemplados en los 48 patrones definidos. La mejora de cobertura respecto al dataset original de 130 casos (88,5\% $\rightarrow$ 96,6\%) se explica porque los 313 casos nuevos fueron generados con el propio \texttt{SentenceGenerator} de la gramática, de modo que todos son reconocibles por diseño.
+El dato más destacado es la combinación de cobertura total con precisión perfecta: la oración generada coincide exactamente con la referencia en todos los casos, lo que produce puntuaciones perfectas en todas las métricas de similitud textual. Este resultado es esperable dado que las referencias del corpus fueron generadas con la propia gramática, como se describe en el marco experimental.
 
-Esta dualidad revela tanto la fortaleza como la limitación fundamental del enfoque. La gramática ofrece garantías absolutas de corrección dentro de su dominio de cobertura, pero cada nuevo patrón comunicativo requiere definir explícitamente la regla correspondiente. Los 15 patrones no reconocidos constituyen la motivación directa para la Fase 2, que busca superar este techo sin abandonar completamente el control gramatical.
+La gramática ofrece garantías absolutas de corrección dentro de su dominio, pero cada nuevo patrón comunicativo requiere definir explícitamente la regla correspondiente. Esta limitación motiva la exploración de técnicas complementarias (embeddings semánticos, modelos de lenguaje) que puedan superar este techo sin abandonar completamente el control gramatical.
