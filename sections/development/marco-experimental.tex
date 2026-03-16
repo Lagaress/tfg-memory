@@ -228,26 +228,3 @@ Además de la calidad lingüística, se miden dos aspectos operativos relevantes
     \item \textit{Coste}: aplicable únicamente a la Fase 3, que utiliza una API comercial de pago. Se estima a partir del número de tokens procesados por consulta y las tarifas del proveedor.
 \end{itemize}
 
-\section{Entorno tecnológico}
-\label{sec:entorno}
-
-Los tres motores se implementan en Python 3.10+ y comparten la estructura de evaluación, pero difieren sustancialmente en sus dependencias:
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l l l}
-\hline
-Fase & Dependencias principales & Requisitos de hardware \\
-\hline
-Fase 1 & Ninguna (biblioteca estándar) & CPU \\
-Fase 2 & FastText (modelo cc.es.300.bin, 4 GB) & CPU, 6 GB RAM \\
-Fase 3 & API OpenAI (GPT-4o / GPT-4o-mini) & Conexión a Internet \\
-\hline
-\end{tabular}
-\caption{Dependencias y requisitos por fase.}
-\label{tab:dependencias}
-\end{table}
-
-La progresión en dependencias refleja un compromiso recurrente en el diseño del sistema: la Fase 1 funciona en cualquier entorno con Python instalado, la Fase 2 requiere descargar un modelo de embeddings de 4 GB y disponer de memoria suficiente para cargarlo, y la Fase 3 necesita conexión a Internet y una clave de API con coste asociado. Esta gradación en requisitos es relevante para el despliegue real en dispositivos de CAA, donde la conectividad no siempre está garantizada.
-
-La evaluación se ejecuta en un entorno unificado para garantizar la comparabilidad: un equipo con procesador Apple M1, 16 GB de RAM y macOS, utilizando Python 3.12. Las mediciones de latencia se realizan en condiciones equivalentes, con la salvedad de que la Fase 3 incluye el tiempo de red de la llamada a la API.
