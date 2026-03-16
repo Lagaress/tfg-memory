@@ -69,7 +69,7 @@ Nótese que la entrada puede variar en longitud desde un solo pictograma ---caso
 
 \subsection{Criterios de diseño del corpus}
 
-El corpus se ha construido siguiendo tres criterios. En primer lugar, representatividad: las categorías reflejan las necesidades comunicativas más frecuentes de los usuarios de CAA, priorizando las expresiones de necesidad y deseo que constituyen la base de la comunicación funcional. En segundo lugar, gradualidad: dentro de cada categoría se incluyen casos de complejidad creciente, desde entradas mínimas que exigen máxima inferencia hasta secuencias completas donde el sistema solo debe aplicar morfología. En tercer lugar, cobertura gramatical: el conjunto abarca los principales fenómenos del español relevantes para CAA ---concordancia de género, contracciones, selección de preposiciones, interrogativas, negación y coordinación.
+El corpus se ha construido siguiendo tres criterios. La representatividad: las categorías reflejan las necesidades comunicativas más frecuentes de los usuarios de CAA, priorizando las expresiones de necesidad y deseo que constituyen la base de la comunicación funcional. La gradualidad: dentro de cada categoría se incluyen casos de complejidad creciente, desde entradas mínimas que exigen máxima inferencia hasta secuencias completas donde el sistema solo debe aplicar morfología. Y la cobertura gramatical: el conjunto abarca los principales fenómenos del español relevantes para CAA ---concordancia de género, contracciones, selección de preposiciones, interrogativas, negación y coordinación.
 
 \section{Métricas de evaluación}
 \label{sec:metricas}
@@ -132,6 +132,15 @@ BERTScore evalúa la similitud semántica entre la predicción y la referencia u
 
 El cálculo alinea cada token de la predicción con su token más similar en la referencia mediante similitud coseno en el espacio de embeddings, y obtiene precisión, recall y $F_1$. Se utiliza un modelo BERT preentrenado en español en lugar del modelo por defecto en inglés, lo que mejora la captura de matices semánticos propios del castellano. Esta métrica se aplica a los seis motores de generación, siendo especialmente informativa cuando los motores producen paráfrasis válidas que las métricas de coincidencia exacta penalizarían.
 
+\subsection{Evaluación multi-referencia}
+\label{sec:multi-referencia}
+
+Las métricas con referencia descritas hasta aquí comparan cada predicción contra una única oración de referencia. Esta estrategia penaliza las reformulaciones válidas: si un motor genera \textit{Quiero beber agua} y la referencia es \textit{Quiero agua}, métricas como Exact Match o BLEU-4 registran una penalización a pesar de que ambas oraciones son correctas. La evaluación multi-referencia mitiga esta limitación utilizando las salidas de los seis motores como referencias alternativas para cada caso.
+
+El cálculo varía según la métrica. Para BLEU y chrF++, sacreBLEU ofrece soporte nativo de múltiples referencias: el score de un motor se calcula contra las salidas de los otros cinco motores simultáneamente, seleccionando la referencia que maximiza la precisión de n-gramas. Para METEOR, ROUGE-L y BERTScore, que aceptan una única referencia, se adopta una estrategia de máximo: se calcula el score contra cada una de las cinco referencias alternativas y se retiene el valor más alto. Para Exact Match, basta con que la predicción coincida con al menos una de las cinco referencias alternativas.
+
+Esta metodología introduce una circularidad parcial ---las salidas de un motor se usan como referencia para otro---. La mitigación principal es que cada motor se evalúa exclusivamente contra los otros cinco, nunca contra sí mismo. La convergencia observada entre motores (véase la Sección~\ref{sec:eval-convergencia}) reduce la circularidad a un efecto de segundo orden: cuando los seis motores producen la misma salida en el 80,4\% de los casos, las referencias alternativas son en su mayoría idénticas a la referencia original. La evaluación multi-referencia resulta informativa precisamente en el 19,6\% restante, donde los motores divergen y la métrica permite distinguir entre reformulaciones válidas y errores genuinos.
+
 \subsection{Normalización previa al cálculo}
 
 Antes de calcular las métricas con referencia ---Exact Match, BLEU, ROUGE-L, METEOR, chrF++ y BERTScore---, el pipeline normaliza la puntuación terminal de hipótesis y referencia eliminando los signos de puntuación terminal ---punto final, signos de exclamación e interrogación tanto de apertura como de cierre---. Esta normalización responde a un efecto observado en los motores híbridos: el post-editor GPT-4o añade sistemáticamente un punto final a las frases que genera, mientras que las referencias del corpus no incluyen puntuación terminal. Sin la normalización, los híbridos recibirían una penalización artificial en todas las métricas de coincidencia por un carácter de puntuación irrelevante para la calidad lingüística. La normalización no se aplica a la perplejidad ni a las métricas específicas de CAA (cobertura, fidelidad), que operan sobre el texto tal como lo produce cada motor.
@@ -145,6 +154,16 @@ $$\text{Fidelidad} = 1 - \frac{|\text{palabras alucinadas}|}{|\text{palabras de 
 Se excluyen del cálculo las \textit{stop words} ---artículos, preposiciones, pronombres, conectores y verbos auxiliares--- para evitar penalizar los elementos funcionales que el sistema añade legítimamente al construir la oración a partir de los pictogramas.
 
 La fidelidad complementa la cobertura: mientras la cobertura detecta omisiones (pictogramas de entrada que no aparecen en la salida), la fidelidad detecta adiciones (palabras de contenido en la salida que no provienen de la entrada). Un motor ideal obtendría cobertura y fidelidad de 1,0 simultáneamente.
+
+\subsection{Fidelidad ajustada}
+
+La fidelidad de contenido descrita en la subsección anterior penaliza como alucinación toda palabra de contenido que no corresponda a un pictograma de entrada. Esta definición operativa produce falsos positivos en un caso recurrente en CAA: la inferencia pragmática. Cuando un usuario selecciona únicamente el pictograma \textit{agua}, el motor puede inferir legítimamente el verbo \textit{querer} y generar \textit{Quiero agua}. La palabra \textit{quiero} no aparece entre los pictogramas de entrada, de modo que la fidelidad estándar la contabiliza como alucinación, aunque se trata de una inferencia que cualquier interlocutor humano haría rutinariamente.
+
+La fidelidad ajustada corrige este efecto excluyendo del recuento de alucinaciones aquellas palabras que constituyen inferencias pragmáticas ---verbos modales como \textit{querer}, verbos de acción predecibles por el contexto y otros elementos que los usuarios de CAA omiten sistemáticamente por economía comunicativa---. El cálculo es idéntico al de la fidelidad estándar, pero el conjunto de palabras alucinadas se reduce al descontar las inferencias detectadas:
+
+$$\text{Fidelidad ajustada} = 1 - \frac{|\text{palabras alucinadas}| - |\text{inferencias pragmáticas}|}{|\text{palabras de contenido generadas}|}$$
+
+La diferencia entre ambas métricas cuantifica el peso de las inferencias pragmáticas en cada motor. Un motor con fidelidad baja pero fidelidad ajustada alta alucina poco en sentido estricto: la mayoría de sus ``alucinaciones'' son inferencias justificables por el contexto comunicativo.
 
 \subsection{Perplejidad y pseudo-perplejidad}
 

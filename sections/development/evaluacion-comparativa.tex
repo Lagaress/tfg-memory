@@ -55,6 +55,7 @@ Perplejidad & 161 & 162 & & 100 & 102 & 150 \\
 Pseudo-perpl. & 33 & 34 & & 18 & 18 & 33 \\
 Cobertura & 0,972 & 0,971 & & 0,983 & 0,980 & 0,987 \\
 Fidelidad & 0,918 & 0,920 & & 0,936 & 0,934 & 0,932 \\
+Fidelidad ajust. & 0,969 & 0,971 & & 0,982 & 0,979 & 0,983 \\
 Latencia (ms) & 0,02 & 1643 & & 811 & 915 & 4179 \\
 Éxito & 1,000 & 1,000 & & 1,000 & 1,000 & 1,000 \\
 \hline
@@ -65,7 +66,7 @@ Latencia (ms) & 0,02 & 1643 & & 811 & 915 & 4179 \\
 
 La tabla de métricas con referencia revela un patrón claro. Los motores base de gramática formal y embeddings semánticos alcanzan el techo del dataset por las razones ya expuestas. El LLM y los tres híbridos se sitúan en un rango alto y estadísticamente equivalente entre sí: Exact Match del 85-89\%, BLEU-4 del 91-93\% y BERTScore de 0,99, lo que indica que en la mayoría de los casos reproducen formulaciones muy próximas a la referencia. El LLM obtiene valores ligeramente inferiores a los híbridos en Exact Match (0,85 frente a 0,89 de Hybrid3) pero equivalentes en ROUGE-L y BERTScore, lo que confirma que sus reformulaciones preservan el contenido semántico aunque difieran en la forma exacta.
 
-La tabla de métricas sin referencia completa el panorama. La cobertura de pictogramas converge en torno al 97-98\% para los seis motores, con valores prácticamente idénticos entre la gramática (0,972) y el LLM (0,971). La fidelidad de contenido muestra valores similares en todos los motores, con los híbridos ligeramente por encima (0,934-0,936) respecto a la gramática (0,918) y al LLM (0,920). La perplejidad revela que los híbridos 1 y 2 producen texto más natural que las técnicas base: medianas de 100 y 102 frente a 161 de la gramática. El LLM obtiene una mediana de 162, comparable a la gramática. Hybrid3, con mediana de 150, se aproxima a la gramática en lugar de mejorarla, un resultado inesperado respecto a su diseño de ranking por perplejidad. La latencia mantiene un espectro amplio: desde los 0,02 ms de la gramática formal hasta los 4,2 segundos de Hybrid3, con el LLM en 1,6 segundos por llamada a la API.
+La tabla de métricas sin referencia completa el panorama. La cobertura de pictogramas converge en torno al 97-98\% para los seis motores, con valores prácticamente idénticos entre la gramática (0,972) y el LLM (0,971). La fidelidad de contenido muestra valores similares en todos los motores, con los híbridos ligeramente por encima (0,934-0,936) respecto a la gramática (0,918) y al LLM (0,920). La fidelidad ajustada ---que descuenta las inferencias pragmáticas del recuento de alucinaciones--- eleva todos los valores por encima de 0,96 y estrecha las diferencias entre motores: la gramática alcanza 0,969 y los híbridos 0,979-0,983, lo que indica que la mayor parte de las ``alucinaciones'' detectadas por la fidelidad estándar son inferencias legítimas como el verbo \textit{querer} a partir de pictogramas de necesidad. La perplejidad revela que los híbridos 1 y 2 producen texto más natural que las técnicas base: medianas de 100 y 102 frente a 161 de la gramática. El LLM obtiene una mediana de 162, comparable a la gramática. Hybrid3, con mediana de 150, se aproxima a la gramática en lugar de mejorarla, un resultado inesperado respecto a su diseño de ranking por perplejidad. La latencia mantiene un espectro amplio: desde los 0,02 ms de la gramática formal hasta los 4,2 segundos de Hybrid3, con el LLM en 1,6 segundos por llamada a la API.
 
 \begin{figure}[H]
     \centering
@@ -106,7 +107,7 @@ Fidelidad & 53,84 & $<$ 0,0001 & Sí \\
 
 El test de Friedman (Tabla~\ref{tab:eval-friedman}) confirma que existen diferencias significativas entre los seis motores en las nueve métricas evaluadas, sin excepciones. Los estadísticos $\chi^2$ en métricas de coincidencia n-gramática oscilan entre 205 y 216, reflejando la dominancia de gramática y embeddings (scores perfectos) frente a la variabilidad del LLM y los híbridos. La perplejidad presenta el $\chi^2$ más alto (423,12), indicando diferencias sustanciales en naturalidad entre motores. La perplejidad y la cobertura, que con 115 casos no alcanzaban significancia, ahora la alcanzan con $\chi^2$ de 423,12 y 29,90 respectivamente. La corrección por comparaciones múltiples es innecesaria a nivel ómnibus, dado que todos los $p$-valores son inferiores a 0,0001.
 
-Las comparaciones por pares con Wilcoxon y corrección de Holm-Bonferroni revelan cuatro hallazgos principales:
+Las comparaciones por pares con Wilcoxon y corrección de Holm-Bonferroni revelan cinco hallazgos principales:
 
 \begin{table}[H]
 \centering
@@ -119,15 +120,18 @@ Gramática $\equiv$ Embeddings & Todas & $p \geq 0{,}08$ \\
 Gramática/Emb. $>$ LLM/Híbridos & BLEU-4, METEOR, EM, chrF++, ROUGE-L & $p < 0{,}0001$ \\
 LLM $\equiv$ H1 $\equiv$ H2 $\equiv$ H3 & BLEU-4, chrF++, ROUGE-L & $p > 0{,}05$ \\
 H1 $\neq$ H2, H1 $\neq$ H3 & METEOR, Exact Match & $p < 0{,}005$ \\
+Todos $\equiv$ (multi-ref) & mr\_BERTScore $F_1$ & $p = 0{,}1477$ \\
 \hline
 \end{tabular}
-\caption{Hallazgos principales del test de Wilcoxon por pares con corrección de Holm-Bonferroni. El símbolo $\equiv$ indica ausencia de diferencia significativa; $>$ indica superioridad significativa.}
+\caption{Hallazgos principales del test de Wilcoxon por pares con corrección de Holm-Bonferroni. El símbolo $\equiv$ indica ausencia de diferencia significativa; $>$ indica superioridad significativa. La última fila corresponde a la evaluación multi-referencia.}
 \label{tab:eval-wilcoxon}
 \end{table}
 
 El primer hallazgo es la equivalencia entre gramática formal y embeddings semánticos ($p \geq 0{,}08$ en todas las métricas), consecuencia de que ambos producen las mismas salidas en 426 de 428 casos (99,5\%). El segundo hallazgo es que gramática y embeddings superan significativamente tanto al LLM como a los tres híbridos en métricas de coincidencia n-gramática ($p < 0{,}0001$), lo que refleja que las reformulaciones introducidas por el LLM ---ya sea directamente o mediante post-edición en los híbridos--- divergen de la formulación exacta de la referencia. El tercer hallazgo es la equivalencia estadística entre el LLM y los tres híbridos en BLEU-4 ($p = 0{,}87$ para H1 vs LLM), chrF++ y ROUGE-L, lo que indica que el rendimiento del LLM como motor autónomo es comparable al de los híbridos en estas métricas. El cuarto hallazgo matiza esta equivalencia: Holm-Bonferroni detecta diferencias significativas entre H1 y H2 en METEOR ($p = 0{,}001$), y entre H1 y H3 tanto en METEOR ($p = 0{,}004$) como en Exact Match ($p = 0{,}003$). H1 obtiene peores resultados que H2 y H3 en estas métricas, lo que sugiere que la frase intermedia proporcionada por los embeddings o la selección multimotor aporta una ventaja que se refleja en la concordancia con la referencia.
 
 En perplejidad, los híbridos 1 y 2 superan significativamente a gramática, embeddings y al LLM ($p < 0{,}0001$), y Hybrid3 se sitúa en un nivel intermedio. El LLM obtiene perplejidad comparable a gramática y embeddings ($p > 0{,}49$), indicando una naturalidad similar. En fidelidad, los híbridos superan a gramática y embeddings ($p < 0{,}001$), mientras que el LLM se sitúa en un nivel intermedio sin diferencia significativa respecto a las técnicas base ($p = 0{,}34$).
+
+El quinto hallazgo proviene de la evaluación multi-referencia (Sección~\ref{sec:eval-multiref}). El test de Friedman sobre mr\_BERTScore $F_1$ no alcanza significancia ($\chi^2 = 8{,}16$, $p = 0{,}1477$): cuando cada motor se evalúa contra las salidas de los otros cinco en lugar de contra una referencia única, las diferencias semánticas entre los seis motores desaparecen. Todos producen oraciones semánticamente equivalentes; lo que varía es la formulación superficial.
 
 \section{Distribución de métricas}
 \label{sec:eval-distribuciones}
@@ -239,6 +243,85 @@ La Figura~\ref{fig:eval-mejora} cuantifica la mejora relativa de cada híbrido r
 
 La degradación en métricas de coincidencia oscila entre el 5\% y el 20\% según la métrica, mientras que la mejora en perplejidad alcanza hasta el 25\% en Hybrid3. La fidelidad mejora entre un 1\% y un 2\%, un cambio marginal pero consistente en los tres híbridos. Estos resultados confirman que la hibridación no cumple el objetivo de mejorar la coincidencia con las referencias ---objetivo inalcanzable cuando las referencias provienen de las técnicas base---, sino que opera en una dimensión diferente: produce texto más natural y algo más fiel al contenido pictográfico, a costa de divergir de la formulación exacta de la referencia.
 
+\section{Evaluación multi-referencia}
+\label{sec:eval-multiref}
+
+Las métricas con referencia única penalizan cualquier reformulación que difiera de la oración gold standard, aunque sea igualmente válida. La evaluación multi-referencia, definida en la Sección~\ref{sec:multi-referencia}, mitiga este sesgo utilizando las salidas de los otros cinco motores como referencias alternativas. La Tabla~\ref{tab:eval-multiref} recoge los resultados.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{l c c c c c c}
+\hline
+ & \multicolumn{2}{c}{Técnicas base} & & \multicolumn{3}{c}{Hibridaciones} \\
+\cline{2-3} \cline{5-7}
+Métrica & Gramática & LLM & & Híbrido 1 & Híbrido 2 & Híbrido 3 \\
+\hline
+mr\_BLEU-4 & 1,00 & 0,98 $\pm$ 0,11 & & 0,99 $\pm$ 0,08 & 0,99 $\pm$ 0,08 & 1,00 $\pm$ 0,06 \\
+mr\_EM & 1,00 & 0,96 $\pm$ 0,21 & & 0,98 $\pm$ 0,14 & 0,98 $\pm$ 0,15 & 0,99 $\pm$ 0,08 \\
+mr\_ROUGE-L $F_1$ & 1,00 & 0,99 $\pm$ 0,07 & & 1,00 $\pm$ 0,03 & 1,00 $\pm$ 0,02 & 1,00 $\pm$ 0,02 \\
+mr\_BERTScore $F_1$ & 1,00 & 1,00 $\pm$ 0,02 & & 1,00 $\pm$ 0,01 & 1,00 $\pm$ 0,01 & 1,00 $\pm$ 0,00 \\
+\hline
+\end{tabular}
+\caption{Métricas multi-referencia por motor (media $\pm$ desviación estándar, $n=428$). Gramática y embeddings comparten columna por las razones expuestas en la Tabla~\ref{tab:eval-referencia}. Los valores se redondean a dos decimales.}
+\label{tab:eval-multiref}
+\end{table}
+
+El contraste con la Tabla~\ref{tab:eval-referencia} es notable. El LLM, que obtenía un Exact Match de 0,85 contra la referencia única, asciende a 0,96 cuando se le permite coincidir con la salida de cualquiera de los otros cinco motores. Los híbridos alcanzan valores de 0,98-0,99. Las diferencias entre motores se comprimen: en mr\_BERTScore $F_1$ todos los motores se sitúan en 1,00 $\pm$ 0,02, y el test de Friedman no detecta diferencias significativas ($\chi^2 = 8{,}16$, $p = 0{,}1477$). Los seis motores son semánticamente equivalentes cuando la evaluación contempla múltiples formulaciones válidas.
+
+Las métricas de n-gramas multi-referencia sí alcanzan significancia en el test de Friedman (mr\_BLEU-4: $\chi^2 = 35{,}75$, $p < 0{,}0001$), pero las comparaciones por pares revelan que las diferencias se concentran entre la gramática y el LLM: gramática supera significativamente al LLM en mr\_BLEU-4 ($p = 0{,}0001$), mientras que los híbridos no difieren entre sí ni respecto a la gramática en la mayoría de comparaciones. Hybrid3, al seleccionar la salida de la gramática en el 88,6\% de los casos, hereda sus scores multi-referencia y se sitúa consistentemente en el grupo de cabeza.
+
+\section{Convergencia y diversidad entre motores}
+\label{sec:eval-convergencia}
+
+La evaluación multi-referencia presupone que los motores producen salidas diversas que se complementan entre sí. Para verificar este supuesto, se analiza en qué medida los seis motores convergen ---producen la misma oración--- o divergen ---generan formulaciones distintas--- para cada caso del corpus.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r r}
+\hline
+Frases únicas & Casos & \% del total \\
+\hline
+1 (todos iguales) & 141 & 32,9\% \\
+2 & 226 & 52,8\% \\
+3 & 54 & 12,6\% \\
+4 & 6 & 1,4\% \\
+5 & 1 & 0,2\% \\
+\hline
+\end{tabular}
+\caption{Distribución de diversidad: número de frases únicas generadas por los seis motores para cada caso ($n=428$).}
+\label{tab:eval-diversidad}
+\end{table}
+
+La Tabla~\ref{tab:eval-diversidad} muestra que la diversidad entre motores es limitada. En el 32,9\% de los casos los seis motores producen exactamente la misma oración; en otro 52,8\% generan solo dos formulaciones distintas. La media de frases únicas por caso es 1,83 ---por debajo de 2 sobre un máximo teórico de 6---, lo que confirma una convergencia alta. En métricas de coincidencia n-gramática (BLEU-4, METEOR, chrF++, ROUGE-L, Exact Match), 344 de los 428 casos (80,4\%) presentan score idéntico en los seis motores, reduciendo la muestra efectiva para las comparaciones estadísticas a 84 casos.
+
+La estructura interna de esta convergencia revela bloques de equivalencia. La gramática formal y los embeddings producen salidas idénticas en 426 de 428 casos (99,5\%), consecuencia de que el componente de embeddings rara vez altera las decisiones del motor basado en reglas para el vocabulario acotado de este proyecto. La gramática y Hybrid3 coinciden en 379 de 428 casos (88,6\%), reflejo del patrón de selección de Hybrid3 que se analiza en la Sección~\ref{sec:eval-seleccion-h3}. Estos tres motores ---gramática, embeddings e Hybrid3--- forman un bloque mayoritario que produce la misma salida en 377 de 428 casos (88,1\%). El LLM y los híbridos 1 y 2, al incorporar un componente de post-edición neural, son los que más frecuentemente divergen del bloque mayoritario.
+
+\section{Análisis de selección de Hybrid3}
+\label{sec:eval-seleccion-h3}
+
+Hybrid3 opera como un sistema de \textit{overgenerate-and-rank}: genera candidatos con cuatro motores (gramática, LLM, Hybrid1 e Hybrid2) y selecciona el de menor perplejidad. La Tabla~\ref{tab:eval-h3-seleccion} desglosa qué motor aporta la candidata seleccionada en cada caso.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l r r}
+\hline
+Motor seleccionado & Casos & \% \\
+\hline
+Gramática formal & 379 & 88,6\% \\
+LLM & 31 & 7,2\% \\
+Híbrido 1 & 16 & 3,7\% \\
+Híbrido 2 & 2 & 0,5\% \\
+\hline
+\end{tabular}
+\caption{Distribución de la selección de Hybrid3 por motor fuente ($n=428$).}
+\label{tab:eval-h3-seleccion}
+\end{table}
+
+La gramática formal domina la selección: Hybrid3 elige su salida en el 88,6\% de los casos (379 de 428). El LLM aporta el 7,2\% y Hybrid1 el 3,7\%; Hybrid2 apenas contribuye con 2 casos. La divergencia efectiva de Hybrid3 respecto a la gramática se limita a 49 de 428 casos (11,4\%).
+
+Este patrón de selección explica varias observaciones previas. La perplejidad de Hybrid3 (mediana 150) se aproxima a la de la gramática (161) en lugar de alcanzar los valores de los híbridos con post-edición (100-102): al seleccionar la gramática en casi nueve de cada diez casos, la distribución de perplejidad de Hybrid3 queda dominada por la de su candidata mayoritaria. Las métricas de coincidencia más altas de Hybrid3 respecto al LLM y a los otros híbridos (Tabla~\ref{tab:eval-referencia}) son un espejismo del mismo fenómeno: Hybrid3 obtiene scores altos porque en la mayoría de los casos reproduce la salida de la gramática, que coincide con la referencia por diseño del dataset. El coste de esta estrategia ---4,2 segundos de latencia y tres llamadas a la API por caso--- no se justifica cuando el resultado es seleccionar la gramática formal en el 88,6\% de las consultas.
+
 \section{Compromisos de diseño}
 \label{sec:eval-compromisos}
 
@@ -275,16 +358,16 @@ El hallazgo central de esta evaluación comparativa es la paradoja entre natural
 
 Los scores perfectos de la gramática formal y los embeddings en las métricas de coincidencia constituyen un artefacto del diseño del dataset: las oraciones de referencia fueron generadas por estos motores, de modo que la coincidencia es trivial. Esta circularidad es una limitación conocida y acotada ---afecta a la interpretación de las métricas de coincidencia pero no a las métricas sin referencia (perplejidad, cobertura, fidelidad) ni a las comparaciones entre los motores no circulares (LLM e híbridos entre sí)---. La equivalencia entre gramática y embeddings (salidas idénticas en 426 de 428 casos, 99,5\%) refuerza esta observación: el componente de embeddings semánticos no aporta variación detectable sobre el dataset actual. Esta convergencia constituye una línea futura de investigación: explorar en qué condiciones ---entradas fuera de vocabulario, dominios no cubiertos por la gramática--- los embeddings podrían diferenciarse.
 
-La convergencia n-gramática entre motores merece atención. En 344 de los 428 casos (80,4\%), los seis motores producen exactamente la misma salida, lo que reduce el tamaño efectivo de la muestra para las comparaciones estadísticas a 84 casos en métricas de coincidencia. La alta redundancia entre las métricas de coincidencia (BLEU-4, METEOR, chrF++, ROUGE-L, Exact Match, BERTScore correlacionan con $r > 0{,}92$) confirma que miden esencialmente la misma dimensión; BLEU-4 se utiliza como métrica principal por ser la más establecida en la literatura de NLG.
+La convergencia entre motores, analizada en detalle en la Sección~\ref{sec:eval-convergencia}, reduce la muestra efectiva a 84 casos en métricas de coincidencia. La alta redundancia entre estas métricas ($r > 0{,}92$) confirma que miden esencialmente la misma dimensión; BLEU-4 se utiliza como métrica principal por ser la más establecida en la literatura de NLG.
 
 La convergencia en métricas de contenido (cobertura $\sim$97-98\% y fidelidad $\sim$92-97\% para los motores funcionales) revela que las diferencias entre técnicas residen en la forma, no en el contenido. Todos los motores preservan los pictogramas de entrada con alta fidelidad; lo que varía es cómo los articulan en una oración ---qué artículos eligen, en qué orden disponen los constituyentes, qué verbos infieren.
 
-Las implicaciones para un sistema de producción son claras. La gramática formal constituye la opción principal para dispositivos offline que priorizan velocidad y previsibilidad: latencia imperceptible, determinismo total, sin coste ni dependencias externas. Los híbridos 1 y 2 ofrecen una alternativa cuando se dispone de conectividad y se valora una formulación más natural (perplejidad $\sim$100 frente a $\sim$161 de la gramática), con el coste de latencia ($\sim$800-900 ms) y pérdida de determinismo.
+Las implicaciones para un sistema de producción apuntan a Hybrid1 como la opción más equilibrada. La perplejidad (mediana 100) es significativamente menor que la de la gramática (161, $p < 0{,}0001$), lo que se traduce en formulaciones más naturales, y la tasa de alucinación ---medida por la fidelidad ajustada--- resulta la más baja entre los motores con componente neural (1,8\% frente al 2,9\% del LLM y al 3,1\% de la gramática). La arquitectura de Hybrid1 es la más simple de los tres híbridos: la gramática aporta la estructura sintáctica y el LLM la pule, sin añadir una segunda capa de complejidad como hace Hybrid2 con FastText o Hybrid3 con el ranking múltiple. Cuando la gramática no cubre una entrada imprevista, el componente LLM puede generar una salida razonable como \textit{fallback}, algo que la gramática sola no ofrece. La latencia de $\sim$811 ms resulta compatible con un sistema interactivo de CAA, y el coste por consulta (\$0,003) iguala al del LLM puro. La gramática formal sigue siendo la opción para dispositivos offline o escenarios donde el determinismo y la latencia imperceptible son prioritarios, y constituye el \textit{fallback} natural de Hybrid1 cuando no hay conectividad.
 
-Entre los tres híbridos, Hybrid3 (Overgenerate-and-Rank) constituye un resultado negativo: selecciona la salida de la gramática formal en el 88,6\% de los casos (379 de 428), alcanza una latencia de 4,2 segundos ---la más alta de todos los motores--- y no mejora la perplejidad respecto a la gramática (mediana 150 frente a 161). El diseño de ranking por perplejidad no justifica su coste computacional cuando la gramática ya produce la candidata más natural en la mayoría de los casos. En un sistema real, Hybrid1 o Hybrid2 serían preferibles.
+Entre los tres híbridos, Hybrid3 (Overgenerate-and-Rank) constituye un resultado negativo: selecciona la salida de la gramática formal en el 88,6\% de los casos (379 de 428), como detalla la Sección~\ref{sec:eval-seleccion-h3}. Sus métricas de coincidencia aparentemente superiores a las de Hybrid1 son un espejismo de esta circularidad ---al reproducir la gramática, obtiene scores altos contra un dataset generado por la gramática---. Su perplejidad (mediana 150) no mejora la de la gramática, su latencia (4,2 s) es cinco veces mayor que la de Hybrid1, y su coste por consulta triplica al de los demás híbridos. Hybrid2, por su parte, obtiene resultados prácticamente idénticos a Hybrid1 (perplejidad 102, fidelidad ajustada 0,979) pero añade la dependencia de FastText sin beneficio medible. El diseño minimalista de Hybrid1 ---gramática más post-edición LLM--- ofrece el mejor compromiso entre naturalidad, fidelidad y complejidad operativa.
 
 La post-edición por LLM introduce un compromiso no previsto en el diseño original: en aproximadamente 16 casos (3,7\%), el post-editor produce una frase más natural pero que pierde algún pictograma respecto a la salida del motor base. Por ejemplo, ante la entrada \texttt{[luego, dormir]}, la gramática genera \textit{Luego quiero dormir} ---infiriendo el verbo modal--- y el post-editor la reformula como \textit{Luego dormiré}, una frase gramaticalmente superior pero que omite el concepto \textit{querer}. Este fenómeno afecta tanto a Hybrid1 como a Hybrid2 y revela una tensión inherente al patrón \textit{plan-then-realize}: el realizador puede mejorar la forma a costa del contenido. En un sistema de producción, una validación de cobertura posterior a la post-edición ---que descarte reformulaciones que pierden pictogramas y revierta al motor base--- mitigaría este efecto sin renunciar a la mejora de naturalidad en los demás casos.
 
 El comportamiento de BERTScore merece una observación metodológica. El test de Friedman detecta diferencias significativas ($\chi^2 = 78{,}05$, $p < 0{,}0001$), y las comparaciones por pares con Holm-Bonferroni confirman que gramática y embeddings superan significativamente al LLM y los tres híbridos ($p < 0{,}0001$). Sin embargo, entre los cuatro motores no deterministas ---LLM, H1, H2 y H3--- ninguna comparación alcanza significancia ($p \geq 0{,}27$). Todos los motores obtienen valores de BERTScore próximos a 1,0 (entre 0,987 y 1,000), de modo que las diferencias absolutas entre el LLM y los híbridos son demasiado pequeñas para que los tests por pares las discriminen. Este resultado confirma que, para el dominio acotado de CAA con frases cortas, BERTScore alcanza un techo donde pierde capacidad discriminativa: todas las salidas son semánticamente equivalentes a la referencia, independientemente de las diferencias superficiales que otras métricas sí capturan.
 
-Las limitaciones de esta evaluación deben hacerse explícitas. Aunque el corpus de 428 casos cubre ocho categorías semánticas y tres niveles de complejidad, los 313 casos añadidos fueron generados por el propio \texttt{SentenceGenerator} de la gramática formal, lo que refuerza la circularidad entre las referencias y las salidas de los motores basados en gramática. Las referencias fueron creadas por un único anotador, lo que introduce un sesgo hacia sus preferencias de formulación. La ausencia de evaluación humana formal ---con múltiples evaluadores puntuando adecuación y fluidez--- impide contrastar las métricas automáticas con la percepción real de los usuarios. Las métricas de perplejidad, aunque alcanzan alta significancia estadística ($\chi^2 = 423{,}12$), presentan desviaciones estándar extremadamente altas que dificultan la interpretación de diferencias entre motores cercanos.
+Las limitaciones de esta evaluación deben hacerse explícitas. Aunque el corpus de 428 casos cubre ocho categorías semánticas y tres niveles de complejidad, los 313 casos añadidos fueron generados por el propio \texttt{SentenceGenerator} de la gramática formal, lo que refuerza la circularidad entre las referencias y las salidas de los motores basados en gramática. Las referencias fueron creadas por un único anotador, lo que introduce un sesgo hacia sus preferencias de formulación. Las métricas de perplejidad, aunque alcanzan alta significancia estadística ($\chi^2 = 423{,}12$), presentan desviaciones estándar extremadamente altas que dificultan la interpretación de diferencias entre motores cercanos. La recomendación de Hybrid1 como opción de producción se sustenta en las métricas automáticas; la evaluación humana descrita en el capítulo siguiente permitirá contrastar esta recomendación con la percepción de usuarios y profesionales.
