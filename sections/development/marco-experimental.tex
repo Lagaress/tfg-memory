@@ -5,7 +5,13 @@ Antes de describir cada técnica de generación, conviene establecer el marco ex
 
 La arquitectura de Dixi sigue un diseño modular: la entrada ---una lista ordenada de etiquetas de pictogramas--- atraviesa un motor de generación de lenguaje natural que produce una oración gramaticalmente correcta, y un motor de síntesis de voz la convierte en audio.
 
-El dominio de la aplicación está acotado: 232 pictogramas ARASAAC organizados en nueve categorías, frases cortas y un vocabulario limitado a las necesidades comunicativas cotidianas. Esta restricción abre una pregunta concreta: ¿qué técnica de generación se adapta mejor a un entorno donde la fidelidad al contenido pictográfico, la latencia y la posibilidad de funcionar sin conexión son más relevantes que la capacidad de manejar un vocabulario abierto? Para responderla, se han implementado seis motores independientes que reciben exactamente la misma entrada y producen el mismo tipo de salida. Tres son técnicas base ---gramática formal, embeddings semánticos y modelos de lenguaje--- y tres son hibridaciones que combinan las anteriores: gramática con post-edición LLM, embeddings con post-edición LLM, y un sistema de sobregeneración y ranking. La comparación directa entre los seis permite identificar qué enfoque, o combinación de enfoques, ofrece el mejor compromiso para un sistema de CAA real.
+\textit{(TODO: Añadir diagrama de la arquitectura modular: pictogramas $\rightarrow$ motor de generación $\rightarrow$ oración $\rightarrow$ TTS $\rightarrow$ audio)}
+
+El dominio de la aplicación está acotado: 232 pictogramas ARASAAC organizados en nueve categorías, frases cortas y un vocabulario limitado a las necesidades comunicativas cotidianas. Esta restricción abre una pregunta concreta: ¿qué técnica de generación se adapta mejor a un entorno donde la fidelidad al contenido pictográfico, la latencia y la posibilidad de funcionar sin conexión son más relevantes que la capacidad de manejar un vocabulario abierto?
+
+Para responderla, se han implementado seis motores independientes que reciben exactamente la misma entrada y producen el mismo tipo de salida. Tres son técnicas base ---gramática formal, embeddings semánticos y modelos de lenguaje--- y tres son hibridaciones que combinan las anteriores: gramática con post-edición LLM, embeddings con post-edición LLM, y un sistema de sobregeneración y ranking.
+
+La comparación directa entre los seis permite identificar qué enfoque, o combinación de enfoques, ofrece el mejor compromiso para un sistema de CAA real.
 
 \section{Conjunto de datos de evaluación}
 \label{sec:dataset}
@@ -38,7 +44,9 @@ Concordancia & Concordancia de género y número & 35 \\
 \label{tab:dataset-categorias}
 \end{table}
 
-El corpus fue ampliado desde los 115 casos originales ---diseñados manualmente--- mediante generación sistemática de combinaciones de pictogramas con el script \texttt{generate\_cases.py}, que utiliza el propio \texttt{SentenceGenerator} de la gramática formal para producir pares (entrada, referencia) adicionales. Los 313 casos nuevos cubren más tipos gramaticales y niveles de complejidad: el dataset resultante contiene 192 casos simples, 181 de complejidad media y 55 complejos, con longitudes de entrada que van desde un solo pictograma (17 casos) hasta cinco pictogramas (12 casos), pasando por dos pictogramas (102 casos), tres pictogramas (239 casos) y cuatro pictogramas (58 casos).
+El corpus fue ampliado desde los 115 casos originales ---diseñados manualmente--- mediante generación sistemática de combinaciones de pictogramas con el script \texttt{generate\_cases.py}, que utiliza el propio \texttt{SentenceGenerator} de la gramática formal para producir pares (entrada, referencia) adicionales.
+
+Los 313 casos nuevos cubren más tipos gramaticales y niveles de complejidad: el dataset resultante contiene 192 casos simples, 181 de complejidad media y 55 complejos, con longitudes de entrada que van desde un solo pictograma (17 casos) hasta cinco pictogramas (12 casos), pasando por dos pictogramas (102 casos), tres pictogramas (239 casos) y cuatro pictogramas (58 casos).
 
 Cada categoría presenta desafíos lingüísticos específicos. Las oraciones de necesidad requieren inferir el verbo modal \textit{querer} cuando el usuario omite la intención; las de movimiento exigen seleccionar la preposición correcta según el lugar de destino; las interrogativas demandan invertir el orden sujeto-verbo; y las compuestas necesitan coordinación con conjunciones.
 
