@@ -7,7 +7,9 @@ Los dos motores anteriores comparten una característica: todo el conocimiento l
 
 Esta tercera técnica explora una alternativa: prescindir de reglas explícitas y delegar la generación a un modelo que ha aprendido las regularidades del español a partir de cantidades masivas de texto.
 
-La elección de GPT-4o~\cite{openai2024gpt4o} y GPT-4o-mini como modelos responde a factores pragmáticos. Ambos representan el estado del arte en generación de texto en español, con capacidades de seguimiento de instrucciones que permiten restringir el comportamiento al dominio CAA sin necesidad de ajuste fino. El despliegue vía API elimina la necesidad de infraestructura GPU, y la interfaz permite iterar con rapidez sobre el diseño de prompts, haciendo viable la experimentación en el contexto de un TFG. Se evalúan dos modelos para determinar si la mayor capacidad de GPT-4o se traduce en mejor rendimiento para esta tarea específica.
+La elección de GPT-4o~\cite{openai2024gpt4o} y GPT-4o-mini como modelos responde a factores pragmáticos. Ambos representan el estado del arte en generación de texto en español, con capacidades de seguimiento de instrucciones que permiten restringir el comportamiento al dominio CAA sin necesidad de ajuste fino. El despliegue vía API elimina la necesidad de infraestructura GPU, y la interfaz permite iterar con rapidez sobre el diseño de prompts, haciendo viable la experimentación en el contexto de un TFG.
+
+Se evalúan dos modelos para determinar si la mayor capacidad de GPT-4o se traduce en mejor rendimiento para esta tarea específica.
 
 Los compromisos de este enfoque son explícitos. Se gana flexibilidad: el modelo puede manejar construcciones no previstas, corregir concordancia de género y generar oraciones naturales sin reglas explícitas.
 
@@ -74,18 +76,24 @@ Cada llamada consume aproximadamente 1.204 tokens de entrada, de los cuales la g
 \section{Metadatos de pictogramas}
 \label{sec:f3-metadatos}
 
-El inventario de metadatos (\texttt{pictogram\_metadata.py}) contiene 539 entradas que mapean etiquetas de pictogramas a 19 categorías gramaticales. El número de entradas es mayor que el léxico de los motores anteriores porque incluye explícitamente las formas conjugadas más frecuentes: en lugar de resolver la conjugación en tiempo de ejecución, se registran las formas de primera, segunda y tercera persona del singular y del plural.
+El inventario de metadatos (\texttt{pictogram\_metadata.py}) contiene 539 entradas que mapean etiquetas de pictogramas a 19 categorías gramaticales.
+
+El número de entradas es mayor que el léxico de los motores anteriores porque incluye explícitamente las formas conjugadas más frecuentes: en lugar de resolver la conjugación en tiempo de ejecución, se registran las formas de primera, segunda y tercera persona del singular y del plural.
 
 La función \texttt{get\_metadata()} recibe una etiqueta y devuelve su categoría gramatical y su forma legible (reemplazando guiones bajos por espacios, de modo que \texttt{pasta\_de\_dientes} se presenta como \textit{pasta de dientes}).
 
-El inventario presenta cuatro conflictos de clave duplicada donde una misma forma pertenece a dos categorías: \textit{frío} (adjetivo y sustantivo de estado), \textit{bajo} (adjetivo y preposición), \textit{como} (verbo e interrogativo) y \textit{limpio} (verbo y adjetivo). Python resuelve las duplicaciones manteniendo la última asignación, y en la práctica el LLM interpreta correctamente el significado por contexto, por lo que estos conflictos no afectan a la calidad de la generación.
+El inventario presenta cuatro conflictos de clave duplicada donde una misma forma pertenece a dos categorías: \textit{frío} (adjetivo y sustantivo de estado), \textit{bajo} (adjetivo y preposición), \textit{como} (verbo e interrogativo) y \textit{limpio} (verbo y adjetivo).
+
+Python resuelve las duplicaciones manteniendo la última asignación, y en la práctica el LLM interpreta correctamente el significado por contexto, por lo que estos conflictos no afectan a la calidad de la generación.
 
 \section{Cliente de API}
 \label{sec:f3-cliente}
 
 Los modelos se configuran mediante una \textit{dataclass} \texttt{ModelConfig} que encapsula seis parámetros: nombre del modelo, \texttt{max\_tokens} (100), temperatura (0,3), \texttt{top\_p} (0,9), timeout (10 segundos) y reintentos máximos (2).
 
-La temperatura de 0,3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0,3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}. El límite de 100 tokens es generoso para oraciones que promedian 4 tokens de salida, pero actúa como salvaguarda contra generaciones desbordadas. El timeout de 10 segundos refleja que, en una aplicación de comunicación asistida, el usuario espera activamente la respuesta.
+La temperatura de 0,3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0,3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
+
+El límite de 100 tokens es generoso para oraciones que promedian 4 tokens de salida, pero actúa como salvaguarda contra generaciones desbordadas. El timeout de 10 segundos refleja que, en una aplicación de comunicación asistida, el usuario espera activamente la respuesta.
 
 El cliente implementa reintentos diferenciados según el tipo de error: los errores de \textit{rate limit} se reintentan con backoff exponencial (2 y 4 segundos), los timeouts se reintentan inmediatamente, y los errores de servidor no se reintentan.
 
@@ -109,4 +117,8 @@ Se excluyen 36 palabras funcionales del conteo de cobertura (preposiciones, dete
 \section{Limitaciones}
 \label{sec:f3-limitaciones}
 
-El motor depende de la API de OpenAI, lo que implica conexión a Internet permanente y un servicio de pago que no es viable para uso offline. La latencia de red añade aproximadamente un segundo a cada generación, un tiempo perceptible en una aplicación de comunicación asistida. Aunque el coste por consulta es reducido (\$0,00018 con GPT-4o-mini), el uso continuado genera un gasto acumulativo que no existe en los motores simbólicos. Con temperatura 0,3, la misma entrada puede producir salidas ligeramente diferentes entre ejecuciones, lo que dificulta la depuración y la reproducibilidad de los resultados. Las interrogativas son la categoría más difícil para el modelo, con las dos únicas interrogativas de los 15 ejemplos \textit{few-shot} insuficientes para cubrir la variedad de inferencias de persona verbal que esta categoría requiere.
+El motor depende de la API de OpenAI, lo que implica conexión a Internet permanente y un servicio de pago que no es viable para uso offline. La latencia de red añade aproximadamente un segundo a cada generación, un tiempo perceptible en una aplicación de comunicación asistida.
+
+Aunque el coste por consulta es reducido (\$0,00018 con GPT-4o-mini), el uso continuado genera un gasto acumulativo que no existe en los motores simbólicos. Con temperatura 0,3, la misma entrada puede producir salidas ligeramente diferentes entre ejecuciones, lo que dificulta la depuración y la reproducibilidad de los resultados.
+
+Las interrogativas son la categoría más difícil para el modelo, con las dos únicas interrogativas de los 15 ejemplos \textit{few-shot} insuficientes para cubrir la variedad de inferencias de persona verbal que esta categoría requiere.
