@@ -178,33 +178,6 @@ Las tres últimas etapas aplican transformaciones de superficie. Las contraccion
 
 El formateo final capitaliza la primera letra, inserta la negación en la posición correcta (antes del verbo conjugado) y envuelve las interrogativas con los signos \textit{¿...?}.
 
-\section{Organización del código}
-\label{sec:f1-codigo}
-
-El motor se implementa en 4.355 líneas distribuidas en siete archivos, cada uno con una responsabilidad delimitada.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l r l}
-\hline
-Archivo & Líneas & Propósito \\
-\hline
-\texttt{models.py} & 355 & Modelos de datos, enumeraciones y excepciones \\
-\texttt{lexicon.py} & 1.208 & Léxico categorizado e índice invertido \\
-\texttt{parser.py} & 742 & 48 patrones sintácticos y tokenización \\
-\texttt{conjugation.py} & 482 & Motor de conjugación (24 irregulares + regulares) \\
-\texttt{postprocessor.py} & 1.158 & Pipeline de 9 etapas de postprocesamiento \\
-\texttt{generator.py} & 353 & Orquestador principal y alternativas \\
-\texttt{\_\_init\_\_.py} & 57 & API pública del módulo \\
-\hline
-\textit{Total} & \textit{4.355} & \\
-\hline
-\end{tabular}
-\caption{Estructura del código del motor de gramática formal.}
-\label{tab:f1-codigo}
-\end{table}
-
-Las decisiones de diseño más relevantes son la ausencia total de dependencias externas, el uso de dataclasses inmutables para el flujo de datos y la separación estricta entre conocimiento lingüístico (léxico), análisis (parser) y transformación (postprocesador). Esta separación permite modificar las reglas de un componente sin afectar a los demás.
 
 \section{Resultados}
 \label{sec:f1-resultados}
