@@ -1,24 +1,16 @@
-Antes de describir cada técnica de generación de lenguaje natural, conviene establecer el marco experimental que las tres comparten. Este capítulo define la arquitectura general del sistema, el conjunto de datos con el que se evalúan, las métricas que cuantifican su rendimiento y el entorno tecnológico en el que operan. De este modo, los capítulos siguientes pueden centrarse exclusivamente en las decisiones de diseño y los detalles de implementación de cada enfoque, sin repetir el contexto experimental.
+Antes de describir cada técnica de generación, conviene establecer el marco experimental que todas comparten. De este modo, los capítulos siguientes pueden centrarse exclusivamente en las decisiones de diseño de cada enfoque, sin repetir el contexto experimental.
 
 \section{Descripción general del sistema}
 \label{sec:descripcion-sistema}
 
-El sistema Dixi transforma secuencias de pictogramas ARASAAC en oraciones naturales en español. Su arquitectura sigue un diseño modular donde la entrada ---una lista ordenada de etiquetas de pictogramas--- atraviesa un motor de generación de lenguaje natural y produce como salida una oración gramaticalmente correcta que, opcionalmente, un motor de síntesis de voz convierte en audio.
+La arquitectura de Dixi sigue un diseño modular: la entrada ---una lista ordenada de etiquetas de pictogramas--- atraviesa un motor de generación de lenguaje natural que produce una oración gramaticalmente correcta, y un motor de síntesis de voz la convierte en audio.
 
-El aspecto central de este trabajo es el motor de generación. En lugar de implementar un único enfoque, se han desarrollado tres motores independientes que resuelven el mismo problema con técnicas de complejidad creciente:
-
-\begin{itemize}
-    \item La \textit{Fase 1} emplea una gramática formal extendida con restricciones de selección semánticas. Opera mediante pattern-matching sobre categorías gramaticales y reglas deterministas de inferencia contextual, sin dependencias externas de aprendizaje automático.
-    \item La \textit{Fase 2} combina reglas gramaticales con embeddings de palabras. Utiliza vectores FastText para tomar decisiones semánticas ---como la predicción de preposiciones--- que una gramática puramente simbólica no puede resolver de forma general.
-    \item La \textit{Fase 3} delega la generación lingüística a modelos de lenguaje grandes (GPT-4o y GPT-4o-mini) mediante ingeniería de prompts, prescindiendo de reglas explícitas.
-\end{itemize}
-
-Los tres motores reciben exactamente la misma entrada y producen el mismo tipo de salida, lo que permite una comparación directa. Esta progresión ---de lo simbólico a lo neuronal, de lo determinista a lo probabilístico--- no es casual: cada fase surge de las limitaciones observadas en la anterior y representa un compromiso diferente entre control, cobertura, coste y flexibilidad.
+El dominio de la aplicación está acotado: 232 pictogramas ARASAAC organizados en nueve categorías, frases cortas y un vocabulario limitado a las necesidades comunicativas cotidianas. Esta restricción abre una pregunta concreta: ¿qué técnica de generación se adapta mejor a un entorno donde la fidelidad al contenido pictográfico, la latencia y la posibilidad de funcionar sin conexión son más relevantes que la capacidad de manejar un vocabulario abierto? Para responderla, se han implementado seis motores independientes que reciben exactamente la misma entrada y producen el mismo tipo de salida. Tres son técnicas base ---gramática formal, embeddings semánticos y modelos de lenguaje--- y tres son hibridaciones que combinan las anteriores: gramática con post-edición LLM, embeddings con post-edición LLM, y un sistema de sobregeneración y ranking. La comparación directa entre los seis permite identificar qué enfoque, o combinación de enfoques, ofrece el mejor compromiso para un sistema de CAA real.
 
 \section{Conjunto de datos de evaluación}
 \label{sec:dataset}
 
-La evaluación de los tres motores se realiza sobre un corpus de 428 casos de prueba diseñado específicamente para este proyecto. Cada caso consiste en una secuencia de pictogramas de entrada y la oración de referencia esperada como salida.
+La evaluación de los seis motores se realiza sobre un corpus de 428 casos de prueba diseñado específicamente para este proyecto. Cada caso consiste en una secuencia de pictogramas de entrada y la oración de referencia esperada como salida.
 
 \subsection{Estructura y categorías}
 
