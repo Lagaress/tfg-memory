@@ -48,26 +48,48 @@ El sistema está pensado principalmente para personas con TEA que presentan difi
 \section{Glosario de términos}
 
 \begin{description}
+    \item[Alucinación] En el contexto de la inteligencia artificial, palabra o concepto que un modelo genera sin que esté justificado por la entrada. En este proyecto, una oración que incluye \textit{quiero} cuando el usuario solo seleccionó el pictograma \textit{agua} contiene una alucinación técnica, aunque la inferencia sea comunicativamente razonable.
+
     \item[ARASAAC] Centro Aragonés para la Comunicación Aumentativa y Alternativa. Ofrece pictogramas y recursos de forma gratuita bajo licencia Creative Commons. Es la referencia más utilizada en el mundo hispanohablante.
-    
+
+    \item[BERTScore] Métrica de evaluación de texto que mide la similitud semántica entre dos oraciones utilizando embeddings contextuales de un modelo BERT. A diferencia de BLEU o ROUGE, reconoce sinónimos y paráfrasis.
+
+    \item[BLEU] \textit{Bilingual Evaluation Understudy}. Métrica que mide la coincidencia de n-gramas entre una oración generada y una de referencia. BLEU-4 considera secuencias de hasta cuatro palabras.
+
+    \item[CAA] Comunicación Aumentativa y Alternativa. Término equivalente a SAAC, más frecuente en la literatura internacional (\textit{AAC} en inglés).
+
+    \item[CFG (\textit{Context-Free Grammar})] Gramática libre de contexto. Formalismo que define un lenguaje mediante reglas de producción. En este proyecto, la CFG se extiende con restricciones semánticas para generar oraciones a partir de pictogramas.
+
     \item[\textit{Embedding}] Representación de palabras o conceptos como vectores numéricos en un espacio donde elementos similares quedan cerca entre sí. Permite a los algoritmos trabajar con el significado de las palabras.
-    
+
+    \item[FastText] Modelo de embeddings de palabras desarrollado por Meta que representa cada palabra a partir de sus fragmentos de caracteres (n-gramas). Esto le permite generar vectores para palabras no vistas durante el entrenamiento, una propiedad útil para la morfología del español.
+
     \item[GLN / NLG] Generación de Lenguaje Natural (\textit{Natural Language Generation}). Subcampo del PLN enfocado en producir texto a partir de datos o representaciones estructuradas.
-    
+
     \item[Gramática formal] Conjunto de reglas que definen cómo construir oraciones válidas en un lenguaje. En este proyecto, se usa para generar frases correctas a partir de pictogramas.
-    
+
+    \item[Ingeniería de prompts] (\textit{Prompt engineering}) Técnica que consiste en diseñar las instrucciones textuales que se proporcionan a un modelo de lenguaje para guiar su comportamiento. En este proyecto, el prompt define reglas de fidelidad, formato y registro que restringen la generación al dominio de CAA.
+
+    \item[Lematización] Proceso de reducir una palabra a su forma base o lema (\textit{comer} es el lema de \textit{como}, \textit{comí}, \textit{comerá}). Se utiliza en este proyecto para verificar si un pictograma está representado en la oración generada independientemente de la forma flexiva.
+
     \item[LLM (\textit{Large Language Model})] Modelo de lenguaje de gran escala, basado en redes neuronales, capaz de generar y comprender texto natural. Ejemplos conocidos son GPT o LLaMA.
-    
+
+    \item[N-grama] Secuencia contigua de $n$ elementos (palabras o caracteres) en un texto. Las métricas de evaluación como BLEU comparan los n-gramas de la oración generada con los de la referencia para medir su similitud.
+
+    \item[Perplejidad] Métrica que cuantifica cuán probable considera un modelo de lenguaje una oración dada. Valores bajos indican texto más natural y fluido; valores altos, construcciones inusuales o agramaticales. Se utiliza como proxy de naturalidad lingüística.
+
     \item[Pictograma] Símbolo gráfico que representa un concepto, acción u objeto. Es el elemento básico de muchos sistemas de comunicación aumentativa.
-    
+
     \item[PLN] Procesamiento del Lenguaje Natural. Área de la inteligencia artificial que trabaja con la comprensión y generación de lenguaje humano por parte de máquinas.
-    
+
     \item[Realización superficial] (\textit{Surface realization}) Etapa final de la generación de lenguaje natural donde una representación abstracta se convierte en texto gramaticalmente correcto.
-    
+
+    \item[ROUGE] \textit{Recall-Oriented Understudy for Gisting Evaluation}. Métrica que mide la coincidencia entre una oración generada y una de referencia. ROUGE-L se basa en la subsecuencia común más larga, lo que la hace más tolerante con variaciones de orden que BLEU.
+
     \item[SAAC] Sistema Aumentativo y Alternativo de Comunicación. Herramientas y estrategias que facilitan la comunicación a personas con dificultades en el habla.
-    
+
     \item[TEA] Trastorno del Espectro Autista. Condición del desarrollo que afecta a la comunicación e interacción social, con un amplio rango de manifestaciones.
-    
+
     \item[TTS (\textit{Text-to-Speech})] Tecnología que convierte texto en voz sintetizada.
 \end{description}
 
