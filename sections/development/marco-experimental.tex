@@ -116,7 +116,11 @@ $$\text{EM}(p, r) = \begin{cases} 1 & \text{si } \text{lower}(\text{strip}(p)) =
 
 \subsection{BLEU}
 
-Exact Match es binaria; las siguientes métricas cuantifican grados de similitud. BLEU (\textit{Bilingual Evaluation Understudy})~\cite{papineni2002bleu}, la métrica más establecida en la literatura de generación de lenguaje natural, mide la precisión de n-gramas entre la predicción y la referencia. Se calculan dos variantes: BLEU-1 (unigramas), que captura si las palabras correctas están presentes, y BLEU-4 (hasta 4-gramas), que refleja también la fluidez y el orden. Una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto. La implementación utiliza sacreBLEU con ajuste de orden efectivo para oraciones cortas, evitando penalizar artificialmente frases de pocas palabras.
+Exact Match es binaria; las siguientes métricas cuantifican grados de similitud.
+
+BLEU (\textit{Bilingual Evaluation Understudy})~\cite{papineni2002bleu}, la métrica más establecida en la literatura de generación de lenguaje natural, mide la precisión de n-gramas entre la predicción y la referencia. Se calculan dos variantes: BLEU-1 (unigramas), que captura si las palabras correctas están presentes, y BLEU-4 (hasta 4-gramas), que refleja también la fluidez y el orden. Una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto.
+
+La implementación utiliza sacreBLEU con ajuste de orden efectivo para oraciones cortas, evitando penalizar artificialmente frases de pocas palabras.
 
 \subsection{ROUGE-L}
 
