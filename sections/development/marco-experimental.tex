@@ -237,6 +237,14 @@ Además de la calidad lingüística, se miden dos aspectos operativos relevantes
 
 \begin{itemize}
     \item \textit{Latencia}: tiempo de procesamiento por consulta, medido con temporizadores de alta resolución. En un sistema de comunicación, la latencia percibida por el usuario afecta directamente la fluidez de la interacción.
-    \item \textit{Coste}: aplicable únicamente a la Fase 3, que utiliza una API comercial de pago. Se estima a partir del número de tokens procesados por consulta y las tarifas del proveedor.
+    \item \textit{Coste}: aplicable únicamente a los motores que utilizan la API de OpenAI. Se estima a partir del número de tokens procesados por consulta y las tarifas del proveedor.
 \end{itemize}
+
+\subsection{Evaluación humana de naturalidad}
+
+Todas las métricas descritas hasta aquí son automáticas: las calcula un algoritmo sin intervención humana. Son objetivas y reproducibles, pero ninguna captura directamente lo que más importa en un sistema de CAA: si la frase suena natural a un ser humano. La perplejidad se acerca a medir naturalidad utilizando un modelo de lenguaje como proxy de lo que un hablante esperaría, pero sigue siendo una aproximación estadística. Aspectos como la adecuación pragmática, la naturalidad percibida o la preferencia subjetiva entre dos formulaciones equivalentes solo pueden evaluarse preguntando a personas.
+
+Para cubrir esta dimensión, se ha diseñado un estudio de evaluación humana mediante encuestas en las que evaluadores externos puntúan la naturalidad de las frases producidas por los distintos motores. El pipeline de evaluación genera las plantillas necesarias: ficheros CSV cegados (sin revelar qué motor generó cada frase) con una clave de desblindaje para el análisis posterior.
+
+\textit{(TODO: Completar con los resultados de la evaluación humana una vez realizada.)}
 
