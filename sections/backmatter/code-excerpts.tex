@@ -1,0 +1,179 @@
+Este anexo recoge los extractos de código más representativos del motor de gramática formal descrito en el capítulo correspondiente. Los fragmentos se presentan en el orden en que intervienen en el pipeline de generación, desde las estructuras de datos hasta la lógica de transformación. El código completo del motor comprende 4.355 líneas distribuidas en siete archivos (véase la Tabla~\ref{tab:f1-codigo}).
+
+\section{Estructuras de datos}
+
+La \texttt{dataclass} \texttt{PalabraInfo} envuelve toda la información léxica de una palabra: su categoría gramatical, subcategoría, género, número y forma base. Cada entrada del índice invertido del léxico (sección~\ref{sec:f1-lexico}) almacena una instancia de esta estructura.
+
+\begin{lstlisting}[language=Python,caption={Estructura \texttt{PalabraInfo} (\texttt{models.py}).},label={lst:palabrainfo},basicstyle=\ttfamily\small,xleftmargin=1cm]
+@dataclass
+class PalabraInfo:
+    palabra: str
+    categoria: str
+    subcategoria: str
+    genero: Optional[str] = None
+    numero: str = "singular"
+    persona: Optional[int] = None
+    forma_base: Optional[str] = None
+    es_irregular: bool = False
+    requiere_determinante: bool = False
+    determinante_preferido: Optional[str] = None
+\end{lstlisting}
+
+Los patrones sintácticos del parser (sección~\ref{sec:f1-patrones}) se definen con la \texttt{dataclass} \texttt{PatronSintactico}. Cada patrón especifica un nombre identificador, la secuencia de categorías gramaticales que debe coincidir con la entrada, el tipo de oración resultante y una prioridad numérica para resolver ambigüedades.
+
+\begin{lstlisting}[language=Python,caption={Estructura \texttt{PatronSintactico} (\texttt{parser.py}).},label={lst:patron-sintactico},basicstyle=\ttfamily\small,xleftmargin=1cm]
+@dataclass
+class PatronSintactico:
+    nombre: str
+    categorias: List[str]
+    tipo_oracion: str
+    descripcion: str = ""
+    prioridad: int = 0
+\end{lstlisting}
+
+\section{Patrones sintácticos}
+
+Los 48 patrones se instancian como una lista ordenada por prioridad. El Extracto de código~\ref{lst:patrones-ejemplo} muestra cuatro patrones representativos de distintos grupos: una oración de necesidad simple, un movimiento a un lugar, una interrogativa y una negativa. La detección consiste en comparar la secuencia de categorías de la entrada con el campo \texttt{categorias} de cada patrón, de mayor a menor prioridad.
+
+\begin{lstlisting}[language=Python,caption={Cuatro patrones sintácticos representativos (\texttt{parser.py}).},label={lst:patrones-ejemplo},basicstyle=\ttfamily\small,xleftmargin=1cm]
+PATRONES_SINTACTICOS: List[PatronSintactico] = [
+    # ...
+    PatronSintactico(
+        nombre="necesidad_simple",
+        categorias=["verbo_necesidad", "objeto"],
+        tipo_oracion="necesidad",
+        descripcion="Quiero agua",
+        prioridad=2
+    ),
+    PatronSintactico(
+        nombre="movimiento_lugar",
+        categorias=["verbo_accion", "lugar"],
+        tipo_oracion="necesidad",
+        descripcion="Ir baño (implica quiero ir)",
+        prioridad=2
+    ),
+    PatronSintactico(
+        nombre="interrogativa_estado_persona",
+        categorias=["interrogativo", "verbo_estado", "persona"],
+        tipo_oracion="interrogativa",
+        descripcion="¿Dónde está mamá?",
+        prioridad=8
+    ),
+    PatronSintactico(
+        nombre="negativa_necesidad_objeto",
+        categorias=["negacion", "verbo_necesidad", "objeto"],
+        tipo_oracion="negativa",
+        descripcion="No quiero agua",
+        prioridad=7
+    ),
+    # ... (48 patrones en total)
+]
+\end{lstlisting}
+
+\section{Restricciones de selección semánticas}
+
+El diccionario \texttt{RESTRICCIONES\_VERBOS} codifica las restricciones de selección descritas en la sección de rasgos semánticos. Para cada verbo, define qué rasgos booleanos deben cumplir sus argumentos. El postprocesador consulta este diccionario durante la etapa de validación semántica (sección~\ref{sec:f1-postprocesamiento}).
+
+\begin{lstlisting}[language=Python,caption={Restricciones de selección semánticas (\texttt{postprocessor.py}).},label={lst:restricciones-verbos},basicstyle=\ttfamily\small,xleftmargin=1cm]
+RESTRICCIONES_VERBOS: Dict[str, Dict[str, Dict[str, bool]]] = {
+    "comer": {
+        "sujeto": {"animado": True},
+        "objeto": {"comestible": True},
+    },
+    "beber": {
+        "sujeto": {"animado": True},
+        "objeto": {"bebible": True},
+    },
+    "ir": {
+        "sujeto": {"animado": True},
+        "complemento": {"lugar": True},
+    },
+    "leer": {
+        "sujeto": {"humano": True},
+        "objeto": {"legible": True},
+    },
+    "escuchar": {
+        "sujeto": {"animado": True},
+        "objeto": {"audible": True},
+    },
+    # ... (16 verbos con restricciones)
+}
+\end{lstlisting}
+
+\section{Inferencia de elementos faltantes}
+
+El fragmento central del postprocesador es el método de inferencia (sección~\ref{sec:f1-postprocesamiento}). Cuando la entrada consiste en un solo objeto o un solo lugar, el sistema inserta los elementos verbales que el usuario de CAA omite. Cada inferencia queda registrada con su tipo, valor y razón, lo que permite trazar las decisiones del sistema.
+
+\begin{lstlisting}[language=Python,caption={Inferencia de elementos faltantes (\texttt{postprocessor.py}).},label={lst:inferencia},basicstyle=\ttfamily\small,xleftmargin=1cm]
+def _inferir_elementos(self, palabras, contexto):
+    resultado = list(palabras)
+    inferencias = []
+
+    if contexto.tipo_oracion == "necesidad" and len(resultado) == 1:
+        # "baño" -> ["quiero", "ir", "baño"]
+        if self.lexicon.es_lugar(resultado[0].lower()):
+            resultado = ["quiero", "ir"] + resultado
+            inferencias.append(InferenciaAplicada(
+                tipo="verbo_necesidad",
+                valor_inferido="quiero",
+                posicion=0,
+                razon="Lugar solo implica quiero ir"
+            ))
+            inferencias.append(InferenciaAplicada(
+                tipo="verbo_movimiento",
+                valor_inferido="ir",
+                posicion=1,
+                razon="Lugar solo implica movimiento"
+            ))
+        # "agua" -> ["quiero", "agua"]
+        elif self.lexicon.es_objeto(resultado[0].lower()):
+            resultado = ["quiero"] + resultado
+            inferencias.append(InferenciaAplicada(
+                tipo="verbo_necesidad",
+                valor_inferido="quiero",
+                posicion=0,
+                razon="Objeto solo implica necesidad"
+            ))
+
+    return resultado, inferencias
+\end{lstlisting}
+
+\section{Motor de conjugación}
+
+El conjugador mantiene tablas completas para los 24 verbos irregulares y aplica reglas morfológicas para los regulares (sección~\ref{sec:f1-postprocesamiento}). El Extracto de código~\ref{lst:conjugacion} muestra tres entradas representativas de la tabla de irregulares y la lógica de conjugación regular, que extrae la raíz del infinitivo y concatena el sufijo correspondiente a la terminación (\textit{-ar}, \textit{-er}, \textit{-ir}).
+
+\begin{lstlisting}[language=Python,caption={Tabla de irregulares y conjugación regular (\texttt{conjugation.py}).},label={lst:conjugacion},basicstyle=\ttfamily\small,xleftmargin=1cm]
+self.irregulares = {
+    "ir": {
+        "1s": "voy", "2s": "vas", "3s": "va",
+        "1p": "vamos", "2p": "vais", "3p": "van"
+    },
+    "querer": {
+        "1s": "quiero", "2s": "quieres", "3s": "quiere",
+        "1p": "queremos", "2p": "queréis", "3p": "quieren"
+    },
+    "dormir": {  # cambio vocalico o -> ue
+        "1s": "duermo", "2s": "duermes", "3s": "duerme",
+        "1p": "dormimos", "2p": "dormís", "3p": "duermen"
+    },
+    # ... (24 verbos irregulares)
+}
+
+self.terminaciones = {
+    "ar": {"1s": "o", "2s": "as", "3s": "a",
+           "1p": "amos", "2p": "ais", "3p": "an"},
+    "er": {"1s": "o", "2s": "es", "3s": "e",
+           "1p": "emos", "2p": "eis", "3p": "en"},
+    "ir": {"1s": "o", "2s": "es", "3s": "e",
+           "1p": "imos", "2p": "is", "3p": "en"},
+}
+
+def _conjugar_regular(self, infinitivo, clave):
+    for terminacion in ["ar", "er", "ir"]:
+        if infinitivo.endswith(terminacion):
+            raiz = infinitivo[:-2]
+            sufijo = self.terminaciones[terminacion].get(clave)
+            if sufijo:
+                return raiz + sufijo
+    return None
+\end{lstlisting}
