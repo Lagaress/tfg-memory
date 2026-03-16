@@ -150,7 +150,7 @@ Por ejemplo, dado el pictograma \textit{comer} (lema: \textit{comer}) y la oraci
 
 \subsection{BERTScore}
 
-BERTScore evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o n-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que \textit{deseo} y \textit{quiero} expresan significados cercanos aunque no compartan tokens.
+BERTScore~\cite{zhang2020bertscore} evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o n-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que \textit{deseo} y \textit{quiero} expresan significados cercanos aunque no compartan tokens.
 
 El cálculo alinea cada token de la predicción con su token más similar en la referencia mediante similitud coseno en el espacio de embeddings, y obtiene precisión, recall y $F_1$. Se utiliza un modelo BERT preentrenado en español en lugar del modelo por defecto en inglés, lo que mejora la captura de matices semánticos propios del castellano. Esta métrica se aplica a los seis motores de generación, siendo especialmente informativa cuando los motores producen paráfrasis válidas que las métricas de coincidencia exacta penalizarían.
 
