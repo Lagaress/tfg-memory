@@ -131,7 +131,7 @@ Todos los componentes del módulo siguen el patrón de inicialización perezosa:
 
 La primera hibridación conecta la gramática formal (sección~\ref{sec:f1-postprocesamiento}) con el motor de LLMs en un pipeline secuencial de dos pasos. Los pictogramas de entrada se procesan primero con la CFG, que intenta generar una frase estructurada según sus 48 patrones. Si la gramática tiene éxito, la frase resultante se envía al post-editor compartido para su refinamiento.
 
-Si falla (porque la secuencia contiene palabras fuera del léxico o no coincide con ningún patrón), se activa el fallback: el post-editor genera la frase desde cero usando el prompt completo del motor de LLMs.
+Si falla (porque la secuencia contiene palabras fuera del léxico o no coincide con ningún patrón), se activa el fallback: el post-editor genera la frase desde cero usando el prompt completo del motor de LLMs (sección~\ref{sec:f3-prompt}).
 
 El campo \texttt{method} del resultado discrimina entre ambos caminos. Cuando la gramática funciona, el método es \texttt{grammar\_post\_edit}; cuando se activa el fallback, es \texttt{fallback\_llm\_direct}. Esta distinción permite desagregar las métricas por ruta de ejecución.
 
@@ -146,7 +146,7 @@ El propósito experimental de esta hibridación es servir como línea base para 
 
 La segunda hibridación replica la estructura de H1 pero sustituye la gramática pura por el motor de embeddings (sección~\ref{sec:f2-pipeline}), que combina CFG con embeddings semánticos, como fuente upstream.
 
-Los pictogramas se procesan con \texttt{HybridGenerator}, que ejecuta el pipeline completo descrito en el capítulo correspondiente: generación estructural vía CFG, ranking semántico de candidatos, refinamiento de preposiciones y fallback por concatenación.
+Los pictogramas se procesan con \texttt{HybridGenerator}, que ejecuta el pipeline completo descrito en la sección~\ref{sec:f2-pipeline}: generación estructural vía CFG, ranking semántico de candidatos, refinamiento de preposiciones y fallback por concatenación.
 
 Si el motor produce una frase válida (es decir, con un método distinto de \texttt{fallback}), la frase se envía al post-editor compartido. Si el motor cae a su propio fallback, la Hibridación 2 considera que la frase no es fiable y activa el mismo mecanismo de generación directa que H1.
 
@@ -216,7 +216,7 @@ Varias decisiones de diseño merecen una justificación explícita, ya que impli
 
 La decisión de compartir el prompt de post-edición entre H1 y H2 prioriza la validez del experimento comparativo sobre la optimización individual de cada pipeline. Un prompt específico para H1 podría dar instrucciones más detalladas sobre preposiciones, donde la CFG es más débil, y uno para H2 podría enfocarse exclusivamente en naturalidad, donde los embeddings ya resolvieron las preposiciones. Sin embargo, cualquier diferencia en los prompts introduciría una variable confundente que impediría atribuir las diferencias de rendimiento a la contribución de los embeddings.
 
-La elección de GPT-4o como modelo para la post-edición mantiene consistencia con la evaluación del motor de LLMs. Para la post-edición el modelo recibe una frase ya estructurada y solo necesita refinamientos menores. Se priorizó la consistencia sobre el ahorro de coste, que para un dataset de 428 casos es marginal.
+La elección de GPT-4o~\cite{openai2024gpt4o} como modelo para la post-edición mantiene consistencia con la evaluación del motor de LLMs (sección~\ref{sec:f3-planteamiento}). Para la post-edición el modelo recibe una frase ya estructurada y solo necesita refinamientos menores. Se priorizó la consistencia sobre el ahorro de coste, que para un dataset de 428 casos es marginal.
 
 El umbral de fidelidad de 1,0 en la Hibridación 3 refleja la prioridad absoluta de la fidelidad en un sistema CAA. Un umbral relajado de 0,8 permitiría frases que omiten un pictograma de cada cinco, lo que en comunicación aumentativa puede cambiar completamente el significado. El fallback (usar todas las candidatas si ninguna alcanza cobertura perfecta) mitiga el riesgo de que el umbral estricto produzca un error cuando ningún motor logra representar todos los pictogramas.
 
