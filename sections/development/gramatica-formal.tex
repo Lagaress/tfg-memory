@@ -102,7 +102,7 @@ Una gramática formal garantiza que una oración esté bien formada sintácticam
 
 Los ocho rasgos no son arbitrarios sino los necesarios para validar las combinaciones verbo-argumento del vocabulario: \texttt{comestible} y \texttt{bebible} permiten verificar \textit{comer} y \textit{beber}, \texttt{animado} y \texttt{humano} validan los sujetos de verbos de acción, \texttt{lugar} restringe los complementos de verbos de movimiento, \texttt{legible} y \texttt{audible} verifican \textit{leer} y \textit{escuchar}, y \texttt{peligroso} actúa como mecanismo de seguridad para usuarios vulnerables. La asignación es automática a partir de los conjuntos de vocabulario: todos los elementos de \texttt{objetos\_comida} reciben \texttt{comestible=True}, todos los de \texttt{objetos\_bebida} reciben \texttt{bebible=True}, y así sucesivamente.
 
-Estos rasgos alimentan dos mecanismos del pipeline (véase el Extracto de código~\ref{lst:restricciones-verbos} del Anexo~\ref{anx:codigo}). Las restricciones de selección verifican la compatibilidad semántica entre verbos y argumentos: \textit{comer} exige un objeto comestible y un sujeto animado. Las restricciones de seguridad generan advertencias críticas cuando se detectan combinaciones potencialmente peligrosas, como \textit{beber lejía}, donde el rasgo \texttt{peligroso=True} activa una alerta que reduce la confianza de la salida a 0,5.
+Estos rasgos alimentan dos mecanismos del pipeline (véase el Extracto de código~\ref{lst:restricciones-verbos} del Anexo~\ref{anx:codigo}). Las restricciones de selección verifican la compatibilidad semántica entre verbos y argumentos: \textit{comer} exige un objeto comestible y un sujeto animado. Las restricciones de seguridad generan advertencias críticas cuando se detectan combinaciones potencialmente peligrosas, como \textit{beber lejía}, donde el rasgo \texttt{peligroso=True} activa una alerta que reduce la confianza de la salida a 0,5 (véase Extracto de código~\ref{lst:restricciones-seguridad} del Anexo~\ref{anx:codigo}).
 
 \subsection{Sistema de género}
 
@@ -162,7 +162,7 @@ La tercera etapa verifica la compatibilidad entre verbos y sus argumentos median
 
 \subsection{Conjugación verbal}
 
-La cuarta etapa conjuga el verbo principal según la persona y número del sujeto. El motor de conjugación mantiene tablas completas para 24 verbos irregulares (144 formas conjugadas) y aplica reglas morfológicas regulares (sufijos \textit{-ar}, \textit{-er}, \textit{-ir}) para el resto. Solo se conjuga el verbo en posición principal; los verbos en posición de complemento se mantienen en infinitivo (\textit{quiero \textit{comer}}, no \textit{quiero como}).
+La cuarta etapa conjuga el verbo principal según la persona y número del sujeto (véase Extracto de código~\ref{lst:conjugacion} del Anexo~\ref{anx:codigo}). El motor de conjugación mantiene tablas completas para 24 verbos irregulares (144 formas conjugadas) y aplica reglas morfológicas regulares (sufijos \textit{-ar}, \textit{-er}, \textit{-ir}) para el resto. Solo se conjuga el verbo en posición principal; los verbos en posición de complemento se mantienen en infinitivo (\textit{quiero \textit{comer}}, no \textit{quiero como}).
 
 \subsection{Inserción de determinantes}
 
@@ -170,11 +170,11 @@ La quinta etapa decide qué determinante acompaña a cada sustantivo, una decisi
 
 \subsection{Inserción de preposiciones}
 
-La sexta etapa selecciona la preposición correcta para complementos de lugar, utilizando tres diccionarios: preposiciones por verbo de movimiento (9 verbos: \textit{ir} $\rightarrow$ \textit{a}, \textit{venir} $\rightarrow$ \textit{de}), preposiciones por lugar con verbos de movimiento (35 lugares: \textit{baño} $\rightarrow$ \textit{al}, \textit{escuela} $\rightarrow$ \textit{a la}) y preposiciones de ubicación para verbos de estado (19 lugares: \textit{colegio} $\rightarrow$ \textit{en el}). La lógica busca hacia atrás desde el lugar hasta encontrar el verbo que lo rige, y selecciona el diccionario apropiado según el tipo de verbo.
+La sexta etapa selecciona la preposición correcta para complementos de lugar (véase Extracto de código~\ref{lst:preposiciones} del Anexo~\ref{anx:codigo}), utilizando tres diccionarios: preposiciones por verbo de movimiento (9 verbos: \textit{ir} $\rightarrow$ \textit{a}, \textit{venir} $\rightarrow$ \textit{de}), preposiciones por lugar con verbos de movimiento (35 lugares: \textit{baño} $\rightarrow$ \textit{al}, \textit{escuela} $\rightarrow$ \textit{a la}) y preposiciones de ubicación para verbos de estado (19 lugares: \textit{colegio} $\rightarrow$ \textit{en el}). La lógica busca hacia atrás desde el lugar hasta encontrar el verbo que lo rige, y selecciona el diccionario apropiado según el tipo de verbo.
 
 \subsection{Contracciones, concordancia y formateo}
 
-Las tres últimas etapas aplican transformaciones de superficie. Las contracciones fusionan \textit{a el} en \textit{al} y \textit{de el} en \textit{del}. La concordancia de género ajusta los adjetivos al género del sustantivo que modifican: ante un sustantivo femenino, un adjetivo terminado en \textit{-o} muta a \textit{-a} (\textit{cansado} $\rightarrow$ \textit{cansada}), mientras que los adjetivos invariables (\textit{feliz}, \textit{triste}, \textit{azul}) permanecen inalterados.
+Las tres últimas etapas aplican transformaciones de superficie. Las contracciones fusionan \textit{a el} en \textit{al} y \textit{de el} en \textit{del}. La concordancia de género (véase Extracto de código~\ref{lst:concordancia} del Anexo~\ref{anx:codigo}) ajusta los adjetivos al género del sustantivo que modifican: ante un sustantivo femenino, un adjetivo terminado en \textit{-o} muta a \textit{-a} (\textit{cansado} $\rightarrow$ \textit{cansada}), mientras que los adjetivos invariables (\textit{feliz}, \textit{triste}, \textit{azul}) permanecen inalterados.
 
 El formateo final capitaliza la primera letra, inserta la negación en la posición correcta (antes del verbo conjugado) y envuelve las interrogativas con los signos \textit{¿...?}.
 
