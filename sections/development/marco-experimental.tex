@@ -126,17 +126,15 @@ ROUGE-L resulta especialmente útil en este contexto porque captura la estructur
 
 \subsection{METEOR}
 
-METEOR (\textit{Metric for Evaluation of Translation with Explicit ORdering})~\cite{banerjee2005meteor} calcula la media armónica de la precisión de unigramas y el recall, aplicando después una penalización por fragmentación que castiga las coincidencias dispersas frente a las contiguas. A diferencia de BLEU, que solo mide precisión, METEOR incorpora el recall directamente en su formulación, lo que la hace más sensible a omisiones.
+METEOR (\textit{Metric for Evaluation of Translation with Explicit ORdering})~\cite{banerjee2005meteor} complementa a BLEU incorporando el recall directamente en su formulación, lo que la hace sensible a omisiones que BLEU no detecta. Calcula la media armónica de la precisión y el recall de unigramas, y aplica una penalización por fragmentación que castiga las coincidencias dispersas frente a las contiguas:
 
 $$\text{METEOR} = F_\text{mean} \cdot (1 - \text{penalty})$$
 
-donde $F_\text{mean}$ es la media armónica ponderada de precisión y recall de unigramas, y la penalización crece con el número de fragmentos no contiguos en la alineación. La implementación utiliza la librería NLTK con tokenización por espacios, apropiada para el español donde los tokens están bien delimitados por espacios en blanco.
-
-METEOR resulta complementaria a BLEU porque captura tanto la presencia de las palabras correctas como su contigüidad en la oración generada. Su valor ligeramente inferior a 1,0 incluso en coincidencias exactas (típicamente $\sim$0,97) se debe al mecanismo de penalización por fragmentación, que no otorga un score perfecto incluso cuando todos los unigramas coinciden.
+donde $F_\text{mean}$ es la media armónica ponderada y la penalización crece con el número de fragmentos no contiguos en la alineación. METEOR captura tanto la presencia de las palabras correctas como su contigüidad en la oración generada.
 
 \subsection{chrF++}
 
-chrF++ evalúa la similitud entre predicción y referencia combinando n-gramas de caracteres con bigramas de palabras. Los n-gramas de caracteres capturan coincidencias parciales a nivel morfológico ---por ejemplo, reconocen la similitud entre \textit{quiero} y \textit{quiere} aunque difieran en su terminación---, mientras que los bigramas de palabras incorporan información sobre el orden.
+chrF++~\cite{popovic2017chrf} evalúa la similitud entre predicción y referencia combinando n-gramas de caracteres con bigramas de palabras. Los n-gramas de caracteres capturan coincidencias parciales a nivel morfológico ---por ejemplo, reconocen la similitud entre \textit{quiero} y \textit{quiere} aunque difieran en su terminación---, mientras que los bigramas de palabras incorporan información sobre el orden.
 
 $$\text{chrF++} = (1 + \beta^2) \cdot \frac{\text{chrP} \cdot \text{chrR}}{\beta^2 \cdot \text{chrP} + \text{chrR}}$$
 
