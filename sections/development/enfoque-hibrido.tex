@@ -16,7 +16,9 @@ Antes de llegar a este diseño se exploró y descartó un enfoque de recuperaci�
 \section{Modelo de embeddings}
 \label{sec:f2-embeddings}
 
-El sistema utiliza el modelo preentrenado FastText~\cite{bojanowski2017fasttext} \texttt{cc.es.300.bin}, entrenado sobre Common Crawl en español. Cada palabra se representa como un vector de 300 dimensiones, y la similitud entre palabras se mide mediante similitud coseno. Se optó por utilizar un modelo preentrenado en lugar de entrenar embeddings propios porque el volumen de datos del proyecto es insuficiente para producir representaciones de calidad, y hacerlo contaminaría la evaluación de la técnica con la baja calidad del recurso base.
+El sistema utiliza el modelo preentrenado FastText~\cite{bojanowski2017fasttext} \texttt{cc.es.300.bin}, entrenado sobre Common Crawl en español. Cada palabra se representa como un vector de 300 dimensiones, y la similitud entre palabras se mide mediante similitud coseno.
+
+Se optó por utilizar un modelo preentrenado en lugar de entrenar embeddings propios porque el volumen de datos del proyecto es insuficiente para producir representaciones de calidad, y hacerlo contaminaría la evaluación de la técnica con la baja calidad del recurso base.
 
 La elección de FastText frente a alternativas como Word2Vec~\cite{mikolov2013word2vec}, GloVe o BERT responde a una ventaja determinante para el español: el manejo nativo de palabras fuera de vocabulario (\textit{out-of-vocabulary}, OOV). FastText representa cada palabra como la suma de los vectores de sus n-gramas de caracteres, lo que permite generar embeddings razonables para formas morfológicas no vistas durante el entrenamiento (conjugaciones, diminutivos, formas de género) sin necesidad de un vocabulario exhaustivo.
 
@@ -27,7 +29,9 @@ Para representar una secuencia de pictogramas como un único vector, el sistema 
 \section{Léxico}
 \label{sec:f2-lexico}
 
-El léxico de este motor contiene 355 entradas exportadas desde el motor de gramática formal mediante un script de conversión. Las 355 entradas son el resultado de filtrar las 646 del léxico original a formas base: los verbos se reducen a infinitivos (las conjugaciones las sigue manejando la CFG), los adjetivos fusionan pares de género (\textit{bonito}/\textit{bonita} se unifican en una sola entrada) y los pronombres eliminan duplicados de tilde. Al sistema de embeddings le interesa la similitud semántica entre conceptos, no entre formas flexionadas de un mismo concepto.
+El léxico de este motor contiene 355 entradas exportadas desde el motor de gramática formal mediante un script de conversión. Las 355 entradas son el resultado de filtrar las 646 del léxico original a formas base: los verbos se reducen a infinitivos (las conjugaciones las sigue manejando la CFG), los adjetivos fusionan pares de género (\textit{bonito}/\textit{bonita} se unifican en una sola entrada) y los pronombres eliminan duplicados de tilde.
+
+Al sistema de embeddings le interesa la similitud semántica entre conceptos, no entre formas flexionadas de un mismo concepto.
 
 Cada entrada se almacena como un objeto JSON con campos que varían según la categoría: los verbos incluyen conjugaciones completas por pronombre, los lugares incluyen preposiciones de movimiento y ubicación, los adjetivos incluyen formas de género, y los objetos incluyen rasgos como \texttt{uncountable} y \texttt{definite\_article}.
 
@@ -40,7 +44,9 @@ El sistema procesa cada secuencia de pictogramas a través de un pipeline de tre
 
 \subsection{Generación estructural vía CFG}
 
-El módulo \texttt{cfg\_bridge.py} encapsula la comunicación con el motor de gramática formal. Durante la inicialización, importa la clase \texttt{SentenceGenerator} añadiendo su ruta al \texttt{sys.path}. Para cada secuencia de pictogramas, el bridge invoca \texttt{SentenceGenerator.generate()}, que ejecuta el pipeline completo descrito en la sección~\ref{sec:f1-postprocesamiento}. Cada candidato se convierte en un diccionario plano con los campos \texttt{sentence} (la frase generada), \texttt{tipo\_oracion}, \texttt{confianza}, \texttt{patron} e \texttt{inferencias}.
+El módulo \texttt{cfg\_bridge.py} encapsula la comunicación con el motor de gramática formal. Durante la inicialización, importa la clase \texttt{SentenceGenerator} añadiendo su ruta al \texttt{sys.path}.
+
+Para cada secuencia de pictogramas, el bridge invoca \texttt{SentenceGenerator.generate()}, que ejecuta el pipeline completo descrito en la sección~\ref{sec:f1-postprocesamiento}. Cada candidato se convierte en un diccionario plano con los campos \texttt{sentence} (la frase generada), \texttt{tipo\_oracion}, \texttt{confianza}, \texttt{patron} e \texttt{inferencias}.
 
 Si la CFG no reconoce la secuencia (por ejemplo, ante una palabra desconocida o una estructura fuera de los 48 patrones), el bridge devuelve una lista vacía y el orquestador gestiona el fallback.
 
@@ -62,9 +68,11 @@ Esta información se reporta como metadato en el resultado pero no bloquea la ge
 
 \subsection{Orquestación}
 
-El módulo \texttt{hybrid\_generator.py} coordina el pipeline completo. Su método \texttt{generate()} sigue una secuencia fija: invoca el bridge para obtener candidatos de la CFG, si hay múltiples candidatos los ordena con el scorer, selecciona el mejor, intenta refinar sus preposiciones con embeddings, calcula los scores de preferencia seleccional y devuelve la frase junto con metadatos detallados (patrón CFG utilizado, scores individuales y combinados, alternativas evaluadas, latencia y advertencias semánticas).
+El módulo \texttt{hybrid\_generator.py} coordina el pipeline completo. Su método \texttt{generate()} sigue una secuencia fija: invoca el bridge para obtener candidatos de la CFG, si hay múltiples candidatos los ordena con el scorer, selecciona el mejor, intenta refinar sus preposiciones con embeddings y calcula los scores de preferencia seleccional.
 
-Si la CFG no genera ningún candidato, el orquestador aplica un fallback que concatena las palabras de entrada capitalizando la primera, marcando el método como \texttt{fallback}. Este mecanismo garantiza que toda entrada produce alguna salida, aunque sea de baja calidad. La diferencia de criterio respecto al motor de gramática es deliberada: en un contexto de CAA, que el usuario se quede sin respuesta es un problema de accesibilidad, y una concatenación como \textit{Ir baño} se entiende aunque no sea gramaticalmente perfecta.
+Si la CFG no genera ningún candidato, el orquestador aplica un fallback que concatena las palabras de entrada capitalizando la primera, marcando el método como \texttt{fallback}. Este mecanismo garantiza que toda entrada produce alguna salida, aunque sea de baja calidad.
+
+La diferencia de criterio respecto al motor de gramática es deliberada: en un contexto de CAA, que el usuario se quede sin respuesta es un problema de accesibilidad, y una concatenación como \textit{Ir baño} se entiende aunque no sea gramaticalmente perfecta.
 
 \section{Refinamiento de preposiciones}
 \label{sec:f2-preposiciones}
@@ -77,7 +85,9 @@ Cuando el sustantivo es un lugar con preposiciones codificadas en el léxico, la
 
 \subsection{Nivel 2: prototipos vectoriales}
 
-Si no existe regla de lugar, el scorer recurre a prototipos vectoriales construidos offline a partir del corpus SBWCE~\cite{cardellino2019sbwce} (\textit{Spanish Billion Word Corpus and Embeddings}). Para cada preposición, el prototipo es la media de los vectores de contexto (suma de embedding del verbo y del sustantivo) extraídos de las tripletas \textit{(palabra\_antes, preposición, palabra\_después)} del corpus:
+Si no existe regla de lugar, el scorer recurre a prototipos vectoriales construidos offline a partir del corpus SBWCE~\cite{cardellino2019sbwce} (\textit{Spanish Billion Word Corpus and Embeddings}).
+
+Para cada preposición, el prototipo es la media de los vectores de contexto (suma de embedding del verbo y del sustantivo) extraídos de las tripletas \textit{(palabra\_antes, preposición, palabra\_después)} del corpus:
 
 $$\vec{p}_k = \frac{1}{|C_k|} \sum_{(w_a, w_d) \in C_k} (\vec{w}_a + \vec{w}_d)$$
 
@@ -94,4 +104,6 @@ Este diseño de tres niveles ejemplifica la filosofía híbrida del sistema: las
 \section{Limitaciones}
 \label{sec:f2-limitaciones}
 
-Los pesos del scoring (0,6/0,4 entre CFG y embeddings, 0,6/0,4 entre preferencia seleccional y similitud oracional) y los umbrales de confianza (0,10 para preferencia seleccional, 0,15 para prototipos, 0,3 para refinamiento de preposiciones) se fijaron manualmente. No se realizó un proceso de optimización automática, y su ajuste empírico queda como posible mejora futura. La implementación de SIF~\cite{arora2017simple} incluye solo la ponderación por frecuencia inversa, sin la corrección PCA (eliminación del primer componente principal) del artículo original; para frases cortas de CAA el impacto es menor. Cuando la CFG no reconoce la entrada, el fallback se limita a concatenar los pictogramas sin procesamiento lingüístico. La calidad de las oraciones depende directamente de la cobertura de la gramática formal: patrones no contemplados activan este fallback. El sistema tampoco aprende de correcciones del usuario ni se adapta con el uso.
+Los pesos del scoring (0,6/0,4 entre CFG y embeddings, 0,6/0,4 entre preferencia seleccional y similitud oracional) y los umbrales de confianza (0,10 para preferencia seleccional, 0,15 para prototipos, 0,3 para refinamiento de preposiciones) se fijaron manualmente. No se realizó un proceso de optimización automática, y su ajuste empírico queda como posible mejora futura.
+
+La implementación de SIF~\cite{arora2017simple} incluye solo la ponderación por frecuencia inversa, sin la corrección PCA (eliminación del primer componente principal) del artículo original; para frases cortas de CAA el impacto es menor. Cuando la CFG no reconoce la entrada, el fallback se limita a concatenar los pictogramas sin procesamiento lingüístico. La calidad de las oraciones depende directamente de la cobertura de la gramática formal: patrones no contemplados activan este fallback. El sistema tampoco aprende de correcciones del usuario ni se adapta con el uso.
