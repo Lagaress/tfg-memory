@@ -110,9 +110,7 @@ $$\text{EM}(p, r) = \begin{cases} 1 & \text{si } \text{lower}(\text{strip}(p)) =
 
 \subsection{BLEU}
 
-BLEU (\textit{Bilingual Evaluation Understudy}) mide la precisión de n-gramas entre la predicción y la referencia. Se calculan BLEU-1 (unigramas) y BLEU-4 (hasta 4-gramas) mediante sacreBLEU con el parámetro \texttt{effective\_order=True}, que ajusta el orden efectivo de n-gramas para oraciones cortas: en lugar de aplicar un suavizado artificial, calcula la media geométrica solo sobre los órdenes de n-gramas que existen en la oración. Así, una oración de tres palabras se evalúa con BLEU-3 efectivo en lugar de recibir un cero en 4-gramas que penalizaría artificialmente el resultado.
-
-BLEU-1 captura la adecuación léxica ---si las palabras correctas están presentes---, mientras que BLEU-4, al considerar secuencias más largas, refleja también la fluidez y el orden de las palabras. Ambas métricas se complementan: una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto.
+BLEU (\textit{Bilingual Evaluation Understudy})~\cite{papineni2002bleu} mide la precisión de n-gramas entre la predicción y la referencia. Se calculan dos variantes: BLEU-1 (unigramas), que captura si las palabras correctas están presentes, y BLEU-4 (hasta 4-gramas), que refleja también la fluidez y el orden. Una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto. La implementación utiliza sacreBLEU con ajuste de orden efectivo para oraciones cortas, evitando penalizar artificialmente frases de pocas palabras.
 
 \subsection{ROUGE-L}
 
