@@ -148,7 +148,7 @@ chrF++~\cite{popovic2017chrf} evalúa la similitud entre predicción y referenci
 
 $$\text{chrF++} = (1 + \beta^2) \cdot \frac{\text{chrP} \cdot \text{chrR}}{\beta^2 \cdot \text{chrP} + \text{chrR}}$$
 
-donde chrP y chrR son la precisión y recall calculadas sobre n-gramas de caracteres y bigramas de palabras conjuntamente, con $\beta = 2$ por defecto. Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente ---como la diferencia entre \textit{come} y \textit{comer}--- representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
+Donde chrP y chrR son la precisión y recall calculadas sobre n-gramas de caracteres y bigramas de palabras conjuntamente, con $\beta = 2$ por defecto. Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente ---como la diferencia entre \textit{come} y \textit{comer}--- representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
 
 \subsection{Cobertura de pictogramas}
 
