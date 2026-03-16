@@ -102,7 +102,7 @@ La evaluación emplea métricas organizadas en cuatro categorías:
 
 \subsection{Exact Match}
 
-La métrica más estricta: compara la predicción con la referencia carácter a carácter, tras normalizar a minúsculas y eliminar espacios sobrantes. Devuelve 1 si la oración generada es idéntica a la referencia y 0 en cualquier otro caso.
+En un sistema de CAA con vocabulario acotado y frases cortas, reproducir exactamente la oración esperada es un objetivo alcanzable y verificable. Exact Match es la métrica más estricta: compara la predicción con la referencia carácter a carácter, tras normalizar a minúsculas y eliminar espacios sobrantes. Devuelve 1 si la oración generada es idéntica a la referencia y 0 en cualquier otro caso.
 
 Su valor reside en que una coincidencia exacta garantiza corrección completa, pero su limitación es que penaliza por igual una variación menor (un artículo de más) y una oración completamente incorrecta.
 
@@ -110,7 +110,7 @@ $$\text{EM}(p, r) = \begin{cases} 1 & \text{si } \text{lower}(\text{strip}(p)) =
 
 \subsection{BLEU}
 
-BLEU (\textit{Bilingual Evaluation Understudy})~\cite{papineni2002bleu} mide la precisión de n-gramas entre la predicción y la referencia. Se calculan dos variantes: BLEU-1 (unigramas), que captura si las palabras correctas están presentes, y BLEU-4 (hasta 4-gramas), que refleja también la fluidez y el orden. Una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto. La implementación utiliza sacreBLEU con ajuste de orden efectivo para oraciones cortas, evitando penalizar artificialmente frases de pocas palabras.
+Exact Match es binaria; las siguientes métricas cuantifican grados de similitud. BLEU (\textit{Bilingual Evaluation Understudy})~\cite{papineni2002bleu}, la métrica más establecida en la literatura de generación de lenguaje natural, mide la precisión de n-gramas entre la predicción y la referencia. Se calculan dos variantes: BLEU-1 (unigramas), que captura si las palabras correctas están presentes, y BLEU-4 (hasta 4-gramas), que refleja también la fluidez y el orden. Una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto. La implementación utiliza sacreBLEU con ajuste de orden efectivo para oraciones cortas, evitando penalizar artificialmente frases de pocas palabras.
 
 \subsection{ROUGE-L}
 
@@ -142,7 +142,7 @@ donde chrP y chrR son la precisión y recall calculadas sobre n-gramas de caract
 
 \subsection{Cobertura de pictogramas}
 
-La cobertura mide la fracción de pictogramas de entrada que se encuentran representados en la oración generada. Para determinar si un pictograma está cubierto, se comparan sus lemas ---obtenidos mediante el modelo de lematización de spaCy para español--- con los lemas de las palabras de la oración de salida. Si existe al menos un lema en común, el pictograma se considera cubierto.
+Las métricas anteriores comparan contra una referencia textual, pero en CAA existe una pregunta más directa: ¿se han preservado los pictogramas que el usuario seleccionó? La cobertura mide la fracción de pictogramas de entrada que se encuentran representados en la oración generada. Para determinar si un pictograma está cubierto, se comparan sus lemas ---obtenidos mediante el modelo de lematización de spaCy para español--- con los lemas de las palabras de la oración de salida. Si existe al menos un lema en común, el pictograma se considera cubierto.
 
 $$\text{Cobertura} = \frac{|\text{pictogramas cubiertos}|}{|\text{pictogramas de entrada}|}$$
 
@@ -195,7 +195,7 @@ La diferencia entre ambas métricas cuantifica el peso de las inferencias pragm�
 
 \subsection{Perplejidad y pseudo-perplejidad}
 
-La perplejidad y la pseudo-perplejidad son métricas sin referencia que evalúan la naturalidad del texto generado sin necesidad de compararlo contra una oración gold standard. Ambas miden cuán probable considera un modelo de lenguaje preentrenado la oración generada: valores menores indican texto más natural y fluido.
+Las métricas anteriores requieren una oración de referencia o los pictogramas de entrada. La perplejidad y la pseudo-perplejidad operan sin ninguna de las dos: evalúan la naturalidad del texto generado midiendo cuán probable lo considera un modelo de lenguaje preentrenado. Ambas miden cuán probable considera un modelo de lenguaje preentrenado la oración generada: valores menores indican texto más natural y fluido.
 
 La perplejidad se calcula con GPT-2 Spanish~\cite{deepesp2019gpt2spanish}, un modelo autoregresivo entrenado sobre 11,5 GB de texto en español que estima la probabilidad de cada palabra condicionada a las anteriores:
 
