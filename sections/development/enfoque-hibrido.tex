@@ -116,30 +116,3 @@ Módulo & Líneas & Propósito \\
 \end{table}
 
 Las dependencias fluyen de arriba hacia abajo: \texttt{config.py} proporciona constantes globales (incluyendo la ruta al proyecto de Fase 1), \texttt{embedding\_loader.py} encapsula el acceso a FastText, \texttt{cfg\_bridge.py} importa \texttt{SentenceGenerator} y genera candidatos estructurales, \texttt{semantic\_scorer.py} concentra todas las decisiones basadas en embeddings, y \texttt{hybrid\_generator.py} orquesta el pipeline completo. La separación entre generación estructural (delegada a la CFG) y refinamiento semántico (embeddings) permite evolucionar cada componente de forma independiente: mejorar la gramática beneficia automáticamente al sistema híbrido, y ajustar los umbrales de los embeddings no altera la corrección gramatical de las frases.
-
-\section{Resultados}
-\label{sec:f2-resultados}
-
-La evaluación sobre el corpus de 428 casos arroja los resultados que muestra la Tabla~\ref{tab:f2-resultados}.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l r}
-\hline
-Métrica & Valor \\
-\hline
-Cobertura (éxito de generación) & 100\% (428 de 428) \\
-Exact Match & 99,53\% \\
-BLEU-1 & 0,9984 \\
-BLEU-4 & 0,9970 \\
-ROUGE-L $F_1$ & 0,9989 \\
-Latencia media & $<$1 ms (sin carga de modelo) \\
-\hline
-\end{tabular}
-\caption{Resultados del motor híbrido con embeddings.}
-\label{tab:f2-resultados}
-\end{table}
-
-El resultado más significativo es la cobertura del 100\%: todas las entradas producen una salida, frente al 88,46\% del corpus original de la Fase 1. Este salto se debe al mecanismo de fallback del orquestador, que garantiza una respuesta incluso cuando la CFG no reconoce la secuencia de entrada. El Exact Match del 99,53\% refleja que la práctica totalidad de las salidas coincide con la referencia; los escasos errores se concentran en casos donde el fallback por concatenación introduce variaciones respecto a la frase esperada.
-
-La comparación directa con la Fase 1 revela un compromiso entre cobertura y precisión puntual. La gramática formal era perfecta dentro de su dominio (100\% EM en casos parseables) pero rechazaba el 11,54\% de las entradas del corpus original; el enfoque híbrido cubre todas las entradas pero comete errores en algunas de ellas. Esta tensión entre cobertura y exactitud motiva la exploración de una tercera vía ---los modelos de lenguaje--- que promete combinar la cobertura total con una capacidad de generalización lingüística que ni las reglas ni los embeddings alcanzan por sí solos.

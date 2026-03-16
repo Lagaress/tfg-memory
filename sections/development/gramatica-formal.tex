@@ -179,27 +179,4 @@ Las tres últimas etapas aplican transformaciones de superficie. Las contraccion
 El formateo final capitaliza la primera letra, inserta la negación en la posición correcta (antes del verbo conjugado) y envuelve las interrogativas con los signos \textit{¿...?}.
 
 
-\section{Resultados}
-\label{sec:f1-resultados}
-
-La evaluación sobre el corpus de 428 casos arroja los resultados que muestra la Tabla~\ref{tab:f1-resultados}.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l r}
-\hline
-Métrica & Valor \\
-\hline
-Exact Match & 100\% \\
-BLEU-4 & 1,0000 \\
-ROUGE-L $F_1$ & 1,0000 \\
-Latencia media & $<$1 ms \\
-\hline
-\end{tabular}
-\caption{Resultados del motor de gramática formal.}
-\label{tab:f1-resultados}
-\end{table}
-
-El dato más destacado es la combinación de cobertura total con precisión perfecta: la oración generada coincide exactamente con la referencia en todos los casos, lo que produce puntuaciones perfectas en todas las métricas de similitud textual. Este resultado es esperable dado que las referencias del corpus fueron generadas con la propia gramática, como se describe en el marco experimental.
-
 La gramática ofrece garantías absolutas de corrección dentro de su dominio, pero presenta limitaciones inherentes al enfoque simbólico. El vocabulario es cerrado: cualquier palabra fuera de las 646 entradas del léxico se rechaza. El motor solo conjuga en presente de indicativo, una restricción aceptable dado que la comunicación cotidiana en CAA es mayoritariamente inmediata (\textit{quiero agua}, \textit{estoy triste}, \textit{¿dónde está mamá?}), aunque ampliar a otros tiempos habría multiplicado la complejidad del conjugador. Los ocho rasgos semánticos booleanos no modelan fenómenos como la polisemia o la metáfora. Y cada nuevo patrón comunicativo requiere definir explícitamente la regla correspondiente: los 48 patrones se mantienen a mano. Estas limitaciones motivan la exploración de técnicas complementarias (embeddings semánticos, modelos de lenguaje) que puedan superar este techo sin abandonar completamente el control gramatical.
