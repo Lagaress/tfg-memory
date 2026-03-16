@@ -114,7 +114,7 @@ BLEU (\textit{Bilingual Evaluation Understudy})~\cite{papineni2002bleu} mide la 
 
 \subsection{ROUGE-L}
 
-ROUGE-L se basa en la subsecuencia común más larga (\textit{Longest Common Subsequence}, LCS) entre la predicción y la referencia. A diferencia de BLEU, que requiere n-gramas consecutivos, ROUGE-L permite omisiones entre las palabras coincidentes, lo que la hace más tolerante con variaciones en el orden.
+ROUGE-L~\cite{lin2004rouge} se basa en la subsecuencia común más larga (\textit{Longest Common Subsequence}, LCS) entre la predicción y la referencia. A diferencia de BLEU, que requiere n-gramas consecutivos, ROUGE-L permite omisiones entre las palabras coincidentes, lo que la hace más tolerante con variaciones en el orden.
 
 A partir de la longitud de la LCS se calculan precisión, recall y su media armónica $F_1$:
 
@@ -126,7 +126,7 @@ ROUGE-L resulta especialmente útil en este contexto porque captura la estructur
 
 \subsection{METEOR}
 
-METEOR (\textit{Metric for Evaluation of Translation with Explicit ORdering}) calcula la media armónica de la precisión de unigramas y el recall, aplicando después una penalización por fragmentación que castiga las coincidencias dispersas frente a las contiguas. A diferencia de BLEU, que solo mide precisión, METEOR incorpora el recall directamente en su formulación, lo que la hace más sensible a omisiones.
+METEOR (\textit{Metric for Evaluation of Translation with Explicit ORdering})~\cite{banerjee2005meteor} calcula la media armónica de la precisión de unigramas y el recall, aplicando después una penalización por fragmentación que castiga las coincidencias dispersas frente a las contiguas. A diferencia de BLEU, que solo mide precisión, METEOR incorpora el recall directamente en su formulación, lo que la hace más sensible a omisiones.
 
 $$\text{METEOR} = F_\text{mean} \cdot (1 - \text{penalty})$$
 
