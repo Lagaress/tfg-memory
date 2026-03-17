@@ -263,6 +263,47 @@ def _conjugar_regular(self, infinitivo, clave):
     return None
 \end{lstlisting}
 
+\section{Léxico del motor de embeddings}
+
+El léxico se serializa como un archivo JSON con una entrada por concepto (sección~\ref{sec:f2-lexico}). Cada categoría gramatical incluye campos específicos: los verbos almacenan conjugaciones por pronombre, los lugares incluyen preposiciones de movimiento y ubicación, los adjetivos registran formas de género, y los objetos codifican rasgos semánticos booleanos.
+
+\begin{lstlisting}[language={},caption={Entradas representativas del léxico (\texttt{lexicon.json}).},label={lst:lexicon-json},basicstyle=\ttfamily\small,xleftmargin=1cm]
+// Verbo: incluye conjugaciones completas
+{
+  "word": "abrir", "category": "verbo",
+  "conjugations": {
+    "yo": "abro", "tu": "abres", "el": "abre",
+    "nosotros": "abrimos", "ellos": "abren"
+  }
+}
+
+// Lugar: preposiciones de movimiento y ubicacion
+{
+  "word": "casa", "category": "lugar",
+  "gender": "femenino",
+  "movement_preposition": "a",
+  "location_preposition": "en"
+}
+
+// Adjetivo: formas de genero
+{
+  "word": "bonito", "category": "adjetivo",
+  "gender_forms": {
+    "masculino": "bonito", "femenino": "bonita"
+  }
+}
+
+// Objeto: rasgos semanticos booleanos
+{
+  "word": "mesa", "category": "objeto",
+  "gender": "femenino",
+  "semantic_traits": {
+    "comestible": false, "bebible": false,
+    "animado": false, "lugar": false
+  }
+}
+\end{lstlisting}
+
 \section{Adaptador CFG}
 
 El módulo \texttt{cfg\_bridge.py} encapsula toda la comunicación con el motor de gramática formal (sección~\ref{sec:f2-pipeline}). Su método \texttt{generate\_candidates()} invoca el generador de la gramática, captura posibles errores y convierte cada opción de frase en un diccionario plano con campos normalizados. El acoplamiento entre ambos motores se limita a este único archivo.
