@@ -52,6 +52,7 @@ Consulta `antipatterns.md` y verifica que no aparece ninguno de los siguientes:
 - Porcentajes con `\%`.
 - Cada párrafo va en una sola línea, sin saltos manuales.
 - No se han añadido comentarios LaTeX ni docstrings que no existían previamente.
+- Los extractos de código (lstlisting) están en el anexo `sections/backmatter/code-excerpts.tex`, NO inline en capítulos de desarrollo. Si se detecta un lstlisting en `sections/development/*.tex` (salvo la gramática EBNF en `gramatica-formal.tex`), moverlo al anexo y reemplazarlo por una referencia: `véase Extracto de código~\ref{lst:nombre} del Anexo~\ref{anx:codigo}`.
 
 ### 5. Integridad de datos
 

@@ -83,15 +83,16 @@ Se analizaron ocho patrones híbridos de la literatura. Además de los tres impl
 
 \begin{table}[H]
 \centering
-\begin{tabular}{l p{9cm}}
+\small
+\begin{tabular}{p{4.5cm} p{7.5cm}}
 \hline
 Patrón descartado & Razón del descarte \\
 \hline
-Decodificación restringida por gramática (Fang et al.) & Requiere acceso a los logits del modelo durante la decodificación, interfaz que la API de OpenAI no expone. \\
+Decodificación restringida (Fang et al.) & Requiere acceso a los logits del modelo, interfaz no expuesta por la API de OpenAI. \\
 NeuroLogic Decoding~\cite{lu2021neurologic} & Misma limitación: necesita modificar la distribución de probabilidad token a token. \\
-Híbridos \textit{template-neural} (Wiseman et al.) & Exige entrenar modelos propios sobre un corpus de pares pictograma-texto que no existe con volumen suficiente en español. \\
-LLM como generador de reglas & Constituye un proyecto de investigación completo, fuera del alcance de este trabajo. \\
-\textit{Grammar Prompting} & Técnica experimental no probada para español ni para dominios CAA. Se menciona como posible trabajo futuro. \\
+Híbridos \textit{template-neural} (Wiseman et al.) & Exige entrenar modelos propios sobre un corpus pictograma-texto inexistente en español con volumen suficiente. \\
+LLM como generador de reglas & Proyecto de investigación completo, fuera del alcance de este trabajo. \\
+\textit{Grammar Prompting} & Técnica experimental no probada para español ni CAA. Posible trabajo futuro. \\
 \hline
 \end{tabular}
 \caption{Patrones híbridos analizados y descartados.}
@@ -139,27 +140,7 @@ Un campo del resultado, \texttt{was\_modified}, indica si el LLM alteró la fras
 
 \subsection{Inicialización perezosa}
 
-Todos los componentes del módulo siguen el patrón de inicialización perezosa: los motores externos (\texttt{SentenceGenerator}, \texttt{HybridGenerator}, \texttt{LLMClient}, \texttt{PerplexityScorer}) no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}. Dado que la carga de FastText ($\sim$4,2 GB) y el modelo GPT-2 en español ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
-
-\begin{lstlisting}[language=Python,caption={Patrón de inicialización perezosa (\texttt{grammar\_llm.py}).},label={lst:lazy-init},basicstyle=\ttfamily\small,xleftmargin=1cm]
-class GrammarLLMHybrid:
-    def __init__(self, grammar_src_path, llm_src_path, model_name="gpt-4o"):
-        self._generator = None   # No se carga aun
-        self._post_editor = None
-
-    def setup(self):
-        from grammar.generator import SentenceGenerator
-        self._generator = SentenceGenerator()
-        self._post_editor = PostEditor(self.llm_src_path, self.model_name)
-
-    def _ensure_setup(self):
-        if self._generator is None or self._post_editor is None:
-            self.setup()
-
-    def generate(self, pictograms):
-        self._ensure_setup()  # Carga en la primera llamada
-        # ...
-\end{lstlisting}
+Todos los componentes del módulo siguen el patrón de inicialización perezosa (véase Extracto de código~\ref{lst:lazy-init} del Anexo~\ref{anx:codigo}): los motores externos (\texttt{SentenceGenerator}, \texttt{HybridGenerator}, \texttt{LLMClient}, \texttt{PerplexityScorer}) no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}. Dado que la carga de FastText ($\sim$4,2 GB) y el modelo GPT-2 en español ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
 
 \section{Hibridación 1: Gramática + LLM como post-editor}
 \label{sec:h-hybrid1}

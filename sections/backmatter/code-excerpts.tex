@@ -801,6 +801,30 @@ REGLAS ESTRICTAS:
    forma, NUNCA la intencion comunicativa.
 \end{lstlisting}
 
+\section{Inicialización perezosa}
+
+Todos los pipelines de hibridación (sección~\ref{sec:h-arquitectura}) siguen el patrón de inicialización perezosa: los motores no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}. El método \texttt{\_ensure\_setup()} verifica si los componentes ya están inicializados antes de cada generación.
+
+\begin{lstlisting}[language=Python,caption={Patrón de inicialización perezosa (\texttt{grammar\_llm.py}).},label={lst:lazy-init},basicstyle=\ttfamily\small,xleftmargin=1cm]
+class GrammarLLMHybrid:
+    def __init__(self, grammar_src_path, llm_src_path, model_name="gpt-4o"):
+        self._generator = None   # No se carga aun
+        self._post_editor = None
+
+    def setup(self):
+        from grammar.generator import SentenceGenerator
+        self._generator = SentenceGenerator()
+        self._post_editor = PostEditor(self.llm_src_path, self.model_name)
+
+    def _ensure_setup(self):
+        if self._generator is None or self._post_editor is None:
+            self.setup()
+
+    def generate(self, pictograms):
+        self._ensure_setup()  # Carga en la primera llamada
+        # ...
+\end{lstlisting}
+
 \section{Pipeline de Hibridación 1}
 
 La Hibridación 1 (sección~\ref{sec:h-hybrid1}) conecta la gramática formal con el post-editor LLM en dos pasos. Si la gramática tiene éxito, la frase se post-edita; si falla, el post-editor genera desde cero. El campo \texttt{method} del resultado distingue ambos caminos.

@@ -47,6 +47,7 @@ Eres el escritor de este TFG. Tu objetivo es redactar o editar secciones del doc
 - Em-dash con --- (tres guiones). Cuando se usa como inciso, lleva espacios: "el proyecto ---que aborda este problema--- propone".
 - Cada párrafo va en una sola línea, sin saltos de línea manuales dentro del párrafo.
 - Porcentajes con \%.
+- Los extractos de código (lstlisting) van SIEMPRE en el anexo `sections/backmatter/code-excerpts.tex`, NUNCA inline en los capítulos de desarrollo. Desde el capítulo se referencian con: `véase Extracto de código~\ref{lst:nombre} del Anexo~\ref{anx:codigo}`. La única excepción es la gramática EBNF en `gramatica-formal.tex`, que es una definición formal.
 - Cantidades aproximadas en texto: "más de 1.200", no "~1200" ni "aproximadamente 1.200".
 - Acrónimos: se definen en la primera aparición con nombre completo y sigla entre paréntesis. Después, solo la sigla.
 
