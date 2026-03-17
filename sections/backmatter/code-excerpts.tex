@@ -492,9 +492,111 @@ def validate_combination(self, verb, argument):
     return score >= self.selectional_threshold  # 0.10
 \end{lstlisting}
 
+\section{System prompt del motor de LLMs}
+
+El \textit{system prompt} (sección~\ref{sec:f3-prompt}) define el rol del modelo y establece las once reglas que gobiernan la generación. Se reproduce íntegro por ser el componente central de este motor: toda la adaptación al dominio CAA se codifica en este texto.
+
+\begin{lstlisting}[language={},caption={\textit{System prompt} completo del motor de LLMs (\texttt{prompts.py}).},label={lst:system-prompt},basicstyle=\ttfamily\small,xleftmargin=1cm]
+Eres el motor de lenguaje de Dixi, una aplicacion de
+Comunicacion Aumentativa y Alternativa (CAA) para personas
+con dificultades del habla. Tu unica funcion es transformar
+secuencias de pictogramas en oraciones naturales en espanol.
+
+Los pictogramas pueden llegar en infinitivo ("querer", "ir",
+"estar") o ya conjugados ("quiero", "estoy", "tengo"). Debes
+manejar ambos formatos y generar siempre una oracion natural
+y correcta.
+
+REGLAS ESTRICTAS:
+
+1. FIDELIDAD SEMANTICA: La oracion DEBE expresar exactamente
+   el significado de los pictogramas proporcionados. No
+   anadas informacion, conceptos, emociones ni matices que
+   no esten representados en los pictogramas de entrada.
+
+2. ELEMENTOS FUNCIONALES: Anade SOLO los elementos
+   gramaticales minimos necesarios: articulos, preposiciones
+   de enlace, conjugacion verbal y concordancia de genero
+   y numero.
+
+3. FORMATO DE SALIDA: Responde UNICAMENTE con la oracion
+   generada. Sin explicaciones, sin alternativas, sin
+   comillas, sin puntuacion extra.
+
+4. UNA SOLA ORACION: Genera exactamente una oracion. No
+   generes multiples opciones ni variantes.
+
+5. REGISTRO: Usa un registro coloquial-neutro, apropiado
+   para comunicacion cotidiana.
+
+6. INTERROGATIVAS: Si la secuencia contiene un pictograma
+   interrogativo (que, quien, donde, cuando, como, por_que,
+   cual), genera una pregunta con signos de interrogacion.
+
+7. NEGACION: Si la secuencia contiene "no", genera una
+   oracion negativa colocando "no" antes del verbo.
+
+8. PICTOGRAMAS COMPUESTOS: Los pictogramas con guion bajo
+   representan un solo concepto: "pasta_de_dientes" ->
+   "pasta de dientes".
+
+9. SUJETOS IMPLICITOS: Si el sujeto es "yo" y el contexto
+   es coloquial, omitelo si suena mas natural en espanol.
+
+10. BREVEDAD: La oracion debe ser lo mas concisa posible
+    sin perder naturalidad ni correccion gramatical.
+
+11. CONCORDANCIA DE GENERO: Si un adjetivo no concuerda en
+    genero con el sustantivo, corrigelo. Ejemplo: "manzana"
+    + "rojo" -> "manzana roja".
+\end{lstlisting}
+
+\section{Metadatos de pictogramas}
+
+El inventario de metadatos (sección~\ref{sec:f3-metadatos}) mapea cada etiqueta de pictograma a su categoría gramatical. A diferencia de los motores anteriores, incluye formas conjugadas explícitas para que el LLM reciba la categoría exacta de cada forma. La función \texttt{get\_metadata()} normaliza la etiqueta para su presentación al modelo.
+
+\begin{lstlisting}[language=Python,caption={Metadatos de pictogramas y función de consulta (\texttt{pictogram\_metadata.py}).},label={lst:pictogram-metadata},basicstyle=\ttfamily\small,xleftmargin=1cm]
+# Extracto de PICTOGRAM_CATEGORIES (539 entradas, 19 categorias)
+PICTOGRAM_CATEGORIES = {
+    # Verbos en infinitivo
+    "querer": "verbo modal",
+    "comer": "verbo",
+    "ir": "verbo",
+    # Formas conjugadas (1a, 2a, 3a persona)
+    "quiero": "verbo modal",
+    "como": "verbo",
+    "voy": "verbo",
+    # Sustantivos
+    "agua": "sustantivo",
+    "pan": "sustantivo",
+    "casa": "lugar",
+    # Compuestos (guion bajo = un solo concepto)
+    "pasta_de_dientes": "sustantivo",
+    "tener_que": "verbo modal",
+    # Estados y emociones
+    "hambre": "estado (sustantivo)",
+    "cansado": "estado fisico",
+    "feliz": "emocion",
+    # Marcadores temporales
+    "manana": "marcador temporal",
+    "ahora": "marcador temporal",
+    # ...
+}
+
+def get_metadata(pictogram: str) -> dict:
+    category = PICTOGRAM_CATEGORIES.get(
+        pictogram, "desconocido"
+    )
+    return {
+        "label": pictogram,
+        "display": pictogram.replace("_", " "),
+        "category": category,
+    }
+\end{lstlisting}
+
 \section{Constructor de mensajes para la API}
 
-El constructor de prompts (sección~\ref{sec:f3-prompt}) ensambla los 32 mensajes que se envían a la API de OpenAI: un \textit{system prompt} con las reglas, 15 pares usuario-asistente con los ejemplos \textit{few-shot}, y un mensaje final con la consulta del usuario. La función auxiliar enriquece cada pictograma con su categoría gramatical para desambiguar la entrada.
+El constructor de prompts (sección~\ref{sec:f3-prompt}) ensambla los 32 mensajes que se envían a la API de OpenAI: un \textit{system prompt} con las reglas (Extracto de código~\ref{lst:system-prompt}), 15 pares usuario-asistente con los ejemplos \textit{few-shot}, y un mensaje final con la consulta del usuario. La función auxiliar enriquece cada pictograma con su categoría gramatical para desambiguar la entrada.
 
 \begin{lstlisting}[language=Python,caption={Construcción de mensajes para la API (\texttt{prompt\_builder.py}).},label={lst:prompt-builder},basicstyle=\ttfamily\small,xleftmargin=1cm]
 def build_messages(pictograms):
@@ -576,9 +678,28 @@ def _matches_concept(pictogram, text, text_words):
     return False
 \end{lstlisting}
 
-\section{Cliente de API con reintentos}
+\section{Configuración y cliente de API}
 
-El cliente de la API (sección~\ref{sec:f3-cliente}) gestiona los reintentos diferenciados según el tipo de error, mide la latencia con precisión de milisegundos y estima el coste de cada llamada a partir de los precios por token.
+La \textit{dataclass} \texttt{ModelConfig} (sección~\ref{sec:f3-cliente}) encapsula los seis parámetros de generación. Los comentarios reflejan las decisiones de diseño para el dominio CAA.
+
+\begin{lstlisting}[language=Python,caption={Configuración de modelos (\texttt{settings.py}).},label={lst:model-config},basicstyle=\ttfamily\small,xleftmargin=1cm]
+@dataclass
+class ModelConfig:
+    name: str
+    max_tokens: int = 100      # Frases CAA son cortas
+    temperature: float = 0.3   # Consistencia > creatividad
+    top_p: float = 0.9
+    timeout: int = 10          # Segundos; el usuario espera
+    max_retries: int = 2
+
+MODELS = {
+    "gpt-4o": ModelConfig(name="gpt-4o"),
+    "gpt-4o-mini": ModelConfig(name="gpt-4o-mini"),
+}
+DEFAULT_MODEL = "gpt-4o-mini"
+\end{lstlisting}
+
+El cliente de la API gestiona los reintentos diferenciados según el tipo de error, mide la latencia con precisión de milisegundos y estima el coste de cada llamada a partir de los precios por token.
 
 \begin{lstlisting}[language=Python,caption={Cliente de API con reintentos y estimación de coste (\texttt{llm\_client.py}).},label={lst:llm-client},basicstyle=\ttfamily\small,xleftmargin=1cm]
 def generate(self, messages):
