@@ -26,7 +26,9 @@ Se implementan tres estrategias de hibridación con objetivos experimentales dif
 
 H1 conecta la gramática formal con un LLM que actúa como post-editor: la CFG genera una frase estructurada y el LLM la refina para mejorar su naturalidad. H2 sustituye la gramática pura por el motor de embeddings como fuente upstream y aplica el mismo post-editor LLM. H3 adopta un enfoque diferente: los cinco motores disponibles generan candidatas, un filtro de fidelidad descarta las que omiten pictogramas y un modelo de perplejidad selecciona la más natural.
 
-La comparación directa entre H1 y H2 constituye el experimento central de esta técnica. Ambas hibridaciones comparten exactamente el mismo post-editor (mismo prompt, mismo modelo, misma configuración) y difieren únicamente en si el motor upstream incluye embeddings semánticos. Cualquier diferencia en las métricas se atribuye directamente a la contribución de los embeddings: si H2 supera a H1, los embeddings aportan valor incluso cuando hay un LLM que refina la salida; si no, el LLM por sí solo ya suple lo que los embeddings proporcionan.
+La comparación directa entre H1 y H2 constituye el experimento central de esta técnica. Ambas hibridaciones comparten exactamente el mismo post-editor (mismo prompt, mismo modelo, misma configuración) y difieren únicamente en si el motor upstream incluye embeddings semánticos.
+
+Cualquier diferencia en las métricas se atribuye directamente a la contribución de los embeddings: si H2 supera a H1, los embeddings aportan valor incluso cuando hay un LLM que refina la salida; si no, el LLM por sí solo ya suple lo que los embeddings proporcionan.
 
 \section{Fundamentos teóricos}
 \label{sec:h-fundamentos}
@@ -43,7 +45,9 @@ La idea clave que se adopta en las Hibridaciones 1 y 2 es la \textit{separación
 
 \subsection{Plan-then-realize}
 
-El patrón \textit{plan-then-realize}, establecido por Moryossef, Goldberg y Dagan en su framework Step-by-Step~\cite{moryossef2019stepbystep}, separa la generación de lenguaje natural en dos etapas: un planificador simbólico que decide qué decir y en qué orden, y un realizador neural que transforma el plan en texto fluido. En el benchmark WebNLG~\cite{gardent2017webnlg}, esta separación mejoró tanto los scores BLEU como las evaluaciones humanas de adecuación respecto a enfoques \textit{end-to-end} puros. Elder et al.~\cite{elder2019intermediate} reforzaron esta conclusión: las representaciones intermedias simbólicas reducen las alucinaciones respecto a modelos \textit{end-to-end}.
+El patrón \textit{plan-then-realize}, establecido por Moryossef, Goldberg y Dagan en su framework Step-by-Step~\cite{moryossef2019stepbystep}, separa la generación de lenguaje natural en dos etapas: un planificador simbólico que decide qué decir y en qué orden, y un realizador neural que transforma el plan en texto fluido.
+
+En el benchmark WebNLG~\cite{gardent2017webnlg}, esta separación mejoró tanto los scores BLEU como las evaluaciones humanas de adecuación respecto a enfoques \textit{end-to-end} puros. Elder et al.~\cite{elder2019intermediate} reforzaron esta conclusión: las representaciones intermedias simbólicas reducen las alucinaciones respecto a modelos \textit{end-to-end}.
 
 En las Hibridaciones 1 y 2, la planificación corresponde a la generación por gramática o embeddings, y la realización a la post-edición por LLM. La restricción de fidelidad en el prompt del post-editor garantiza que el realizador no introduce información que el planificador no proporcionó.
 
@@ -66,6 +70,7 @@ El modelo utilizado es \texttt{DeepESP/gpt2-spanish}~\cite{deepesp2019gpt2spanis
 El modelo originalmente previsto era MarIA GPT-2-BNE, entrenado sobre el corpus de la Biblioteca Nacional de España, pero el BSC eliminó todos los modelos del namespace \texttt{PlanTL-GOB-ES} de HuggingFace durante el desarrollo del proyecto.
 
 \subsection{Cobertura de pictogramas como restricción de fidelidad}
+\label{sec:h-cobertura}
 
 En un sistema CAA, la fidelidad es la restricción más crítica: si el usuario selecciona los pictogramas \texttt{[quiero, agua]}, la frase generada debe contener representaciones de ambos conceptos. Una frase como \textit{Quiero un vaso de agua fría} viola la fidelidad al añadir conceptos no seleccionados por el usuario.
 
@@ -132,15 +137,17 @@ El post-editor es el componente central que comparten las Hibridaciones 1 y 2. S
 \label{tab:h-reglas-prompt}
 \end{table}
 
-El post-editor ofrece dos modos de operación (véase Extracto de código~\ref{lst:post-editor-prompt} del Anexo~\ref{anx:codigo}). El primero, \texttt{post\_edit}, recibe una frase candidata y los pictogramas originales, construye un mensaje que combina ambos y envía al LLM el prompt de ocho reglas para que refine la frase. El segundo, \texttt{generate\_direct}, se activa como fallback cuando el motor upstream falla: reutiliza el prompt completo del motor de LLMs (once reglas más quince ejemplos \textit{few-shot}, sección~\ref{sec:f3-prompt}) para generar la frase desde cero.
+El post-editor ofrece dos modos de operación (véase Extracto de código~\ref{lst:post-editor-prompt} del Anexo~\ref{anx:codigo}). El primero, \texttt{post\_edit}, recibe una frase candidata y los pictogramas originales, construye un mensaje que combina ambos y envía al LLM el prompt de ocho reglas para que refine la frase.
 
-La diferencia entre ambos modos es fundamental: \texttt{post\_edit} instruye al LLM como realizador que mejora una frase existente, mientras que \texttt{generate\_direct} lo instruye como generador autónomo idéntico al motor LLM independiente.
+El segundo, \texttt{generate\_direct}, se activa como fallback cuando el motor upstream falla: reutiliza el prompt completo del motor de LLMs (once reglas más quince ejemplos \textit{few-shot}, sección~\ref{sec:f3-prompt}) para generar la frase desde cero. La diferencia es que \texttt{post\_edit} instruye al LLM como realizador que mejora una frase existente, mientras que \texttt{generate\_direct} lo instruye como generador autónomo.
 
 Un campo del resultado, \texttt{was\_modified}, indica si el LLM alteró la frase candidata. La detección se realiza con una comparación insensible a mayúsculas. Este campo permite calcular la tasa de modificación del post-editor: una tasa baja sugiere que el motor upstream ya produce frases de alta calidad; una tasa alta sugiere que la post-edición aporta valor significativo.
 
 \subsection{Inicialización perezosa}
 
-Todos los componentes del módulo siguen el patrón de inicialización perezosa (véase Extracto de código~\ref{lst:lazy-init} del Anexo~\ref{anx:codigo}): los motores externos (\texttt{SentenceGenerator}, \texttt{HybridGenerator}, \texttt{LLMClient}, \texttt{PerplexityScorer}) no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}. Dado que la carga de FastText ($\sim$4,2 GB) y el modelo GPT-2 en español ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
+Todos los componentes del módulo siguen el patrón de inicialización perezosa (véase Extracto de código~\ref{lst:lazy-init} del Anexo~\ref{anx:codigo}): los motores externos (\texttt{SentenceGenerator}, \texttt{HybridGenerator}, \texttt{LLMClient}, \texttt{PerplexityScorer}) no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}.
+
+Dado que la carga de FastText ($\sim$4,2 GB) y el modelo GPT-2 en español ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
 
 \section{Hibridación 1: Gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
@@ -151,13 +158,13 @@ La primera hibridación conecta la gramática formal (sección~\ref{sec:f1-postp
 
 Si falla (porque la secuencia contiene palabras fuera del léxico o no coincide con ningún patrón), se activa el fallback: el post-editor genera la frase desde cero usando el prompt completo del motor de LLMs (sección~\ref{sec:f3-prompt}).
 
-El campo \texttt{method} del resultado discrimina entre ambos caminos. Cuando la gramática funciona, el método es \texttt{grammar\_post\_edit}; cuando se activa el fallback, es \texttt{fallback\_llm\_direct}. Esta distinción permite desagregar las métricas por ruta de ejecución.
+El campo \texttt{method} del resultado discrimina entre ambos caminos: \texttt{grammar\_post\_edit} cuando la gramática funciona, o \texttt{fallback\_llm\_direct} cuando se activa el fallback. Esta distinción permite desagregar las métricas por ruta de ejecución.
 
 Un ejemplo ilustra el camino exitoso. Para la entrada \texttt{[quiero, agua]}, la gramática detecta el patrón de necesidad simple, aplica las reglas de postprocesamiento y produce \textit{Quiero agua}. El post-editor recibe esta frase junto con los pictogramas originales, evalúa que ya es correcta según sus ocho reglas y la devuelve sin modificar. El campo \texttt{was\_modified} queda en falso. La latencia total es de aproximadamente 450 ms, dominada por la llamada a la API; la gramática contribuye menos de 1 ms.
 
 El fallback se activa en un ejemplo como \texttt{[ayer, abuelo, contar, cuento]}, donde la combinación de un marcador temporal con cuatro palabras no encaja en ningún patrón de la CFG. La gramática lanza una excepción, el pipeline la captura y delega al post-editor en modo \texttt{generate\_direct}. El LLM produce \textit{Ayer el abuelo contó un cuento}. El resultado es idéntico al que produciría el motor LLM de forma independiente, ya que reutiliza exactamente el mismo prompt y modelo.
 
-El propósito experimental de esta hibridación es servir como línea base para evaluar la contribución de los embeddings. Al comparar H1 con H2, se puede determinar si el refinamiento semántico del motor de embeddings (sección~\ref{sec:f2-pipeline}) aporta valor adicional cuando la frase será posteriormente editada por un LLM, o si la capacidad del LLM ya subsume las mejoras que introducen los embeddings.
+El propósito experimental de esta hibridación es servir como línea base para la comparación con H2 descrita en el planteamiento (sección~\ref{sec:h-planteamiento}).
 
 \section{Hibridación 2: (Gramática + Embeddings) + LLM como post-editor}
 \label{sec:h-hybrid2}
@@ -192,7 +199,7 @@ Fallback & \texttt{generate\_direct} & \texttt{generate\_direct} \\
 
 Un ejemplo representativo es la entrada \texttt{[ir, colegio]}. El motor de embeddings detecta el patrón de movimiento, genera la frase \textit{Quiero ir al colegio} con la preposición contraída correcta, y reporta el método como \texttt{hybrid}. El post-editor recibe esta frase, la evalúa según las ocho reglas y la devuelve sin modificar. El resultado es idéntico al del camino exitoso de H1 para esta misma entrada, lo que sugiere que, para frases dentro de la cobertura de la gramática, los embeddings no aportan una diferencia que el post-editor pueda explotar.
 
-La identidad deliberada de la capa LLM convierte la comparación H1 versus H2 en un experimento controlado. Cualquier diferencia en métricas se atribuye exclusivamente a la frase intermedia que recibe el post-editor.
+La identidad deliberada de la capa LLM convierte la comparación H1 versus H2 en el experimento controlado descrito en la sección~\ref{sec:h-planteamiento}.
 
 \section{Hibridación 3: Overgenerate-and-Rank multimotor}
 \label{sec:h-hybrid3}
@@ -209,7 +216,7 @@ La generación es secuencial: cada motor se invoca uno tras otro. Los motores of
 
 \subsection{Filtro de fidelidad}
 
-La segunda etapa evalúa la cobertura de pictogramas de cada candidata mediante \texttt{PictogramCoverageScorer}, el mismo componente utilizado en el framework de comparación. Para cada candidata, el scorer verifica cuántos pictogramas de entrada están representados en la frase generada, aplicando la lematización con spaCy descrita en la sección de fundamentos.
+La segunda etapa evalúa la cobertura de pictogramas de cada candidata mediante \texttt{PictogramCoverageScorer}, el mismo componente utilizado en el framework de comparación. Para cada candidata, el scorer verifica cuántos pictogramas de entrada están representados en la frase generada, aplicando la lematización con spaCy descrita en la sección~\ref{sec:h-cobertura}.
 
 El umbral es 1,0: solo pasan al ranking las candidatas que cubren el 100\% de los pictogramas. Si ninguna candidata alcanza el umbral, se aplica un fallback: todas las candidatas pasan al ranking, garantizando que el pipeline siempre produce un resultado aunque ningún motor logre cobertura perfecta.
 
@@ -229,24 +236,22 @@ Este caso ilustra una limitación del paradigma: cuando todos los motores produc
 
 El valor diferencial de la Hibridación 3 se manifiesta cuando los motores producen candidatas distintas. Para entradas fuera de la cobertura de la gramática o con múltiples formulaciones válidas, cada motor puede generar una variante diferente. El filtro de fidelidad descarta las que omiten pictogramas y el ranking por perplejidad selecciona la formulación más natural entre las fieles al input del usuario.
 
-En la práctica, para las frases que están dentro de la cobertura de la gramática, todos los motores tienden a converger porque la gramática ya produce la frase de referencia y tanto los embeddings como el LLM la reproducen o mantienen. La diversidad real aparece en los casos complejos (frases compuestas largas, combinaciones con marcadores temporales, secuencias que desbordan los patrones de la CFG) donde cada motor aplica estrategias diferentes de generación.
+En la práctica, para las frases que están dentro de la cobertura de la gramática, todos los motores tienden a converger porque la gramática ya produce la frase de referencia y tanto los embeddings como el LLM la reproducen o mantienen.
+
+La diversidad real aparece en los casos complejos (frases compuestas largas, combinaciones con marcadores temporales, secuencias que desbordan los patrones de la CFG) donde cada motor aplica estrategias diferentes de generación.
 
 \section{Decisiones de diseño}
 \label{sec:h-decisiones}
 
-Varias decisiones de diseño merecen una justificación explícita, ya que implican compromisos entre objetivos en tensión.
+La decisión de compartir el prompt de post-edición entre H1 y H2 prioriza la validez del experimento comparativo sobre la optimización individual. Un prompt específico para H1 podría dar instrucciones más detalladas sobre preposiciones, donde la CFG es más débil, y uno para H2 podría enfocarse exclusivamente en naturalidad. Sin embargo, cualquier diferencia en los prompts introduciría una variable confundente que impediría atribuir las diferencias de rendimiento a la contribución de los embeddings.
 
-La decisión de compartir el prompt de post-edición entre H1 y H2 prioriza la validez del experimento comparativo sobre la optimización individual de cada pipeline. Un prompt específico para H1 podría dar instrucciones más detalladas sobre preposiciones, donde la CFG es más débil, y uno para H2 podría enfocarse exclusivamente en naturalidad, donde los embeddings ya resolvieron las preposiciones. Sin embargo, cualquier diferencia en los prompts introduciría una variable confundente que impediría atribuir las diferencias de rendimiento a la contribución de los embeddings.
-
-La elección de GPT-4o~\cite{openai2024gpt4o} como modelo para la post-edición mantiene consistencia con la evaluación del motor de LLMs (sección~\ref{sec:f3-planteamiento}). Para la post-edición el modelo recibe una frase ya estructurada y solo necesita refinamientos menores. Se priorizó la consistencia sobre el ahorro de coste, que para un dataset de 428 casos es marginal.
-
-El umbral de fidelidad de 1,0 en la Hibridación 3 refleja la prioridad absoluta de la fidelidad en un sistema CAA. Un umbral relajado de 0,8 permitiría frases que omiten un pictograma de cada cinco, lo que en comunicación aumentativa puede cambiar completamente el significado. El fallback (usar todas las candidatas si ninguna alcanza cobertura perfecta) mitiga el riesgo de que el umbral estricto produzca un error cuando ningún motor logra representar todos los pictogramas.
-
-La restricción de post-edición conservadora (el prompt prohíbe explícitamente añadir o eliminar conceptos) refleja el principio de que el post-editor actúa como realizador, no como generador. En el marco del patrón \textit{plan-then-realize}, su función es mejorar la forma, no el contenido. Si el usuario seleccionó \texttt{[quiero, agua]}, el post-editor puede ajustar concordancia o artículos, pero no expandir la frase a \textit{Quiero un vaso de agua, por favor}, porque ello introduciría conceptos no seleccionados por el usuario.
+La elección de GPT-4o~\cite{openai2024gpt4o} como modelo para la post-edición mantiene consistencia con la evaluación del motor de LLMs (sección~\ref{sec:f3-planteamiento}). Se priorizó la consistencia experimental sobre el ahorro de coste, que para un dataset de 428 casos es marginal.
 
 \section{Limitaciones}
 \label{sec:h-limitaciones}
 
-Las tres hibridaciones heredan la dependencia de la API de OpenAI (GPT-4o) para la post-edición o la generación directa, lo que implica coste por llamada, latencia de red y falta de disponibilidad offline. En la Hibridación 3, la generación secuencial de las cinco candidatas acumula aproximadamente tres veces la latencia de una sola llamada API; en producción, la paralelización reduciría este coste, pero los tres motores que llaman a OpenAI comparten la misma fuente y podrían provocar limitaciones de tasa.
+Las tres hibridaciones heredan la dependencia de la API de OpenAI (GPT-4o) para la post-edición o la generación directa, lo que implica coste por llamada, latencia de red y falta de disponibilidad offline.
+
+En la Hibridación 3, la generación secuencial de las cinco candidatas acumula aproximadamente tres veces la latencia de una sola llamada API; en producción, la paralelización reduciría este coste, pero los tres motores que llaman a OpenAI comparten la misma fuente y podrían provocar limitaciones de tasa.
 
 El umbral de fidelidad de 1,0 puede descartar frases naturales que omiten un pictograma con representación implícita: \textit{Quiero agua} para la entrada \texttt{[yo, quiero, agua]} podría fallar si el scorer no reconoce el sujeto implícito. El fallback mitiga este riesgo, pero no lo elimina.
