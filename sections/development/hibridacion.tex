@@ -35,13 +35,15 @@ Esta sección revisa cada uno de los patrones en los que se basan las tres hibri
 
 \subsection{LLM como post-editor de sistemas de reglas}
 
-Chen, Heininger, Schneider et al. de AX Semantics~\cite{chen2025axsemantics} describieron el uso de un LLM para control de calidad sobre texto generado por un sistema de reglas en producción. Su sistema genera noticias deportivas en alemán, francés y español mediante reglas, y el LLM identifica errores gramaticales y ortográficos en la salida, vinculando las correcciones a las reglas originales mediante identificadores únicos para que la corrección de una regla mejore todos los textos futuros.
+Chen, Heininger, Schneider et al. de AX Semantics~\cite{chen2025axsemantics} describieron el uso de un LLM para control de calidad sobre texto generado por un sistema de reglas en producción.
+
+Su sistema genera noticias deportivas en alemán, francés y español mediante reglas, y el LLM identifica errores gramaticales y ortográficos en la salida, vinculando las correcciones a las reglas originales mediante identificadores únicos para que la corrección de una regla mejore todos los textos futuros.
 
 La idea clave que se adopta en las Hibridaciones 1 y 2 es la \textit{separación de responsabilidades}: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. La diferencia con el trabajo de AX Semantics es que aquí el LLM actúa en tiempo real sobre cada frase individual, no como herramienta offline de mejora de reglas.
 
 \subsection{Plan-then-realize}
 
-El patrón \textit{plan-then-realize}, establecido por Moryossef, Goldberg y Dagan en su framework Step-by-Step~\cite{moryossef2019stepbystep}, separa la generación de lenguaje natural en dos etapas: un planificador simbólico que decide qué decir y en qué orden, y un realizador neural que transforma el plan en texto fluido. En el benchmark WebNLG, esta separación mejoró tanto los scores BLEU como las evaluaciones humanas de adecuación respecto a enfoques \textit{end-to-end} puros. Elder et al.~\cite{elder2019intermediate} reforzaron esta conclusión: las representaciones intermedias simbólicas reducen las alucinaciones respecto a modelos \textit{end-to-end}.
+El patrón \textit{plan-then-realize}, establecido por Moryossef, Goldberg y Dagan en su framework Step-by-Step~\cite{moryossef2019stepbystep}, separa la generación de lenguaje natural en dos etapas: un planificador simbólico que decide qué decir y en qué orden, y un realizador neural que transforma el plan en texto fluido. En el benchmark WebNLG~\cite{gardent2017webnlg}, esta separación mejoró tanto los scores BLEU como las evaluaciones humanas de adecuación respecto a enfoques \textit{end-to-end} puros. Elder et al.~\cite{elder2019intermediate} reforzaron esta conclusión: las representaciones intermedias simbólicas reducen las alucinaciones respecto a modelos \textit{end-to-end}.
 
 En las Hibridaciones 1 y 2, la planificación corresponde a la generación por gramática o embeddings, y la realización a la post-edición por LLM. La restricción de fidelidad en el prompt del post-editor garantiza que el realizador no introduce información que el planificador no proporcionó.
 
@@ -77,7 +79,24 @@ En la Hibridación 3, el umbral de fidelidad es 1,0: solo pasan al ranking las f
 
 \subsection{Patrones descartados}
 
-Se analizaron ocho patrones híbridos de la literatura. Además de los tres implementados, se descartaron cinco. La decodificación restringida por gramática, tanto en su variante de Fang et al. como en la de NeuroLogic Decoding~\cite{lu2021neurologic}, requiere acceso a los logits del modelo durante la decodificación, una interfaz que la API de OpenAI no expone. Los híbridos \textit{template-neural} de Wiseman et al. exigen entrenar modelos propios sobre un corpus de pares pictograma-texto que no existe con volumen suficiente en español. El uso del LLM como generador de reglas constituye un proyecto de investigación completo, fuera del alcance de este trabajo. Finalmente, \textit{Grammar Prompting} es una técnica experimental no probada para español ni para dominios CAA, que se menciona como posible trabajo futuro.
+Se analizaron ocho patrones híbridos de la literatura. Además de los tres implementados, se descartaron cinco por las razones recogidas en la Tabla~\ref{tab:h-patrones-descartados}.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l p{9cm}}
+\hline
+Patrón descartado & Razón del descarte \\
+\hline
+Decodificación restringida por gramática (Fang et al.) & Requiere acceso a los logits del modelo durante la decodificación, interfaz que la API de OpenAI no expone. \\
+NeuroLogic Decoding~\cite{lu2021neurologic} & Misma limitación: necesita modificar la distribución de probabilidad token a token. \\
+Híbridos \textit{template-neural} (Wiseman et al.) & Exige entrenar modelos propios sobre un corpus de pares pictograma-texto que no existe con volumen suficiente en español. \\
+LLM como generador de reglas & Constituye un proyecto de investigación completo, fuera del alcance de este trabajo. \\
+\textit{Grammar Prompting} & Técnica experimental no probada para español ni para dominios CAA. Se menciona como posible trabajo futuro. \\
+\hline
+\end{tabular}
+\caption{Patrones híbridos analizados y descartados.}
+\label{tab:h-patrones-descartados}
+\end{table}
 
 \section{Arquitectura general y componentes compartidos}
 \label{sec:h-arquitectura}
@@ -85,6 +104,8 @@ Se analizaron ocho patrones híbridos de la literatura. Además de los tres impl
 Las tres hibridaciones comparten una arquitectura modular que reutiliza los motores de los capítulos anteriores como componentes de un pipeline más amplio. Ningún módulo reimplementa lógica de generación: el sistema importa y orquesta los motores existentes en runtime, conectándolos mediante tres pipelines que explotan la complementariedad de las técnicas.
 
 Las dependencias externas se resuelven en tiempo de ejecución insertando las rutas de los proyectos hermanos en \texttt{sys.path}, el mismo mecanismo que ya utiliza el motor de embeddings para importar la gramática formal (sección~\ref{sec:f2-pipeline}).
+
+\textit{(TODO: Añadir diagrama de arquitectura mostrando los tres pipelines y cómo reutilizan los motores existentes.)}
 
 \subsection{Post-editor compartido}
 
@@ -110,7 +131,7 @@ El post-editor es el componente central que comparten las Hibridaciones 1 y 2. S
 \label{tab:h-reglas-prompt}
 \end{table}
 
-El post-editor ofrece dos modos de operación. El primero, \texttt{post\_edit}, recibe una frase candidata y los pictogramas originales, construye un mensaje que combina ambos y envía al LLM el prompt de ocho reglas para que refine la frase. El segundo, \texttt{generate\_direct}, se activa como fallback cuando el motor upstream falla: reutiliza el prompt completo del motor de LLMs (once reglas más quince ejemplos \textit{few-shot}, sección~\ref{sec:f3-prompt}) para generar la frase desde cero.
+El post-editor ofrece dos modos de operación (véase Extracto de código~\ref{lst:post-editor-prompt} del Anexo~\ref{anx:codigo}). El primero, \texttt{post\_edit}, recibe una frase candidata y los pictogramas originales, construye un mensaje que combina ambos y envía al LLM el prompt de ocho reglas para que refine la frase. El segundo, \texttt{generate\_direct}, se activa como fallback cuando el motor upstream falla: reutiliza el prompt completo del motor de LLMs (once reglas más quince ejemplos \textit{few-shot}, sección~\ref{sec:f3-prompt}) para generar la frase desde cero.
 
 La diferencia entre ambos modos es fundamental: \texttt{post\_edit} instruye al LLM como realizador que mejora una frase existente, mientras que \texttt{generate\_direct} lo instruye como generador autónomo idéntico al motor LLM independiente.
 
@@ -120,8 +141,30 @@ Un campo del resultado, \texttt{was\_modified}, indica si el LLM alteró la fras
 
 Todos los componentes del módulo siguen el patrón de inicialización perezosa: los motores externos (\texttt{SentenceGenerator}, \texttt{HybridGenerator}, \texttt{LLMClient}, \texttt{PerplexityScorer}) no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}. Dado que la carga de FastText ($\sim$4,2 GB) y el modelo GPT-2 en español ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
 
+\begin{lstlisting}[language=Python,caption={Patrón de inicialización perezosa (\texttt{grammar\_llm.py}).},label={lst:lazy-init},basicstyle=\ttfamily\small,xleftmargin=1cm]
+class GrammarLLMHybrid:
+    def __init__(self, grammar_src_path, llm_src_path, model_name="gpt-4o"):
+        self._generator = None   # No se carga aun
+        self._post_editor = None
+
+    def setup(self):
+        from grammar.generator import SentenceGenerator
+        self._generator = SentenceGenerator()
+        self._post_editor = PostEditor(self.llm_src_path, self.model_name)
+
+    def _ensure_setup(self):
+        if self._generator is None or self._post_editor is None:
+            self.setup()
+
+    def generate(self, pictograms):
+        self._ensure_setup()  # Carga en la primera llamada
+        # ...
+\end{lstlisting}
+
 \section{Hibridación 1: Gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
+
+\textit{(TODO: Añadir diagrama del pipeline de H1: pictogramas $\rightarrow$ CFG $\rightarrow$ post-editor LLM $\rightarrow$ frase final, con el camino de fallback.)}
 
 La primera hibridación conecta la gramática formal (sección~\ref{sec:f1-postprocesamiento}) con el motor de LLMs en un pipeline secuencial de dos pasos (véase Extracto de código~\ref{lst:hybrid1-pipeline} del Anexo~\ref{anx:codigo}). Los pictogramas de entrada se procesan primero con la CFG, que intenta generar una frase estructurada según sus 48 patrones. Si la gramática tiene éxito, la frase resultante se envía al post-editor compartido para su refinamiento.
 
@@ -137,6 +180,8 @@ El propósito experimental de esta hibridación es servir como línea base para 
 
 \section{Hibridación 2: (Gramática + Embeddings) + LLM como post-editor}
 \label{sec:h-hybrid2}
+
+\textit{(TODO: Añadir diagrama del pipeline de H2: pictogramas $\rightarrow$ embeddings (CFG + FastText) $\rightarrow$ post-editor LLM $\rightarrow$ frase final, con el camino de fallback.)}
 
 La segunda hibridación replica la estructura de H1 pero sustituye la gramática pura por el motor de embeddings (sección~\ref{sec:f2-pipeline}), que combina CFG con embeddings semánticos, como fuente upstream.
 
@@ -170,6 +215,8 @@ La identidad deliberada de la capa LLM convierte la comparación H1 versus H2 en
 
 \section{Hibridación 3: Overgenerate-and-Rank multimotor}
 \label{sec:h-hybrid3}
+
+\textit{(TODO: Añadir diagrama del pipeline de H3: 5 motores $\rightarrow$ sobregeneración $\rightarrow$ filtro de fidelidad $\rightarrow$ ranking por perplejidad $\rightarrow$ frase seleccionada.)}
 
 La tercera hibridación implementa el paradigma \textit{overgenerate-and-rank} con los cinco motores del proyecto como fuentes de candidatas (véase Extracto de código~\ref{lst:hybrid3-pipeline} del Anexo~\ref{anx:codigo}). A diferencia de H1 y H2, que mejoran la salida de un motor individual, H3 busca la mejor frase entre todas las que los motores pueden producir. El pipeline se ejecuta en tres etapas secuenciales: sobregeneración, filtrado por fidelidad y ranking por perplejidad.
 

@@ -760,6 +760,47 @@ def _estimate_cost(self, input_tokens, output_tokens):
     )
 \end{lstlisting}
 
+\section{Prompt del post-editor}
+
+El \textit{system prompt} del post-editor (sección~\ref{sec:h-componentes}) define ocho reglas orientadas a mejorar la naturalidad sin alterar el contenido semántico. A diferencia del prompt del motor de LLMs (Extracto de código~\ref{lst:system-prompt}), que genera desde cero, este prompt recibe una frase ya generada y restringe las modificaciones a correcciones gramaticales y de fluidez.
+
+\begin{lstlisting}[language={},caption={\textit{System prompt} del post-editor (\texttt{prompt.py}).},label={lst:post-editor-prompt},basicstyle=\ttfamily\small,xleftmargin=1cm]
+Eres el modulo de post-edicion de Dixi, una aplicacion de
+Comunicacion Aumentativa y Alternativa (CAA). Recibes una
+frase generada automaticamente a partir de pictogramas y tu
+tarea es mejorar SOLO su naturalidad y correccion gramatical.
+
+REGLAS ESTRICTAS:
+
+1. FIDELIDAD ABSOLUTA: NO anadas conceptos, emociones,
+   informacion ni matices que no esten en la frase original
+   ni en los pictogramas de entrada.
+
+2. NO ELIMINES CONCEPTOS: Todos los conceptos presentes en
+   los pictogramas originales deben aparecer en la frase
+   final.
+
+3. MEJORAS PERMITIDAS: Corregir concordancia de genero y
+   numero, anadir articulos o preposiciones minimos,
+   mejorar orden de palabras, corregir conjugacion verbal.
+
+4. FORMATO: Responde UNICAMENTE con la frase mejorada. Sin
+   explicaciones, sin comillas, sin alternativas.
+
+5. SI LA FRASE YA ES CORRECTA: Repitela tal cual. No la
+   "mejores" si ya suena natural.
+
+6. UNA SOLA ORACION: Genera exactamente una oracion.
+
+7. REGISTRO: Coloquial-neutro, apropiado para comunicacion
+   cotidiana.
+
+8. PRESERVAR MODALIDAD E INTENCION VERBAL: NO elimines
+   verbos modales. NO cambies tiempo ni modo verbal.
+   Manten el sujeto si esta presente. Puedes mejorar la
+   forma, NUNCA la intencion comunicativa.
+\end{lstlisting}
+
 \section{Pipeline de Hibridación 1}
 
 La Hibridación 1 (sección~\ref{sec:h-hybrid1}) conecta la gramática formal con el post-editor LLM en dos pasos. Si la gramática tiene éxito, la frase se post-edita; si falla, el post-editor genera desde cero. El campo \texttt{method} del resultado distingue ambos caminos.
