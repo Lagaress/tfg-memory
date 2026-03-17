@@ -83,6 +83,8 @@ La latencia mantiene un espectro amplio: desde los 0,02 ms de la gramática form
 
 La Figura~\ref{fig:eval-radar} sintetiza visualmente este panorama. El perfil de la gramática formal y los embeddings forma un polígono que cubre prácticamente toda la superficie del radar. El LLM y los tres híbridos comparten un perfil ligeramente comprimido en los ejes de métricas n-gramáticas pero que se expande hacia los ejes de cobertura y fidelidad, donde convergen con las técnicas base. Los seis motores se concentran en una franja estrecha de rendimiento, con las diferencias principales en las métricas de coincidencia exacta.
 
+Los seis motores generan oraciones de alta calidad; lo que los diferencia no es si producen buenas frases, sino cómo las formulan y a qué coste operativo.
+
 \section{Significancia estadística}
 \label{sec:eval-significancia}
 
@@ -193,6 +195,8 @@ El hallazgo más relevante es que las frases de complejidad media resultan las m
 
 La métrica chrF++ (Figura~\ref{fig:eval-chrf-complejidad}) suaviza estas diferencias al operar a nivel de caracteres: incluso donde BLEU-4 registra caídas del 20\%, chrF++ se mantiene por encima de 0,90 para todos los motores y niveles de complejidad, confirmando que las divergencias son predominantemente de formulación (orden de palabras, elecciones morfológicas) y no de contenido.
 
+La complejidad de la entrada afecta a la forma de las frases generadas, no a su corrección: todos los motores mantienen alta calidad en los tres niveles.
+
 \subsection{Análisis de errores}
 \label{sec:eval-errores}
 
@@ -210,6 +214,8 @@ El hallazgo más revelador es que la hibridación cambia la naturaleza de los er
 Cuando el motor infiere correctamente un verbo como \textit{quiero} a partir del pictograma \textit{agua}, esa inferencia se contabiliza técnicamente como alucinación porque la palabra \textit{quiero} no corresponde a ningún pictograma de la secuencia de entrada.
 
 Los híbridos, al pasar la salida de la gramática por un LLM de post-edición, tienden a reducir las alucinaciones (el LLM elimina o sustituye algunas de estas inferencias) pero introducen errores morfológicos y léxicos: conjugaciones ligeramente diferentes, artículos cambiados o sinónimos parciales. El LLM presenta un perfil intermedio: menos alucinaciones que la gramática pero más errores léxicos que los motores deterministas.
+
+La hibridación no reduce los errores en términos absolutos, sino que los transforma: intercambia inferencias pragmáticas (clasificadas como alucinaciones) por variaciones morfológicas y léxicas propias de la reformulación neural.
 
 \subsection{Perplejidad y naturalidad}
 \label{sec:eval-perplejidad}
@@ -239,6 +245,8 @@ Los híbridos 1 y 2 alcanzan las menores perplejidades (medianas de 100 y 102 re
 La pseudo-perplejidad, calculada con un modelo BERT enmascarado, confirma la tendencia: los híbridos 1 y 2 obtienen medianas de 18 frente a 33 de la gramática. El LLM obtiene una mediana de 34, comparable a la gramática y los embeddings, lo que indica que su estilo de generación no produce formulaciones más naturales según el modelo BERT.
 
 Las desviaciones estándar de la perplejidad siguen siendo extremadamente altas (superiores a 7000 en todos los motores), reflejo de outliers en oraciones cortas o con construcciones poco frecuentes. Con 428 casos, el test de Friedman alcanza alta significancia ($\chi^2 = 423{,}12$, $p < 0{,}0001$), y las comparaciones por pares confirman que los híbridos 1 y 2 producen texto significativamente más natural que la gramática, los embeddings y el LLM ($p < 0{,}0001$), mientras que Hybrid3 no se diferencia de la gramática.
+
+La post-edición por LLM es el único mecanismo que mejora la naturalidad de forma medible; ni los embeddings ni la selección por perplejidad de Hybrid3 consiguen el mismo efecto.
 
 \section{Análisis metodológico}
 \label{sec:eval-metodologico}
@@ -322,6 +330,8 @@ La Tabla~\ref{tab:eval-diversidad} muestra que la diversidad entre motores es li
 La estructura interna de esta convergencia revela bloques de equivalencia. La gramática formal y los embeddings producen salidas idénticas en 426 de 428 casos (99,5\%), consecuencia de que el componente de embeddings rara vez altera las decisiones del motor basado en reglas para el vocabulario acotado de este proyecto. La gramática y Hybrid3 coinciden en 379 de 428 casos (88,6\%), reflejo del patrón de selección de Hybrid3 que se analiza en la Sección~\ref{sec:eval-seleccion-h3}.
 
 Estos tres motores (gramática, embeddings e Hybrid3) forman un bloque mayoritario que produce la misma salida en 377 de 428 casos (88,1\%). El LLM y los híbridos 1 y 2, al incorporar un componente de post-edición neural, son los que más frecuentemente divergen del bloque mayoritario.
+
+La diversidad entre motores es baja: para la mayoría de las entradas del corpus, las seis técnicas convergen en la misma oración o en dos variantes muy próximas.
 
 \section{Análisis de los híbridos}
 \label{sec:eval-hibridos}
