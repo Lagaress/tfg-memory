@@ -63,6 +63,8 @@ El motor utiliza 15 ejemplos \textit{few-shot}~\cite{brown2020language} que cubr
 \label{tab:f3-fewshot}
 \end{table}
 
+El número de 15 se fijó porque es el mínimo que cubre las ocho categorías del dataset con al menos un ejemplo representativo; añadir más ejemplos incrementaría el coste de cada llamada sin beneficio proporcional, dado que los aproximadamente 1.204 tokens de entrada ya están dominados por el prompt fijo y los \textit{few-shot} existentes.
+
 Los criterios de selección priorizan la cobertura de patrones que requieren inferencia: el ejemplo 4 enseña al modelo a expandir un solo sustantivo en una oración de necesidad; el ejemplo 5, a insertar la preposición contraída \textit{al}; el ejemplo 15, a corregir la concordancia de género. Los ejemplos se adaptaron al formato real del dataset, que utiliza tanto infinitivos como formas conjugadas como pictogramas de entrada.
 
 \subsection{Construcción dinámica del prompt}

@@ -156,7 +156,7 @@ Dado que la carga de FastText ($\sim$4,2 GB) y el modelo GPT-2 en español ($\si
 
 La primera hibridación conecta la gramática formal (sección~\ref{sec:f1-postprocesamiento}) con el motor de LLMs en un pipeline secuencial de dos pasos (véase Extracto de código~\ref{lst:hybrid1-pipeline} del Anexo~\ref{anx:codigo}). Los pictogramas de entrada se procesan primero con la CFG, que intenta generar una frase estructurada según sus 48 patrones. Si la gramática tiene éxito, la frase resultante se envía al post-editor compartido para su refinamiento.
 
-Si falla (porque la secuencia contiene palabras fuera del léxico o no coincide con ningún patrón), se activa el fallback: el post-editor genera la frase desde cero usando el prompt completo del motor de LLMs (sección~\ref{sec:f3-prompt}).
+Si falla (porque la secuencia contiene palabras fuera del léxico o no coincide con ningún patrón), se activa el fallback: el post-editor genera la frase desde cero usando el prompt completo del motor de LLMs (sección~\ref{sec:f3-prompt}). En una aplicación de CAA, dejar al usuario sin respuesta constituye un problema de accesibilidad más grave que devolver una frase imperfecta: la comunicación no puede quedar interrumpida porque el motor no reconozca un patrón. El fallback garantiza que la Hibridación 1 siempre produce una salida, independientemente de la entrada.
 
 El campo \texttt{method} del resultado discrimina entre ambos caminos: \texttt{grammar\_post\_edit} cuando la gramática funciona, o \texttt{fallback\_llm\_direct} cuando se activa el fallback. Esta distinción permite desagregar las métricas por ruta de ejecución.
 
@@ -198,6 +198,8 @@ Fallback & \texttt{generate\_direct} & \texttt{generate\_direct} \\
 \end{table}
 
 Un ejemplo representativo es la entrada \texttt{[ir, colegio]}. El motor de embeddings detecta el patrón de movimiento, genera la frase \textit{Quiero ir al colegio} con la preposición contraída correcta, y reporta el método como \texttt{hybrid}. El post-editor recibe esta frase, la evalúa según las ocho reglas y la devuelve sin modificar. El resultado es idéntico al del camino exitoso de H1 para esta misma entrada, lo que sugiere que, para frases dentro de la cobertura de la gramática, los embeddings no aportan una diferencia que el post-editor pueda explotar.
+
+Este patrón se generaliza en las métricas del dataset completo: la equivalencia en perplejidad (102 frente a 100) y en fidelidad ajustada (0,979 frente a 0,982) entre H2 y H1 indica que los embeddings no aportan una diferenciación medible cuando un LLM post-editor está presente. El LLM subsume las mejoras semánticas que los embeddings proporcionan en las técnicas base: el refinamiento de preposiciones, la selección de variantes léxicas y el reordenamiento que realiza el motor de embeddings quedan absorbidos por la capacidad del post-editor para reformular la frase completa.
 
 La identidad deliberada de la capa LLM convierte la comparación H1 versus H2 en el experimento controlado descrito en la sección~\ref{sec:h-planteamiento}.
 

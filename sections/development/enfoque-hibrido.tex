@@ -112,4 +112,4 @@ Los pesos del scoring (0,6/0,4 entre CFG y embeddings, 0,6/0,4 entre preferencia
 
 La implementación de SIF~\cite{arora2017simple} incluye solo la ponderación por frecuencia inversa, sin la corrección PCA (eliminación del primer componente principal) del artículo original; para frases cortas de CAA el impacto es menor.
 
-La calidad de las oraciones depende directamente de la cobertura de la gramática formal: patrones no contemplados activan el fallback descrito en la sección~\ref{sec:f2-pipeline}. El sistema tampoco aprende de correcciones del usuario ni se adapta con el uso.
+La calidad de las oraciones depende directamente de la cobertura de la gramática formal: patrones no contemplados activan el fallback descrito en la sección~\ref{sec:f2-pipeline}. El sistema tampoco aprende de correcciones del usuario ni se adapta con el uso. Queda pendiente explorar si los embeddings aportarían una diferenciación mayor con vocabularios más amplios o dominios temáticos no cubiertos por las reglas de la gramática, donde la similitud semántica tendría más margen para desambiguar combinaciones no anticipadas.
