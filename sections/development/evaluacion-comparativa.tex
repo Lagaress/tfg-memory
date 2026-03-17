@@ -1,28 +1,26 @@
-Los capítulos anteriores han descrito tres técnicas base de generación de lenguaje natural (gramática formal, embeddings semánticos y modelos de lenguaje grandes) y tres hibridaciones que las combinan. Cada una ha sido evaluada individualmente sobre su propio corpus.
-
-Este capítulo las confronta sobre un mismo conjunto de datos mediante un pipeline de evaluación automatizado que aplica métricas con referencia, sin referencia y específicas de CAA, complementadas con tests de significancia estadística y visualizaciones comparativas. El objetivo no es proclamar un ganador, sino cartografiar las fortalezas, debilidades y compromisos de cada enfoque.
+Este capítulo confronta los seis motores sobre un mismo dataset mediante un pipeline de evaluación automatizado que aplica métricas con referencia, sin referencia y específicas de CAA, complementadas con tests de significancia estadística.
 
 \section{Metodología de la evaluación}
 \label{sec:eval-metodologia}
 
-La comparación rigurosa de seis motores de generación requiere un protocolo que garantice la equidad de condiciones. El pipeline de evaluación opera en cinco pasos secuenciales:
+El pipeline de evaluación opera en cinco pasos secuenciales:
 
 \begin{enumerate}
-    \item \textit{Unificación del dataset}: los tres conjuntos de datos de las técnicas base, cada uno con formato y campos ligeramente diferentes, se normalizan a un formato canónico y se calcula su intersección por identificador. El resultado son 428 casos comunes que constituyen el corpus de evaluación unificado.
-    \item \textit{Generación}: cada uno de los seis motores procesa los 428 casos y produce una oración de salida por caso. Los resultados se almacenan en caché para garantizar reproducibilidad. Los seis motores generaron salida para la totalidad de los 428 casos.
+    \item \textit{Unificación del dataset}: los conjuntos de datos de las tres técnicas base se normalizan a un formato canónico y se intersectan por identificador. El resultado son 428 casos comunes que constituyen el corpus de evaluación.
+    \item \textit{Generación}: cada motor procesa los 428 casos y produce una oración por caso. Los seis motores alcanzaron cobertura completa.
     \item \textit{Cálculo de métricas}: para cada par (predicción, referencia) se calculan las métricas descritas en la Sección~\ref{sec:metricas}. En total se obtienen 17 valores por caso y motor.
-    \item \textit{Análisis estadístico}: se aplican tests de significancia no paramétricos (Friedman como test ómnibus, Wilcoxon \textit{signed-rank} por pares con corrección de Holm-Bonferroni, y bootstrap pareado para intervalos de confianza) sobre las distribuciones de métricas de los seis motores.
+    \item \textit{Análisis estadístico}: se aplican tests de significancia no paramétricos (Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y bootstrap pareado para intervalos de confianza) sobre las distribuciones de métricas de los seis motores.
     \item \textit{Generación de informes}: tablas comparativas, gráficas de distribución y plantillas para evaluación humana.
 \end{enumerate}
 
-Una observación fundamental para interpretar los resultados: los motores de gramática formal y embeddings semánticos obtienen scores perfectos o casi perfectos en las métricas de coincidencia porque las oraciones de referencia del dataset fueron generadas originalmente por estos motores. La referencia \textit{es} su salida, de modo que la coincidencia es trivial por diseño. Estos valores no indican superioridad sino que constituyen el techo teórico del dataset: el máximo que cualquier motor podría alcanzar si reprodujera exactamente las mismas formulaciones.
+Los scores perfectos o casi perfectos de la gramática formal y los embeddings en métricas de coincidencia se explican por el sesgo de referencia descrito en la sección~\ref{sec:multi-referencia}: las oraciones de referencia fueron generadas por estos motores, de modo que la coincidencia es trivial por diseño.
 
 \section{Resultados globales}
 \label{sec:eval-resultados}
 
 Las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el rendimiento de los seis motores. Cada celda muestra la media $\pm$ desviación estándar sobre los 428 casos.
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \small
 \begin{tabular}{l c c c c c c}
@@ -44,7 +42,7 @@ BERTScore $F_1$ & 1,00 & 0,99 $\pm$ 0,03 & & 0,99 $\pm$ 0,04 & 0,99 $\pm$ 0,03 &
 \label{tab:eval-referencia}
 \end{table}
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \small
 \begin{tabular}{l c c c c c c}
@@ -66,7 +64,7 @@ Latencia (ms) & 0,02 & 1643 & & 811 & 915 & 4179 \\
 \label{tab:eval-sin-referencia}
 \end{table}
 
-La tabla de métricas con referencia revela un patrón claro. Los motores base de gramática formal y embeddings semánticos alcanzan el techo del dataset por las razones ya expuestas. El LLM y los tres híbridos se sitúan en un rango alto y estadísticamente equivalente entre sí: Exact Match del 85-89\%, BLEU-4 del 91-93\% y BERTScore de 0,99, lo que indica que en la mayoría de los casos reproducen formulaciones muy próximas a la referencia.
+La tabla de métricas con referencia revela un patrón claro. Los motores base de gramática formal y embeddings semánticos alcanzan el techo del dataset por el sesgo de referencia (sección~\ref{sec:multi-referencia}). El LLM y los tres híbridos se sitúan en un rango alto y estadísticamente equivalente entre sí: Exact Match del 85-89\%, BLEU-4 del 91-93\% y BERTScore de 0,99, lo que indica que en la mayoría de los casos reproducen formulaciones muy próximas a la referencia.
 
 El LLM obtiene valores ligeramente inferiores a los híbridos en Exact Match (0,85 frente a 0,89 de Hybrid3) pero equivalentes en ROUGE-L y BERTScore, lo que confirma que sus reformulaciones preservan el contenido semántico aunque difieran en la forma exacta.
 
@@ -78,7 +76,7 @@ La perplejidad revela que los híbridos 1 y 2 producen texto más natural que la
 
 La latencia mantiene un espectro amplio: desde los 0,02 ms de la gramática formal hasta los 4,2 segundos de Hybrid3, con el LLM en 1,6 segundos por llamada a la API.
 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/eval-radar.png}
     \caption{Perfil multimétrica de los seis motores. Líneas continuas para las técnicas base, discontinuas para las hibridaciones. Las técnicas base dominan las métricas de coincidencia (ejes superiores), mientras que los híbridos se aproximan en ROUGE-L, chrF++ y cobertura (ejes inferiores).}
@@ -96,7 +94,7 @@ El test de Friedman~\cite{friedman1937use} actúa como test ómnibus: evalúa si
 
 Con 6 motores existen $\binom{6}{2} = 15$ pares posibles, lo que requiere corrección por comparaciones múltiples. Se aplica la corrección de Holm-Bonferroni~\cite{holm1979simple}, que ordena los $p$-valores de menor a mayor y compara cada uno con un umbral adaptativo $\alpha / (m - k + 1)$, donde $m = 15$ es el número de comparaciones y $k$ la posición en el ranking. Esta corrección ofrece mayor potencia estadística que la de Bonferroni clásica ($\alpha' = 0{,}05 / 15 = 0{,}0033$ fijo para todas las comparaciones) sin sacrificar el control del error de tipo I familiar.
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \begin{tabular}{l r r l}
 \hline
@@ -119,11 +117,11 @@ Fidelidad & 53,84 & $<$ 0,0001 & Sí \\
 
 El test de Friedman (Tabla~\ref{tab:eval-friedman}) confirma que existen diferencias significativas entre los seis motores en las nueve métricas evaluadas, sin excepciones. Los estadísticos $\chi^2$ en métricas de coincidencia n-gramática oscilan entre 205 y 216, reflejando la dominancia de gramática y embeddings (scores perfectos) frente a la variabilidad del LLM y los híbridos. La perplejidad presenta el $\chi^2$ más alto (423,12), indicando diferencias sustanciales en naturalidad entre motores.
 
-La perplejidad y la cobertura, que con 115 casos no alcanzaban significancia, ahora la alcanzan con $\chi^2$ de 423,12 y 29,90 respectivamente. La corrección por comparaciones múltiples es innecesaria a nivel ómnibus, dado que todos los $p$-valores son inferiores a 0,0001.
+La corrección por comparaciones múltiples es innecesaria a nivel ómnibus, dado que todos los $p$-valores son inferiores a 0,0001.
 
 Las comparaciones por pares con Wilcoxon y corrección de Holm-Bonferroni revelan cinco hallazgos principales:
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \small
 \begin{tabular}{l l l}
@@ -156,7 +154,7 @@ El quinto hallazgo proviene de la evaluación multi-referencia (Sección~\ref{se
 \section{Distribución de métricas}
 \label{sec:eval-distribuciones}
 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/eval-boxplots.png}
     \caption{Distribución de las principales métricas por motor. La gramática formal y los embeddings presentan distribuciones degeneradas (todas las observaciones en el mismo punto). El LLM y los híbridos presentan mayor dispersión que las técnicas base, especialmente en BLEU-4 y METEOR, con colas izquierdas de casos donde las reformulaciones divergen de la referencia.}
@@ -172,14 +170,14 @@ La dispersión tiene implicaciones prácticas para un sistema de CAA. Un motor c
 \section{Análisis por complejidad}
 \label{sec:eval-complejidad}
 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/eval-bleu4-complejidad.png}
     \caption{BLEU-4 por nivel de complejidad de la frase de entrada. Las barras de error indican $\pm$ una desviación estándar.}
     \label{fig:eval-bleu4-complejidad}
 \end{figure}
 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/eval-chrf-complejidad.png}
     \caption{chrF++ por nivel de complejidad de la frase de entrada. La métrica de caracteres suaviza las diferencias entre motores respecto a BLEU-4.}
@@ -193,7 +191,7 @@ La métrica chrF++ (Figura~\ref{fig:eval-chrf-complejidad}) suaviza estas difere
 \section{Análisis de errores}
 \label{sec:eval-errores}
 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/eval-errores.png}
     \caption{Distribución de tipos de error por motor. La gramática formal y los embeddings concentran sus errores en alucinaciones (palabras de contenido no justificadas por los pictogramas). Los híbridos reducen la alucinación pero introducen errores morfológicos y léxicos. El LLM presenta un perfil intermedio.}
@@ -209,7 +207,7 @@ Los híbridos, al pasar la salida de la gramática por un LLM de post-edición, 
 \section{Perplejidad y naturalidad}
 \label{sec:eval-perplejidad}
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \begin{tabular}{l r r}
 \hline
@@ -236,7 +234,7 @@ Las desviaciones estándar de la perplejidad siguen siendo extremadamente altas 
 \section{Correlación entre métricas}
 \label{sec:eval-correlacion}
 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=0.75\textwidth]{figures/eval-heatmap.png}
     \caption{Matriz de correlación entre métricas calculada sobre los seis motores combinados. Se distinguen dos grupos ortogonales: métricas de coincidencia n-gramática (BLEU, METEOR, BERTScore) y métricas específicas de CAA (cobertura, fidelidad). La perplejidad no correlaciona significativamente con ninguna otra métrica.}
@@ -256,7 +254,7 @@ Esta estructura de correlaciones refuerza la necesidad de un protocolo multimét
 \section{Mejora relativa de los híbridos}
 \label{sec:eval-mejora}
 
-\begin{figure}[H]
+\begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/eval-mejora-relativa.png}
     \caption{Porcentaje de mejora (o degradación) de cada híbrido respecto a su técnica base natural. Valores positivos indican mejora; negativos, degradación. Los híbridos degradan las métricas de coincidencia pero mejoran marginalmente en perplejidad y fidelidad.}
@@ -274,7 +272,7 @@ Estos resultados confirman que la hibridación no cumple el objetivo de mejorar 
 
 Las métricas con referencia única penalizan cualquier reformulación que difiera de la oración gold standard, aunque sea igualmente válida. La evaluación multi-referencia, definida en la Sección~\ref{sec:multi-referencia}, mitiga este sesgo utilizando las salidas de los otros cinco motores como referencias alternativas. La Tabla~\ref{tab:eval-multiref} recoge los resultados.
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \small
 \begin{tabular}{l c c c c c c}
@@ -304,7 +302,7 @@ Las métricas de n-gramas multi-referencia sí alcanzan significancia en el test
 
 La evaluación multi-referencia presupone que los motores producen salidas diversas que se complementan entre sí. Para verificar este supuesto, se analiza en qué medida los seis motores convergen (producen la misma oración) o divergen (generan formulaciones distintas) para cada caso del corpus.
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \begin{tabular}{l r r}
 \hline
@@ -332,7 +330,7 @@ Estos tres motores (gramática, embeddings e Hybrid3) forman un bloque mayoritar
 
 Hybrid3 opera como un sistema de \textit{overgenerate-and-rank}: genera candidatos con cuatro motores (gramática, LLM, Hybrid1 e Hybrid2) y selecciona el de menor perplejidad. La Tabla~\ref{tab:eval-h3-seleccion} desglosa qué motor aporta la candidata seleccionada en cada caso.
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \begin{tabular}{l r r}
 \hline
@@ -357,7 +355,7 @@ El coste de esta estrategia (4,2 segundos de latencia y tres llamadas a la API p
 \section{Compromisos de diseño}
 \label{sec:eval-compromisos}
 
-\begin{table}[H]
+\begin{table}[ht]
 \centering
 \small
 \begin{tabular}{l c c c c c c}
