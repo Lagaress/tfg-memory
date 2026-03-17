@@ -1,11 +1,4 @@
-La cuarta línea de experimentación nace de una observación directa: ninguno de los tres motores anteriores domina simultáneamente en fidelidad, naturalidad, cobertura y latencia. La gramática formal es determinista y rápida pero rígida y limitada en cobertura; los embeddings amplían esa cobertura y refinan preposiciones pero no mejoran la naturalidad; el LLM produce frases fluidas y cubre cualquier entrada pero introduce latencia, coste y no determinismo.
-
-Este capítulo describe tres técnicas de hibridación que combinan los motores anteriores para explorar si la composición supera a las partes.
-
-\section{Planteamiento del enfoque}
-\label{sec:h-planteamiento}
-
-La motivación para hibridar los motores se resume en una tabla de fortalezas y debilidades complementarias. La Tabla~\ref{tab:h-motores-dimensiones} resume el perfil de cada motor en las cuatro dimensiones relevantes para un sistema de CAA.
+La cuarta línea de experimentación nace de una observación directa: ninguno de los tres motores anteriores domina simultáneamente en fidelidad, naturalidad, cobertura y latencia. La Tabla~\ref{tab:h-motores-dimensiones} resume el perfil de cada motor en estas cuatro dimensiones.
 
 \begin{table}[H]
 \centering
@@ -22,40 +15,41 @@ LLM (GPT-4o) & Alta & Alta & 100\% & $\sim$1600 ms \\
 \label{tab:h-motores-dimensiones}
 \end{table}
 
-Ningún motor individual alcanza el máximo en todas las dimensiones. La gramática garantiza fidelidad perfecta dentro de su dominio pero rechaza el 3,4\% de las entradas y produce frases que, aunque correctas, suenan rígidas. Los embeddings resuelven la cobertura pero heredan la rigidez estructural de la CFG. El LLM alcanza naturalidad y cobertura máximas pero depende de una API externa con latencia y coste por llamada.
+La gramática garantiza fidelidad perfecta dentro de su dominio pero rechaza el 3,4\% de las entradas y produce frases que, aunque correctas, suenan rígidas. Los embeddings resuelven la cobertura pero heredan la rigidez estructural de la CFG. El LLM alcanza naturalidad y cobertura máximas pero depende de una API externa con latencia y coste por llamada.
 
-La pregunta que motiva esta técnica es si existen combinaciones de motores que produzcan frases mejores que las de cualquier motor individual.
+Este capítulo describe tres técnicas de hibridación que exploran si la composición de motores supera a las partes.
 
-Se implementan tres estrategias de hibridación con objetivos experimentales diferenciados. La primera, H1, conecta la gramática formal con un LLM que actúa como post-editor: la CFG genera una frase estructurada y el LLM la refina para mejorar su naturalidad.
+\section{Planteamiento del enfoque}
+\label{sec:h-planteamiento}
 
-La segunda, H2, sustituye la gramática pura por el motor de embeddings como fuente upstream y aplica el mismo post-editor LLM. La tercera, H3, implementa un paradigma de sobregeneración y ranking: los cinco motores disponibles generan candidatas, un filtro de fidelidad descarta las que omiten pictogramas y un modelo de perplejidad selecciona la más natural.
+Se implementan tres estrategias de hibridación con objetivos experimentales diferenciados. Las dos primeras se basan en el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep} y en la post-edición neuronal de texto generado por reglas~\cite{chen2025axsemantics}. La tercera implementa el paradigma de sobregeneración y ranking~\cite{sharma2019overgenerate}.
+
+H1 conecta la gramática formal con un LLM que actúa como post-editor: la CFG genera una frase estructurada y el LLM la refina para mejorar su naturalidad. H2 sustituye la gramática pura por el motor de embeddings como fuente upstream y aplica el mismo post-editor LLM. H3 adopta un enfoque diferente: los cinco motores disponibles generan candidatas, un filtro de fidelidad descarta las que omiten pictogramas y un modelo de perplejidad selecciona la más natural.
 
 La comparación directa entre H1 y H2 constituye el experimento central de esta técnica. Ambas hibridaciones comparten exactamente el mismo post-editor (mismo prompt, mismo modelo, misma configuración) y difieren únicamente en si el motor upstream incluye embeddings semánticos. Cualquier diferencia en las métricas se atribuye directamente a la contribución de los embeddings: si H2 supera a H1, los embeddings aportan valor incluso cuando hay un LLM que refina la salida; si no, el LLM por sí solo ya suple lo que los embeddings proporcionan.
 
 \section{Fundamentos teóricos}
 \label{sec:h-fundamentos}
 
-Las tres hibridaciones se apoyan en tres patrones establecidos en la literatura de generación de lenguaje natural: la post-edición neuronal de texto generado por reglas, la arquitectura \textit{plan-then-realize} y el paradigma \textit{overgenerate-and-rank}. Esta sección revisa cada patrón, identifica el trabajo previo relevante y justifica las métricas de selección utilizadas en la Hibridación 3.
+Esta sección revisa cada uno de los patrones en los que se basan las tres hibridaciones, identifica el trabajo previo relevante y justifica las métricas de selección utilizadas en la Hibridación 3.
 
 \subsection{LLM como post-editor de sistemas de reglas}
 
 Chen, Heininger, Schneider et al. de AX Semantics~\cite{chen2025axsemantics} describieron el uso de un LLM para control de calidad sobre texto generado por un sistema de reglas en producción. Su sistema genera noticias deportivas en alemán, francés y español mediante reglas, y el LLM identifica errores gramaticales y ortográficos en la salida, vinculando las correcciones a las reglas originales mediante identificadores únicos para que la corrección de una regla mejore todos los textos futuros.
 
-La idea clave que se adopta en este trabajo es la \textit{separación de responsabilidades}: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. En el contexto de Dixi, la gramática formal o el sistema de embeddings genera una frase estructuralmente correcta y el LLM la refina sin alterar el contenido semántico.
-
-La diferencia con el trabajo de AX Semantics es que aquí el LLM actúa en tiempo real sobre cada frase individual, no como herramienta offline de mejora de reglas, lo que introduce latencia y coste por llamada pero permite mejorar la naturalidad de cada frase de forma inmediata.
+La idea clave que se adopta en las Hibridaciones 1 y 2 es la \textit{separación de responsabilidades}: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. La diferencia con el trabajo de AX Semantics es que aquí el LLM actúa en tiempo real sobre cada frase individual, no como herramienta offline de mejora de reglas.
 
 \subsection{Plan-then-realize}
 
 El patrón \textit{plan-then-realize}, establecido por Moryossef, Goldberg y Dagan en su framework Step-by-Step~\cite{moryossef2019stepbystep}, separa la generación de lenguaje natural en dos etapas: un planificador simbólico que decide qué decir y en qué orden, y un realizador neural que transforma el plan en texto fluido. En el benchmark WebNLG, esta separación mejoró tanto los scores BLEU como las evaluaciones humanas de adecuación respecto a enfoques \textit{end-to-end} puros. Elder et al.~\cite{elder2019intermediate} reforzaron esta conclusión: las representaciones intermedias simbólicas reducen las alucinaciones respecto a modelos \textit{end-to-end}.
 
-Las Hibridaciones 1 y 2 implementan una variante de este patrón. La planificación corresponde a la generación por gramática o embeddings, que produce una frase estructurada con los conceptos correctos; la realización corresponde a la post-edición por LLM, que mejora la naturalidad sin alterar el contenido. La restricción de fidelidad en el prompt del post-editor es la garantía de que el realizador no introduce información que el planificador no proporcionó.
+En las Hibridaciones 1 y 2, la planificación corresponde a la generación por gramática o embeddings, y la realización a la post-edición por LLM. La restricción de fidelidad en el prompt del post-editor garantiza que el realizador no introduce información que el planificador no proporcionó.
 
 \subsection{Overgenerate-and-rank}
 
 Sharma, Shah, Garg y Subba~\cite{sharma2019overgenerate} formalizaron el paradigma \textit{Generate-Filter-Rank} para sistemas NLG en producción: se generan múltiples candidatas con cualquier método, se filtran por criterios de calidad y se selecciona la mejor según una función de ranking. Agarwal, Dymetman y Gaussier~\cite{agarwal2018reranking} demostraron la eficacia del reranking en el E2E Challenge, y Lee, Auli y Ranzato~\cite{lee2021discriminative} mostraron que el reranking discriminativo con transformers grandes puede mejorar hasta 4 puntos BLEU sobre el mejor candidato individual.
 
-La Hibridación 3 implementa este paradigma con tres etapas: generación de cinco candidatas por cinco motores distintos, filtrado por cobertura de pictogramas como restricción de fidelidad y ranking por perplejidad como proxy de naturalidad.
+La Hibridación 3 aplica las tres etapas de este paradigma con las métricas que se describen a continuación: cobertura de pictogramas como criterio de filtrado y perplejidad como función de ranking.
 
 \subsection{Perplejidad como métrica de naturalidad}
 
