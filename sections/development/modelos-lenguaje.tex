@@ -9,7 +9,9 @@ Los dos motores anteriores comparten una característica: todo el conocimiento l
 
 Esta tercera técnica explora una alternativa: prescindir de reglas explícitas y delegar la generación a un modelo que ha aprendido las regularidades del español a partir de cantidades masivas de texto.
 
-La elección de GPT-4o~\cite{openai2024gpt4o} y GPT-4o-mini como modelos responde a factores pragmáticos. Ambos representan el estado del arte en generación de texto en español, con capacidades de seguimiento de instrucciones que permiten restringir el comportamiento al dominio CAA sin necesidad de ajuste fino. El despliegue vía API elimina la necesidad de infraestructura GPU, y la interfaz permite iterar con rapidez sobre el diseño de prompts, haciendo viable la experimentación en el contexto de un TFG. Se evalúan ambos para determinar si la mayor capacidad de GPT-4o se traduce en mejor rendimiento para esta tarea específica.
+La elección de GPT-4o~\cite{openai2024gpt4o} y GPT-4o-mini como modelos responde a factores pragmáticos. Ambos representan el estado del arte en generación de texto en español, con capacidades de seguimiento de instrucciones que permiten restringir el comportamiento al dominio CAA sin necesidad de ajuste fino. El despliegue vía API elimina la necesidad de infraestructura GPU, y la interfaz permite iterar con rapidez sobre el diseño de prompts, haciendo viable la experimentación en el contexto de un TFG.
+
+Se evalúan ambos para determinar si la mayor capacidad de GPT-4o se traduce en mejor rendimiento para esta tarea específica.
 
 \section{Diseño del prompt}
 \label{sec:f3-prompt}
@@ -97,7 +99,9 @@ El límite de 100 tokens es generoso para oraciones que promedian 4 tokens de sa
 
 El cliente implementa reintentos diferenciados según el tipo de error (véase Extracto de código~\ref{lst:llm-client} del Anexo~\ref{anx:codigo}): los errores de \textit{rate limit} se reintentan con backoff exponencial (2 y 4 segundos), los timeouts se reintentan inmediatamente, y los errores de servidor no se reintentan.
 
-El coste se estima a partir de los precios de la API~\cite{openai2024pricing}: \$2,50/1M tokens de entrada y \$10,00/1M de salida para GPT-4o, frente a \$0,15/1M y \$0,60/1M para GPT-4o-mini. Con la media de 1.204 tokens de entrada y 4 de salida, cada consulta cuesta \$0,00018 con GPT-4o-mini y \$0,00305 con GPT-4o, una diferencia de factor 16,7$\times$.
+El coste se estima a partir de los precios de la API~\cite{openai2024pricing}: \$2,50/1M tokens de entrada y \$10,00/1M de salida para GPT-4o, frente a \$0,15/1M y \$0,60/1M para GPT-4o-mini.
+
+Con los aproximadamente 1.204 tokens de entrada y 4 de salida descritos en la sección~\ref{sec:f3-prompt}, cada consulta cuesta \$0,00018 con GPT-4o-mini y \$0,00305 con GPT-4o, una diferencia de factor 16,7$\times$.
 
 \section{Validación post-generación}
 \label{sec:f3-validacion}
@@ -147,6 +151,8 @@ Los umbrales son: cobertura inferior al 50\% genera un error bloqueante; entre 5
 
 El motor depende de la API de OpenAI, lo que implica conexión a Internet permanente y un servicio de pago que no es viable para uso offline. La latencia de red añade aproximadamente un segundo a cada generación, un tiempo perceptible en una aplicación de comunicación asistida.
 
-Aunque el coste por consulta es reducido (\$0,00018 con GPT-4o-mini)~\cite{openai2024pricing}, el uso continuado genera un gasto acumulativo que no existe en los motores simbólicos. Con temperatura 0,3, la misma entrada puede producir salidas ligeramente diferentes entre ejecuciones, lo que dificulta la depuración y la reproducibilidad de los resultados.
+Aunque el coste por consulta es reducido (\$0,00018 con GPT-4o-mini)~\cite{openai2024pricing}, el uso continuado genera un gasto acumulativo que no existe en los motores simbólicos.
+
+Con temperatura 0,3, la misma entrada puede producir salidas ligeramente diferentes entre ejecuciones, lo que dificulta la depuración y la reproducibilidad de los resultados.
 
 Las interrogativas son la categoría más difícil para el modelo, con las dos únicas interrogativas de los 15 ejemplos \textit{few-shot} insuficientes para cubrir la variedad de inferencias de persona verbal que esta categoría requiere.
