@@ -35,12 +35,14 @@ Las 355 entradas son el resultado de filtrar las 646 del léxico original a form
 
 Cada entrada se almacena como un objeto JSON con campos que varían según la categoría (véase Extracto de código~\ref{lst:lexicon-json} del Anexo~\ref{anx:codigo}): los verbos incluyen conjugaciones completas por pronombre, los lugares incluyen preposiciones de movimiento y ubicación, los adjetivos incluyen formas de género, y los objetos incluyen rasgos como \texttt{uncountable} y \texttt{definite\_article}.
 
-La decisión de reutilizar el léxico del motor de gramática, en lugar de construir uno independiente, responde a tres razones: la información lingüística ya estaba validada, se garantiza consistencia entre ambos motores al evaluar sobre el mismo conjunto de conceptos, y se evita duplicar un esfuerzo considerable de etiquetado manual. La diferencia fundamental es el formato: mientras que el motor de gramática codifica el léxico como estructuras Python en memoria, este motor lo serializa a JSON para independizar el léxico del código.
+La diferencia respecto al léxico del motor de gramática es el formato: mientras que aquel codifica las entradas como estructuras Python en memoria, este motor las serializa a JSON para independizar el léxico del código.
 
 \section{Arquitectura del pipeline}
 \label{sec:f2-pipeline}
 
-El sistema procesa cada secuencia de pictogramas a través de un pipeline de tres etapas: generación estructural, ranking y refinamiento semántico, y orquestación. La primera etapa delega toda la generación gramatical a la CFG del motor de gramática; la segunda aplica embeddings para desambiguar y refinar; la tercera coordina ambas y formatea el resultado.
+El sistema procesa cada secuencia de pictogramas a través de un pipeline de tres etapas: generación estructural, ranking y refinamiento semántico, y orquestación.
+
+La primera etapa delega toda la generación gramatical a la CFG del motor de gramática; la segunda aplica embeddings para desambiguar y refinar; la tercera coordina ambas y formatea el resultado.
 
 \subsection{Generación estructural vía CFG}
 
@@ -48,7 +50,7 @@ El módulo \texttt{cfg\_bridge.py} encapsula la comunicación con el motor de gr
 
 Para cada secuencia de pictogramas, el bridge invoca \texttt{SentenceGenerator.generate()}, que ejecuta el pipeline completo descrito en la sección~\ref{sec:f1-postprocesamiento}. Cada candidato se convierte en un diccionario plano con los campos \texttt{sentence} (la frase generada), \texttt{tipo\_oracion}, \texttt{confianza}, \texttt{patron} e \texttt{inferencias}.
 
-Si la CFG no reconoce la secuencia (por ejemplo, ante una palabra desconocida o una estructura fuera de los 48 patrones), el bridge devuelve una lista vacía y el orquestador gestiona el fallback.
+Cuando la CFG no reconoce la secuencia, el bridge devuelve una lista vacía. En ese caso, a diferencia del capítulo anterior donde la entrada se rechazaba sin más, el orquestador aplica un fallback: en una aplicación de CAA, dejar al usuario sin respuesta es un problema de accesibilidad mayor que devolver una frase imperfecta.
 
 \subsection{Ranking semántico de candidatos}
 
@@ -56,7 +58,9 @@ Cuando la CFG genera múltiples candidatos para una misma entrada, como \textit{
 
 $$\text{score} = \text{confianza}_{\text{CFG}} \times 0{,}6 + \text{score}_{\text{embedding}} \times 0{,}4$$
 
-El score de embedding se compone a su vez de dos señales: la preferencia seleccional (60\%), que mide la similitud coseno entre cada par verbo-argumento, y la similitud vectorial a nivel de oración (40\%), que compara el vector compuesto de los pictogramas de entrada con el de la frase generada. La preferencia seleccional recibe mayor peso porque la coherencia de un par concreto como \textit{comer}--\textit{manzana} es una señal más directa que la similitud global de la oración, donde frases con casi las mismas palabras obtienen valores casi idénticos.
+El score de embedding se compone a su vez de dos señales: la preferencia seleccional (60\%), que mide la similitud coseno entre cada par verbo-argumento, y la similitud vectorial a nivel de oración (40\%), que compara el vector compuesto de los pictogramas de entrada con el de la frase generada.
+
+La preferencia seleccional recibe mayor peso porque la coherencia de un par concreto como \textit{comer}--\textit{manzana} es una señal más directa que la similitud global de la oración, donde frases con casi las mismas palabras obtienen valores casi idénticos.
 
 Los pesos 0,6/0,4 entre CFG y embeddings reflejan una decisión deliberada: la estructura gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
 
@@ -70,9 +74,7 @@ Esta información se reporta como metadato en el resultado pero no bloquea la ge
 
 El módulo \texttt{hybrid\_generator.py} coordina el pipeline completo. Su método \texttt{generate()} sigue una secuencia fija: invoca el bridge para obtener candidatos de la CFG, si hay múltiples candidatos los ordena con el scorer, selecciona el mejor, intenta refinar sus preposiciones con embeddings y calcula los scores de preferencia seleccional.
 
-Si la CFG no genera ningún candidato, el orquestador aplica un fallback que concatena las palabras de entrada capitalizando la primera, marcando el método como \texttt{fallback}. Este mecanismo garantiza que toda entrada produce alguna salida, aunque sea de baja calidad.
-
-La diferencia de criterio respecto al motor de gramática es deliberada: en un contexto de CAA, que el usuario se quede sin respuesta es un problema de accesibilidad, y una concatenación como \textit{Ir baño} se entiende aunque no sea gramaticalmente perfecta.
+Si la CFG no genera ningún candidato, el orquestador aplica el fallback mencionado: concatena las palabras de entrada capitalizando la primera y marca el método como \texttt{fallback}. Una concatenación como \textit{Ir baño} no es gramaticalmente perfecta, pero se entiende.
 
 \section{Refinamiento de preposiciones}
 \label{sec:f2-preposiciones}
@@ -93,7 +95,9 @@ $$\vec{p}_k = \frac{1}{|C_k|} \sum_{(w_a, w_d) \in C_k} (\vec{w}_a + \vec{w}_d)$
 
 En tiempo de ejecución, dado un par (verbo, sustantivo), se calcula el vector de contexto $\vec{c} = \vec{v} + \vec{n}$ y se selecciona la preposición cuyo prototipo tiene mayor similitud coseno con $\vec{c}$, siempre que supere un umbral mínimo de confianza (0,15). Los prototipos se calculan una sola vez y se almacenan en caché como un archivo JSON.
 
-El refinamiento solo sobrescribe la preposición de la CFG si se cumplen tres condiciones: la confianza del embedding supera 0,3, la preposición predicha difiere de la generada por la CFG, y la CFG no utilizó una regla específica por lugar. En la práctica, las preposiciones de la CFG son correctas para los 35 lugares del vocabulario; los embeddings aportan valor para combinaciones nuevas o no cubiertas por el léxico.
+El refinamiento solo sobrescribe la preposición de la CFG si se cumplen tres condiciones: la confianza del embedding supera 0,3 (por debajo de ese umbral, la predicción vectorial no es fiable y es preferible mantener la preposición original), la preposición predicha difiere de la generada por la CFG, y la CFG no utilizó una regla específica por lugar (estas reglas tienen confianza 1,0, ya que proceden de información verificada en el léxico).
+
+En la práctica, las preposiciones de la CFG son correctas para los 35 lugares del vocabulario; los embeddings aportan valor para combinaciones nuevas o no cubiertas por el léxico.
 
 \subsection{Nivel 3: reglas por verbo}
 
@@ -106,4 +110,6 @@ Este diseño de tres niveles ejemplifica la filosofía híbrida del sistema: las
 
 Los pesos del scoring (0,6/0,4 entre CFG y embeddings, 0,6/0,4 entre preferencia seleccional y similitud oracional) y los umbrales de confianza (0,10 para preferencia seleccional, 0,15 para prototipos, 0,3 para refinamiento de preposiciones) se fijaron manualmente. No se realizó un proceso de optimización automática, y su ajuste empírico queda como posible mejora futura.
 
-La implementación de SIF~\cite{arora2017simple} incluye solo la ponderación por frecuencia inversa, sin la corrección PCA (eliminación del primer componente principal) del artículo original; para frases cortas de CAA el impacto es menor. Cuando la CFG no reconoce la entrada, el fallback se limita a concatenar los pictogramas sin procesamiento lingüístico. La calidad de las oraciones depende directamente de la cobertura de la gramática formal: patrones no contemplados activan este fallback. El sistema tampoco aprende de correcciones del usuario ni se adapta con el uso.
+La implementación de SIF~\cite{arora2017simple} incluye solo la ponderación por frecuencia inversa, sin la corrección PCA (eliminación del primer componente principal) del artículo original; para frases cortas de CAA el impacto es menor.
+
+Cuando la CFG no reconoce la entrada, el fallback se limita a concatenar los pictogramas sin procesamiento lingüístico. La calidad de las oraciones depende directamente de la cobertura de la gramática formal: patrones no contemplados activan este fallback. El sistema tampoco aprende de correcciones del usuario ni se adapta con el uso.
