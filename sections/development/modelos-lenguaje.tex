@@ -93,17 +93,17 @@ Python resuelve las duplicaciones manteniendo la última asignación, y en la pr
 \section{Cliente de API}
 \label{sec:f3-cliente}
 
-Los modelos se configuran mediante una \textit{dataclass} \texttt{ModelConfig} que encapsula seis parámetros (véase Extracto de código~\ref{lst:model-config} del Anexo~\ref{anx:codigo}): nombre del modelo, \texttt{max\_tokens} (100), temperatura (0,3), \texttt{top\_p} (0,9), timeout (10 segundos) y reintentos máximos (2).
+Los modelos se configuran mediante una \textit{dataclass} \texttt{ModelConfig} que encapsula seis parámetros (véase Extracto de código~\ref{lst:model-config} del Anexo~\ref{anx:codigo}): nombre del modelo, \texttt{max\_tokens} (100), temperatura (0.3), \texttt{top\_p} (0.9), timeout (10 segundos) y reintentos máximos (2).
 
-La temperatura de 0,3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0,3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
+La temperatura de 0.3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0.3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
 
 El límite de 100 tokens es generoso para oraciones que promedian 4 tokens de salida, pero actúa como salvaguarda contra generaciones desbordadas. El timeout de 10 segundos refleja que, en una aplicación de comunicación asistida, el usuario espera activamente la respuesta.
 
 El cliente implementa reintentos diferenciados según el tipo de error (véase Extracto de código~\ref{lst:llm-client} del Anexo~\ref{anx:codigo}): los errores de \textit{rate limit} se reintentan con backoff exponencial (2 y 4 segundos), los timeouts se reintentan inmediatamente, y los errores de servidor no se reintentan.
 
-El coste se estima a partir de los precios de la API~\cite{openai2024pricing}: \$2,50/1M tokens de entrada y \$10,00/1M de salida para GPT-4o, frente a \$0,15/1M y \$0,60/1M para GPT-4o-mini.
+El coste se estima a partir de los precios de la API~\cite{openai2024pricing}: \$2.50/1M tokens de entrada y \$10.00/1M de salida para GPT-4o, frente a \$0.15/1M y \$0.60/1M para GPT-4o-mini.
 
-Con los aproximadamente 1.204 tokens de entrada y 4 de salida descritos en la sección~\ref{sec:f3-prompt}, cada consulta cuesta \$0,00018 con GPT-4o-mini y \$0,00305 con GPT-4o, una diferencia de factor 16,7$\times$.
+Con los aproximadamente 1.204 tokens de entrada y 4 de salida descritos en la sección~\ref{sec:f3-prompt}, cada consulta cuesta \$0.00018 con GPT-4o-mini y \$0.00305 con GPT-4o, una diferencia de factor 16.7$\times$.
 
 \section{Validación post-generación}
 \label{sec:f3-validacion}
@@ -153,8 +153,8 @@ Los umbrales son: cobertura inferior al 50\% genera un error bloqueante; entre 5
 
 El motor depende de la API de OpenAI, lo que implica conexión a Internet permanente y un servicio de pago que no es viable para uso offline. La latencia de red añade aproximadamente un segundo a cada generación, un tiempo perceptible en una aplicación de comunicación asistida.
 
-Aunque el coste por consulta es reducido (\$0,00018 con GPT-4o-mini)~\cite{openai2024pricing}, el uso continuado genera un gasto acumulativo que no existe en los motores simbólicos.
+Aunque el coste por consulta es reducido (\$0.00018 con GPT-4o-mini)~\cite{openai2024pricing}, el uso continuado genera un gasto acumulativo que no existe en los motores simbólicos.
 
-Con temperatura 0,3, la misma entrada puede producir salidas ligeramente diferentes entre ejecuciones, lo que dificulta la depuración y la reproducibilidad de los resultados.
+Con temperatura 0.3, la misma entrada puede producir salidas ligeramente diferentes entre ejecuciones, lo que dificulta la depuración y la reproducibilidad de los resultados.
 
 Las interrogativas son la categoría más difícil para el modelo, con las dos únicas interrogativas de los 15 ejemplos \textit{few-shot} insuficientes para cubrir la variedad de inferencias de persona verbal que esta categoría requiere.

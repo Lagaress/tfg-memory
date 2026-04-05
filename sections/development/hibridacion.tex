@@ -6,7 +6,7 @@ La cuarta línea de experimentación nace de una observación directa: ninguno d
 \hline
 Motor & Fidelidad & Naturalidad & Cobertura & Latencia \\
 \hline
-Gramática formal (CFG) & Alta & Baja & 96,6\% & $<$1 ms \\
+Gramática formal (CFG) & Alta & Baja & 96.6\% & $<$1 ms \\
 Embeddings (CFG + FastText) & Alta & Media & 100\% & $<$1 ms \\
 LLM (GPT-4o) & Alta & Alta & 100\% & $\sim$1600 ms \\
 \hline
@@ -63,9 +63,9 @@ La perplejidad de una secuencia de tokens $w_1, w_2, \ldots, w_N$ bajo un modelo
 
 $$PPL(w_1, \ldots, w_N) = \exp\left(-\frac{1}{N} \sum_{i=1}^{N} \log P(w_i \mid w_1, \ldots, w_{i-1})\right)$$
 
-Intuitivamente, la perplejidad mide cuánto sorprende la secuencia al modelo: una frase natural y frecuente tendrá baja perplejidad, mientras que una frase agramatical o inusual tendrá alta perplejidad. En el contexto de la Hibridación 3, la perplejidad se usa como función de ranking: dado un conjunto de frases que cubren los mismos pictogramas, se selecciona aquella que el modelo de lenguaje considera más probable.
+\noindent Intuitivamente, la perplejidad mide cuánto sorprende la secuencia al modelo: una frase natural y frecuente tendrá baja perplejidad, mientras que una frase agramatical o inusual tendrá alta perplejidad. En el contexto de la Hibridación 3, la perplejidad se usa como función de ranking: dado un conjunto de frases que cubren los mismos pictogramas, se selecciona aquella que el modelo de lenguaje considera más probable.
 
-El modelo utilizado es \texttt{DeepESP/gpt2-spanish}~\cite{deepesp2019gpt2spanish}, un GPT-2 entrenado sobre 11,5 GB de texto en español de dominio general. Su naturaleza autoregresiva permite calcular la perplejidad de forma directa, a diferencia de modelos bidireccionales como BERT donde la perplejidad no se define de forma natural. Su tamaño ($\sim$500 MB) lo hace ejecutable en CPU sin necesidad de GPU.
+El modelo utilizado es \texttt{DeepESP/gpt2-spanish}~\cite{deepesp2019gpt2spanish}, un GPT-2 entrenado sobre 11.5 GB de texto en español de dominio general. Su naturaleza autoregresiva permite calcular la perplejidad de forma directa, a diferencia de modelos bidireccionales como BERT donde la perplejidad no se define de forma natural. Su tamaño ($\sim$500 MB) lo hace ejecutable en CPU sin necesidad de GPU.
 
 El modelo originalmente previsto era MarIA GPT-2-BNE, entrenado sobre el corpus de la Biblioteca Nacional de España, pero el BSC eliminó todos los modelos del namespace \texttt{PlanTL-GOB-ES} de HuggingFace durante el desarrollo del proyecto.
 
@@ -78,9 +78,9 @@ La cobertura de pictogramas se define como la proporción de pictogramas de entr
 
 $$\text{cobertura}(pictos, frase) = \frac{|\{p \in pictos : \text{representado}(p, frase)\}|}{|pictos|}$$
 
-La función $\text{representado}(p, frase)$ compara los lemas del pictograma con los lemas de las palabras de la frase, utilizando el modelo de lematización de spaCy para español (\texttt{es\_core\_news\_sm}). Si al menos un lema coincide, el pictograma se considera cubierto: el pictograma ``comer'' (lema: ``comer'') se detecta en la frase ``Yo como pan'' porque el token ``como'' tiene el mismo lema.
+\noindent La función $\text{representado}(p, frase)$ compara los lemas del pictograma con los lemas de las palabras de la frase, utilizando el modelo de lematización de spaCy para español (\texttt{es\_core\_news\_sm}). Si al menos un lema coincide, el pictograma se considera cubierto: el pictograma ``comer'' (lema: ``comer'') se detecta en la frase ``Yo como pan'' porque el token ``como'' tiene el mismo lema.
 
-En la Hibridación 3, el umbral de fidelidad es 1,0: solo pasan al ranking las frases que cubren el 100\% de los pictogramas.
+En la Hibridación 3, el umbral de fidelidad es 1.0: solo pasan al ranking las frases que cubren el 100\% de los pictogramas.
 
 \subsection{Patrones descartados}
 
@@ -147,7 +147,7 @@ Un campo del resultado, \texttt{was\_modified}, indica si el LLM alteró la fras
 
 Todos los componentes del módulo siguen el patrón de inicialización perezosa (véase Extracto de código~\ref{lst:lazy-init} del Anexo~\ref{anx:codigo}): los motores externos (\texttt{SentenceGenerator}, \texttt{HybridGenerator}, \texttt{LLMClient}, \texttt{PerplexityScorer}) no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}.
 
-Dado que la carga de FastText ($\sim$4,2 GB) y el modelo GPT-2 en español ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
+Dado que la carga de FastText ($\sim$4.2 GB) y el modelo GPT-2 en español ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
 
 \section{Hibridación 1: Gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
@@ -199,7 +199,7 @@ Fallback & \texttt{generate\_direct} & \texttt{generate\_direct} \\
 
 Un ejemplo representativo es la entrada \texttt{[ir, colegio]}. El motor de embeddings detecta el patrón de movimiento, genera la frase \textit{Quiero ir al colegio} con la preposición contraída correcta, y reporta el método como \texttt{hybrid}. El post-editor recibe esta frase, la evalúa según las ocho reglas y la devuelve sin modificar. El resultado es idéntico al del camino exitoso de H1 para esta misma entrada, lo que sugiere que, para frases dentro de la cobertura de la gramática, los embeddings no aportan una diferencia que el post-editor pueda explotar.
 
-Este patrón se generaliza en las métricas del dataset completo: la equivalencia en perplejidad (102 frente a 100) y en fidelidad ajustada (0,979 frente a 0,982) entre H2 y H1 indica que los embeddings no aportan una diferenciación medible cuando un LLM post-editor está presente. El LLM subsume las mejoras semánticas que los embeddings proporcionan en las técnicas base: el refinamiento de preposiciones, la selección de variantes léxicas y el reordenamiento que realiza el motor de embeddings quedan absorbidos por la capacidad del post-editor para reformular la frase completa.
+Este patrón se generaliza en las métricas del dataset completo: la equivalencia en perplejidad (102 frente a 100) y en fidelidad ajustada (0.979 frente a 0.982) entre H2 y H1 indica que los embeddings no aportan una diferenciación medible cuando un LLM post-editor está presente. El LLM subsume las mejoras semánticas que los embeddings proporcionan en las técnicas base: el refinamiento de preposiciones, la selección de variantes léxicas y el reordenamiento que realiza el motor de embeddings quedan absorbidos por la capacidad del post-editor para reformular la frase completa.
 
 La identidad deliberada de la capa LLM convierte la comparación H1 versus H2 en el experimento controlado descrito en la sección~\ref{sec:h-planteamiento}.
 
@@ -220,7 +220,7 @@ La generación es secuencial: cada motor se invoca uno tras otro. Los motores of
 
 La segunda etapa evalúa la cobertura de pictogramas de cada candidata mediante \texttt{PictogramCoverageScorer}, el mismo componente utilizado en el framework de comparación. Para cada candidata, el scorer verifica cuántos pictogramas de entrada están representados en la frase generada, aplicando la lematización con spaCy descrita en la sección~\ref{sec:h-cobertura}.
 
-El umbral es 1,0: solo pasan al ranking las candidatas que cubren el 100\% de los pictogramas. Si ninguna candidata alcanza el umbral, se aplica un fallback: todas las candidatas pasan al ranking, garantizando que el pipeline siempre produce un resultado aunque ningún motor logre cobertura perfecta.
+El umbral es 1.0: solo pasan al ranking las candidatas que cubren el 100\% de los pictogramas. Si ninguna candidata alcanza el umbral, se aplica un fallback: todas las candidatas pasan al ranking, garantizando que el pipeline siempre produce un resultado aunque ningún motor logre cobertura perfecta.
 
 \subsection{Ranking por perplejidad}
 
@@ -230,7 +230,7 @@ Un detalle técnico relevante es la normalización de puntuación (véase Extrac
 
 \subsection{Ejemplo con convergencia}
 
-Para la entrada \texttt{[dónde, estar, mamá]}, los cinco motores convergen en la misma frase: \textit{¿Dónde está mamá?}. El filtro de fidelidad verifica que los tres pictogramas están representados y las cinco candidatas pasan con cobertura 1,0. El ranking calcula perplejidades idénticas y selecciona la primera por convención: gramática. La latencia total es de aproximadamente 2.400 ms, dominada por las tres llamadas API secuenciales.
+Para la entrada \texttt{[dónde, estar, mamá]}, los cinco motores convergen en la misma frase: \textit{¿Dónde está mamá?}. El filtro de fidelidad verifica que los tres pictogramas están representados y las cinco candidatas pasan con cobertura 1.0. El ranking calcula perplejidades idénticas y selecciona la primera por convención: gramática. La latencia total es de aproximadamente 2.400 ms, dominada por las tres llamadas API secuenciales.
 
 Este caso ilustra una limitación del paradigma: cuando todos los motores producen la misma salida, la sobregeneración y el ranking no aportan valor adicional respecto a cualquier motor individual, pero sí acumulan latencia.
 
@@ -256,4 +256,4 @@ Las tres hibridaciones heredan la dependencia de la API de OpenAI (GPT-4o) para 
 
 En la Hibridación 3, la generación secuencial de las cinco candidatas acumula aproximadamente tres veces la latencia de una sola llamada API; en producción, la paralelización reduciría este coste, pero los tres motores que llaman a OpenAI comparten la misma fuente y podrían provocar limitaciones de tasa.
 
-El umbral de fidelidad de 1,0 puede descartar frases naturales que omiten un pictograma con representación implícita: \textit{Quiero agua} para la entrada \texttt{[yo, quiero, agua]} podría fallar si el scorer no reconoce el sujeto implícito. El fallback mitiga este riesgo, pero no lo elimina.
+El umbral de fidelidad de 1.0 puede descartar frases naturales que omiten un pictograma con representación implícita: \textit{Quiero agua} para la entrada \texttt{[yo, quiero, agua]} podría fallar si el scorer no reconoce el sujeto implícito. El fallback mitiga este riesgo, pero no lo elimina.

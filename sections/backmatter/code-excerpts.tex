@@ -343,7 +343,7 @@ class CFGBridge:
 
 \section{Composición vectorial ponderada}
 
-La estrategia de composición vectorial por defecto (sección~\ref{sec:f2-embeddings}) pondera las palabras según su tipo: las de contenido (sustantivos, verbos, adjetivos) reciben peso 1,0 y las funcionales (artículos, preposiciones) reciben peso 0,3. Esta ponderación refleja que en CAA el usuario selecciona deliberadamente las palabras de contenido, mientras que las funcionales las infiere el sistema.
+La estrategia de composición vectorial por defecto (sección~\ref{sec:f2-embeddings}) pondera las palabras según su tipo: las de contenido (sustantivos, verbos, adjetivos) reciben peso 1.0 y las funcionales (artículos, preposiciones) reciben peso 0.3. Esta ponderación refleja que en CAA el usuario selecciona deliberadamente las palabras de contenido, mientras que las funcionales las infiere el sistema.
 
 \begin{lstlisting}[language=Python,caption={Composición vectorial ponderada (\texttt{vector\_composer.py}).},label={lst:weighted-average},basicstyle=\ttfamily\small,xleftmargin=1cm]
 def weighted_average(self, tokens):
@@ -473,7 +473,7 @@ def predict_preposition(self, verb, noun):
 
 \section{Preferencia seleccional con embeddings}
 
-La preferencia seleccional (sección~\ref{sec:f2-pipeline}) mide la compatibilidad semántica entre un verbo y su argumento mediante la similitud coseno de sus embeddings. El umbral de 0,10 es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes en el contexto de CAA.
+La preferencia seleccional (sección~\ref{sec:f2-pipeline}) mide la compatibilidad semántica entre un verbo y su argumento mediante la similitud coseno de sus embeddings. El umbral de 0.10 es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes en el contexto de CAA.
 
 \begin{lstlisting}[language=Python,caption={Preferencia seleccional (\texttt{semantic\_scorer.py}).},label={lst:selectional-preference},basicstyle=\ttfamily\small,xleftmargin=1cm]
 def compute_selectional_preference(self, verb, argument):

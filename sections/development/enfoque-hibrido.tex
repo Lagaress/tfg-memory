@@ -22,9 +22,9 @@ Se optó por utilizar un modelo preentrenado en lugar de entrenar embeddings pro
 
 La elección de FastText frente a alternativas como Word2Vec~\cite{mikolov2013word2vec}, GloVe~\cite{pennington2014glove} o BERT~\cite{devlin2019bert} responde a una ventaja determinante para el español: el manejo nativo de palabras fuera de vocabulario (\textit{out-of-vocabulary}, OOV). FastText representa cada palabra como la suma de los vectores de sus $n$-gramas de caracteres, lo que permite generar embeddings razonables para formas morfológicas no vistas durante el entrenamiento (conjugaciones, diminutivos, formas de género) sin necesidad de un vocabulario exhaustivo.
 
-Word2Vec~\cite{mikolov2013word2vec} y GloVe~\cite{pennington2014glove} carecen de esta capacidad, devolviendo un vector nulo para cualquier palabra no presente en su vocabulario. BERT~\cite{devlin2019bert} ofrece embeddings contextuales superiores pero su latencia ($\sim$50 ms por consulta frente a $\sim$0,01 ms de FastText~\cite{bojanowski2017fasttext}) y sus dependencias (PyTorch, GPU recomendada) no se justifican para un sistema de consulta puntual sobre palabras individuales.
+Word2Vec~\cite{mikolov2013word2vec} y GloVe~\cite{pennington2014glove} carecen de esta capacidad, devolviendo un vector nulo para cualquier palabra no presente en su vocabulario. BERT~\cite{devlin2019bert} ofrece embeddings contextuales superiores pero su latencia ($\sim$50 ms por consulta frente a $\sim$0.01 ms de FastText~\cite{bojanowski2017fasttext}) y sus dependencias (PyTorch, GPU recomendada) no se justifican para un sistema de consulta puntual sobre palabras individuales.
 
-Para representar una secuencia de pictogramas como un único vector, el sistema implementa tres estrategias de composición vectorial (véase Extracto de código~\ref{lst:weighted-average} del Anexo~\ref{anx:codigo}): promedio simple, promedio ponderado, que asigna peso 1,0 a las palabras de contenido (sustantivos, verbos, adjetivos) y 0,3 a las funcionales (artículos, preposiciones, conjunciones), y SIF (\textit{Smooth Inverse Frequency})~\cite{arora2017simple}, que pondera cada palabra inversamente a su frecuencia estimada en el idioma. La estrategia utilizada por defecto es el promedio ponderado, que equilibra sencillez y sensibilidad al contenido semántico relevante.
+Para representar una secuencia de pictogramas como un único vector, el sistema implementa tres estrategias de composición vectorial (véase Extracto de código~\ref{lst:weighted-average} del Anexo~\ref{anx:codigo}): promedio simple, promedio ponderado, que asigna peso 1.0 a las palabras de contenido (sustantivos, verbos, adjetivos) y 0.3 a las funcionales (artículos, preposiciones, conjunciones), y SIF (\textit{Smooth Inverse Frequency})~\cite{arora2017simple}, que pondera cada palabra inversamente a su frecuencia estimada en el idioma. La estrategia utilizada por defecto es el promedio ponderado, que equilibra sencillez y sensibilidad al contenido semántico relevante.
 
 \section{Léxico}
 \label{sec:f2-lexico}
@@ -56,17 +56,17 @@ Cuando la CFG no reconoce la secuencia, el bridge devuelve una lista vacía. En 
 
 Cuando la CFG genera múltiples candidatos para una misma entrada, como \textit{Quiero ir al colegio} y \textit{Voy al colegio} para la secuencia \texttt{[ir, colegio]}, el módulo \texttt{semantic\_scorer.py} los ordena mediante un score combinado que pondera la confianza gramatical y la coherencia semántica (véase Extracto de código~\ref{lst:ranking-candidatos} del Anexo~\ref{anx:codigo}):
 
-$$\text{score} = \text{confianza}_{\text{CFG}} \times 0{,}6 + \text{score}_{\text{embedding}} \times 0{,}4$$
+$$\text{score} = \text{confianza}_{\text{CFG}} \times 0.6 + \text{score}_{\text{embedding}} \times 0.4$$
 
-El score de embedding se compone a su vez de dos señales: la preferencia seleccional (60\%), que mide la similitud coseno entre cada par verbo-argumento, y la similitud vectorial a nivel de oración (40\%), que compara el vector compuesto de los pictogramas de entrada con el de la frase generada.
+\noindent El score de embedding se compone a su vez de dos señales: la preferencia seleccional (60\%), que mide la similitud coseno entre cada par verbo-argumento, y la similitud vectorial a nivel de oración (40\%), que compara el vector compuesto de los pictogramas de entrada con el de la frase generada.
 
 La preferencia seleccional recibe mayor peso porque la coherencia de un par concreto como ``comer''--``manzana'' es una señal más directa que la similitud global de la oración, donde frases con casi las mismas palabras obtienen valores casi idénticos.
 
-Los pesos 0,6/0,4 entre CFG y embeddings reflejan una decisión deliberada: la estructura gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
+Los pesos 0.6/0.4 entre CFG y embeddings reflejan una decisión deliberada: la estructura gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
 
 \subsection{Validación de preferencias seleccionales}
 
-El scorer implementa una verificación de preferencia seleccional basada en la hipótesis distribucional (véase Extracto de código~\ref{lst:selectional-preference} del Anexo~\ref{anx:codigo}): la similitud coseno entre el embedding de un verbo y el de su argumento aproxima la compatibilidad semántica de la combinación. Si la similitud supera un umbral de 0,10, la combinación se considera coherente. El umbral es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes: ``querer juguete'' tiene menor similitud que ``querer agua'', pero ambas son correctas en el contexto de CAA.
+El scorer implementa una verificación de preferencia seleccional basada en la hipótesis distribucional (véase Extracto de código~\ref{lst:selectional-preference} del Anexo~\ref{anx:codigo}): la similitud coseno entre el embedding de un verbo y el de su argumento aproxima la compatibilidad semántica de la combinación. Si la similitud supera un umbral de 0.10, la combinación se considera coherente. El umbral es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes: ``querer juguete'' tiene menor similitud que ``querer agua'', pero ambas son correctas en el contexto de CAA.
 
 Esta información se reporta como metadato en el resultado pero no bloquea la generación: su propósito es informativo, no restrictivo, a diferencia de las restricciones de seguridad del motor de gramática (sección~\ref{sec:f1-limitaciones}) que sí reducen la confianza.
 
@@ -83,7 +83,7 @@ La predicción de preposiciones es una de las contribuciones principales del com
 
 \subsection{Nivel 1: reglas por lugar}
 
-Cuando el sustantivo es un lugar con preposiciones codificadas en el léxico, la CFG aplica directamente la regla durante su etapa de postprocesamiento. Si el verbo es de movimiento, utiliza la preposición de movimiento del lugar (\textit{ir al colegio}); si no lo es, utiliza la de ubicación (\textit{estar en el colegio}). La confianza de este nivel es 1,0, y el scorer no intenta sobrescribirla.
+Cuando el sustantivo es un lugar con preposiciones codificadas en el léxico, la CFG aplica directamente la regla durante su etapa de postprocesamiento. Si el verbo es de movimiento, utiliza la preposición de movimiento del lugar (\textit{ir al colegio}); si no lo es, utiliza la de ubicación (\textit{estar en el colegio}). La confianza de este nivel es 1.0, y el scorer no intenta sobrescribirla.
 
 \subsection{Nivel 2: prototipos vectoriales}
 
@@ -93,9 +93,9 @@ Para cada preposición, el prototipo es la media de los vectores de contexto (su
 
 $$\vec{p}_k = \frac{1}{|C_k|} \sum_{(w_a, w_d) \in C_k} (\vec{w}_a + \vec{w}_d)$$
 
-En tiempo de ejecución, dado un par (verbo, sustantivo), se calcula el vector de contexto $\vec{c} = \vec{v} + \vec{n}$ y se selecciona la preposición cuyo prototipo tiene mayor similitud coseno con $\vec{c}$, siempre que supere un umbral mínimo de confianza (0,15). Los prototipos se calculan una sola vez y se almacenan en caché como un archivo JSON.
+\noindent En tiempo de ejecución, dado un par (verbo, sustantivo), se calcula el vector de contexto $\vec{c} = \vec{v} + \vec{n}$ y se selecciona la preposición cuyo prototipo tiene mayor similitud coseno con $\vec{c}$, siempre que supere un umbral mínimo de confianza (0.15). Los prototipos se calculan una sola vez y se almacenan en caché como un archivo JSON.
 
-El refinamiento solo sobrescribe la preposición de la CFG si se cumplen tres condiciones: la confianza del embedding supera 0,3 (por debajo de ese umbral, la predicción vectorial no es fiable y es preferible mantener la preposición original), la preposición predicha difiere de la generada por la CFG, y la CFG no utilizó una regla específica por lugar (estas reglas tienen confianza 1,0, ya que proceden de información verificada en el léxico).
+El refinamiento solo sobrescribe la preposición de la CFG si se cumplen tres condiciones: la confianza del embedding supera 0.3 (por debajo de ese umbral, la predicción vectorial no es fiable y es preferible mantener la preposición original), la preposición predicha difiere de la generada por la CFG, y la CFG no utilizó una regla específica por lugar (estas reglas tienen confianza 1.0, ya que proceden de información verificada en el léxico).
 
 En la práctica, las preposiciones de la CFG son correctas para los 35 lugares del vocabulario; los embeddings aportan valor para combinaciones nuevas o no cubiertas por el léxico.
 
@@ -108,7 +108,7 @@ Este diseño de tres niveles ejemplifica la filosofía híbrida del sistema: las
 \section{Limitaciones}
 \label{sec:f2-limitaciones}
 
-Los pesos del scoring (0,6/0,4 entre CFG y embeddings, 0,6/0,4 entre preferencia seleccional y similitud oracional) y los umbrales de confianza (0,10 para preferencia seleccional, 0,15 para prototipos, 0,3 para refinamiento de preposiciones) se fijaron manualmente. No se realizó un proceso de optimización automática, y su ajuste empírico queda como posible mejora futura.
+Los pesos del scoring (0.6/0.4 entre CFG y embeddings, 0.6/0.4 entre preferencia seleccional y similitud oracional) y los umbrales de confianza (0.10 para preferencia seleccional, 0.15 para prototipos, 0.3 para refinamiento de preposiciones) se fijaron manualmente. No se realizó un proceso de optimización automática, y su ajuste empírico queda como posible mejora futura.
 
 La implementación de SIF~\cite{arora2017simple} incluye solo la ponderación por frecuencia inversa, sin la corrección PCA (eliminación del primer componente principal) del artículo original; para frases cortas de CAA el impacto es menor.
 

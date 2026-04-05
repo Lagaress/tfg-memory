@@ -133,7 +133,7 @@ $$\text{precisión} = \frac{\text{LCS}}{|\text{pred}|}, \quad \text{recall} = \f
 
 $$F_1 = \frac{2 \cdot \text{precisión} \cdot \text{recall}}{\text{precisión} + \text{recall}}$$
 
-ROUGE-L resulta especialmente útil en este contexto porque captura la estructura secuencial de la oración sin penalizar la inserción de elementos adicionales (como artículos que el sistema añade correctamente pero que no figuran en la referencia de la misma forma).
+\noindent ROUGE-L resulta especialmente útil en este contexto porque captura la estructura secuencial de la oración sin penalizar la inserción de elementos adicionales (como artículos que el sistema añade correctamente pero que no figuran en la referencia de la misma forma).
 
 \subsection{METEOR}
 
@@ -141,7 +141,7 @@ METEOR (\textit{Metric for Evaluation of Translation with Explicit ORdering})~\c
 
 $$\text{METEOR} = F_\text{mean} \cdot (1 - \text{penalty})$$
 
-donde $F_\text{mean}$ es la media armónica ponderada y la \textit{penalty} crece con el número de fragmentos no contiguos en la alineación. METEOR captura tanto la presencia de las palabras correctas como su contigüidad en la oración generada.
+\noindent donde $F_\text{mean}$ es la media armónica ponderada y la \textit{penalty} crece con el número de fragmentos no contiguos en la alineación. METEOR captura tanto la presencia de las palabras correctas como su contigüidad en la oración generada.
 
 \subsection{chrF++}
 
@@ -159,7 +159,7 @@ La cobertura mide la fracción de pictogramas de entrada que se encuentran repre
 
 $$\text{Cobertura} = \frac{|\text{pictogramas cubiertos}|}{|\text{pictogramas de entrada}|}$$
 
-Por ejemplo, dado el pictograma ``comer'' (lema: ``comer'') y la oración generada ``Yo como pan'' (lemas: ``yo'', ``comer'', ``pan''), el pictograma se considera cubierto porque el lema ``comer'' aparece en ambos conjuntos. Esta métrica es específica del dominio de CAA y complementa las métricas de coincidencia con la referencia: mientras que BLEU o ROUGE-L comparan contra una oración gold standard, la cobertura verifica directamente que el contenido pictográfico se preserve en la salida, independientemente de la formulación exacta.
+\noindent Por ejemplo, dado el pictograma ``comer'' (lema: ``comer'') y la oración generada ``Yo como pan'' (lemas: ``yo'', ``comer'', ``pan''), el pictograma se considera cubierto porque el lema ``comer'' aparece en ambos conjuntos. Esta métrica es específica del dominio de CAA y complementa las métricas de coincidencia con la referencia: mientras que BLEU o ROUGE-L comparan contra una oración gold standard, la cobertura verifica directamente que el contenido pictográfico se preserve en la salida, independientemente de la formulación exacta.
 
 \subsection{BERTScore}
 
@@ -177,17 +177,17 @@ Por este motivo, la métrica de fidelidad empleada en este proyecto excluye del 
 
 $$\text{Fidelidad} = 1 - \frac{|\text{palabras alucinadas}| - |\text{inferencias pragmáticas}|}{|\text{palabras de contenido generadas}|}$$
 
-La fidelidad complementa la cobertura: mientras la cobertura detecta omisiones (pictogramas de entrada que no aparecen en la salida), la fidelidad detecta adiciones (palabras de contenido en la salida que no provienen de la entrada). Un motor ideal obtendría cobertura y fidelidad de 1,0 simultáneamente.
+\noindent La fidelidad complementa la cobertura: mientras la cobertura detecta omisiones (pictogramas de entrada que no aparecen en la salida), la fidelidad detecta adiciones (palabras de contenido en la salida que no provienen de la entrada). Un motor ideal obtendría cobertura y fidelidad de 1.0 simultáneamente.
 
 \subsection{Perplejidad y pseudo-perplejidad}
 
 Las métricas anteriores requieren una oración de referencia o los pictogramas de entrada. La perplejidad y la pseudo-perplejidad operan sin ninguna de las dos: evalúan la naturalidad del texto generado midiendo cuán probable lo considera un modelo de lenguaje preentrenado. Ambas miden cuán probable considera un modelo de lenguaje preentrenado la oración generada: valores menores indican texto más natural y fluido.
 
-La perplejidad se calcula con GPT-2 Spanish~\cite{deepesp2019gpt2spanish}, un modelo autoregresivo entrenado sobre 11,5 GB de texto en español que estima la probabilidad de cada palabra condicionada a las anteriores:
+La perplejidad se calcula con GPT-2 Spanish~\cite{deepesp2019gpt2spanish}, un modelo autoregresivo entrenado sobre 11.5 GB de texto en español que estima la probabilidad de cada palabra condicionada a las anteriores:
 
 $$\text{PPL}(s) = 2^{-\frac{1}{N} \sum_{i=1}^{N} \log_2 P(w_i \mid w_1, \ldots, w_{i-1})}$$
 
-La pseudo-perplejidad~\cite{salazar2020masked} utiliza un modelo BERT enmascarado en español (BETO), que evalúa la probabilidad de cada token dado su contexto bidireccional. Se enmascara cada token de la oración y se mide la probabilidad de reconstruirlo a partir del resto. Este modelo es el mismo que se emplea para el cálculo de BERTScore, lo que permite reutilizar la carga del modelo y reducir el tiempo total de evaluación.
+\noindent La pseudo-perplejidad~\cite{salazar2020masked} utiliza un modelo BERT enmascarado en español (BETO), que evalúa la probabilidad de cada token dado su contexto bidireccional. Se enmascara cada token de la oración y se mide la probabilidad de reconstruirlo a partir del resto. Este modelo es el mismo que se emplea para el cálculo de BERTScore, lo que permite reutilizar la carga del modelo y reducir el tiempo total de evaluación.
 
 Estas métricas son especialmente relevantes en el contexto de CAA porque capturan la fluidez percibida del texto independientemente de la referencia. Un motor puede generar una oración semánticamente correcta pero con una estructura gramatical poco natural, algo que las métricas de coincidencia con la referencia no detectan pero que la perplejidad sí penaliza.
 
@@ -197,8 +197,8 @@ El análisis de errores clasifica cada caso en una de cinco categorías mediante
 
 \begin{itemize}
     \item Ninguno: la generación coincide con la referencia o no presenta errores detectables.
-    \item Omisión: uno o más pictogramas de entrada no se reflejan en la salida (cobertura inferior a 1,0).
-    \item Alucinación: la oración contiene palabras de contenido no justificadas por los pictogramas (fidelidad inferior a 0,8).
+    \item Omisión: uno o más pictogramas de entrada no se reflejan en la salida (cobertura inferior a 1.0).
+    \item Alucinación: la oración contiene palabras de contenido no justificadas por los pictogramas (fidelidad inferior a 0.8).
     \item Morfológico: las palabras correctas aparecen pero con forma flexiva diferente, ya sea conjugación, género o número incorrectos (solapamiento léxico superior al 50\% sin coincidencia exacta).
     \item Léxico: el motor elige palabras diferentes para expresar el mismo concepto (solapamiento léxico inferior al 50\% con cobertura parcial).
 \end{itemize}
