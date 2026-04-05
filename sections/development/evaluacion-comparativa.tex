@@ -267,7 +267,7 @@ La Figura~\ref{fig:eval-heatmap} muestra la matriz de correlación de Pearson en
 
 El primer grupo comprende las métricas de coincidencia n-gramática ---BLEU-4, BLEU-1, METEOR, BERTScore $F_1$ y Exact Match---, que correlacionan fuertemente entre sí ($r > 0{,}92$). Esto confirma que, a pesar de sus diferentes formulaciones matemáticas, todas capturan esencialmente la misma dimensión: cuánto se parece la oración generada a la referencia a nivel de palabras y secuencias.
 
-El segundo grupo incluye las métricas específicas de CAA ---cobertura y fidelidad---, que presentan correlación próxima a cero con las métricas n-gramáticas ($r \approx 0$). Este resultado es coherente con el análisis anterior: todos los motores preservan el contenido pictográfico de forma similar, de modo que las diferencias entre motores en cobertura y fidelidad son ortogonales a las diferencias en coincidencia con la referencia.
+El segundo grupo incluye las métricas específicas de CAA (cobertura y fidelidad), que presentan correlación próxima a cero con las métricas n-gramáticas ($r \approx 0$). Este resultado es coherente con el análisis anterior: todos los motores preservan el contenido pictográfico de forma similar, de modo que las diferencias entre motores en cobertura y fidelidad son ortogonales a las diferencias en coincidencia con la referencia.
 
 La perplejidad se sitúa en una dimensión propia, sin correlación significativa con ninguna otra métrica. Esto justifica su inclusión en el protocolo de evaluación: aporta información sobre la naturalidad del texto que ninguna otra métrica captura, y su independencia garantiza que no es redundante.
 
@@ -352,7 +352,7 @@ La Figura~\ref{fig:eval-mejora} cuantifica la mejora relativa de cada híbrido r
 
 La degradación en métricas de coincidencia oscila entre el 5\% y el 20\% según la métrica, mientras que la mejora en perplejidad alcanza hasta el 25\% en Hybrid3. La fidelidad mejora entre un 1\% y un 2\%, un cambio marginal pero consistente en los tres híbridos.
 
-Estos resultados confirman que la hibridación no cumple el objetivo de mejorar la coincidencia con las referencias ---objetivo inalcanzable cuando las referencias provienen de las técnicas base---, sino que opera en una dimensión diferente: produce texto más natural y algo más fiel al contenido pictográfico, a costa de divergir de la formulación exacta de la referencia.
+Estos resultados confirman que la hibridación no cumple el objetivo de mejorar la coincidencia con las referencias (objetivo inalcanzable cuando las referencias provienen de las técnicas base), sino que opera en una dimensión diferente: produce texto más natural y algo más fiel al contenido pictográfico, a costa de divergir de la formulación exacta de la referencia.
 
 \subsection{Selección de Hybrid3}
 \label{sec:eval-seleccion-h3}

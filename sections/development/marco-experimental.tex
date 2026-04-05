@@ -1,4 +1,4 @@
-La arquitectura de Dixi sigue un diseño modular: la entrada ---una lista ordenada de etiquetas de pictogramas--- atraviesa un motor de generación de lenguaje natural que produce una oración gramaticalmente correcta, y un motor de síntesis de voz la convierte en audio.
+La arquitectura de Dixi sigue un diseño modular: la entrada (una lista ordenada de etiquetas de pictogramas) atraviesa un motor de generación de lenguaje natural que produce una oración gramaticalmente correcta, y un motor de síntesis de voz la convierte en audio.
 
 \textit{(TODO: Añadir diagrama de la arquitectura modular: pictogramas $\rightarrow$ motor de generación $\rightarrow$ oración $\rightarrow$ TTS $\rightarrow$ audio)}
 
@@ -141,21 +141,21 @@ METEOR (\textit{Metric for Evaluation of Translation with Explicit ORdering})~\c
 
 $$\text{METEOR} = F_\text{mean} \cdot (1 - \text{penalty})$$
 
-donde $F_\text{mean}$ es la media armónica ponderada y la penalización crece con el número de fragmentos no contiguos en la alineación. METEOR captura tanto la presencia de las palabras correctas como su contigüidad en la oración generada.
+donde $F_\text{mean}$ es la media armónica ponderada y la \textit{penalty} crece con el número de fragmentos no contiguos en la alineación. METEOR captura tanto la presencia de las palabras correctas como su contigüidad en la oración generada.
 
 \subsection{chrF++}
 
-chrF++~\cite{popovic2017chrf} evalúa la similitud entre predicción y referencia combinando $n$-gramas de caracteres con bigramas de palabras. Los $n$-gramas de caracteres capturan coincidencias parciales a nivel morfológico ---por ejemplo, reconocen la similitud entre ``quiero'' y ``quiere'' aunque difieran en su terminación---, mientras que los bigramas de palabras incorporan información sobre el orden.
+chrF++~\cite{popovic2017chrf} evalúa la similitud entre predicción y referencia combinando $n$-gramas de caracteres con bigramas de palabras. Los $n$-gramas de caracteres capturan coincidencias parciales a nivel morfológico: por ejemplo, reconocen la similitud entre ``quiero'' y ``quiere'' aunque difieran en su terminación. Los bigramas de palabras, por su parte, incorporan información sobre el orden.
 
 $$\text{chrF++} = (1 + \beta^2) \cdot \frac{\text{chrP} \cdot \text{chrR}}{\beta^2 \cdot \text{chrP} + \text{chrR}}$$
 
-Donde chrP y chrR son la precisión y recall calculadas sobre $n$-gramas de caracteres y bigramas de palabras conjuntamente, con $\beta = 2$ por defecto. Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente ---como la diferencia entre ``come'' y ``comer''--- representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
+Donde chrP y chrR son la precisión y recall calculadas sobre $n$-gramas de caracteres y bigramas de palabras conjuntamente, con $\beta = 2$ por defecto. Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente (como la diferencia entre ``come'' y ``comer'') representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
 
 \subsection{Cobertura de pictogramas}
 
 Las métricas anteriores comparan contra una referencia textual, pero en CAA existe una pregunta más directa: ¿se han preservado los pictogramas que el usuario seleccionó?
 
-La cobertura mide la fracción de pictogramas de entrada que se encuentran representados en la oración generada. Para determinar si un pictograma está cubierto, se comparan sus lemas ---obtenidos mediante el modelo de lematización de spaCy para español--- con los lemas de las palabras de la oración de salida. Si existe al menos un lema en común, el pictograma se considera cubierto.
+La cobertura mide la fracción de pictogramas de entrada que se encuentran representados en la oración generada. Para determinar si un pictograma está cubierto, se comparan sus lemas, obtenidos mediante el modelo de lematización de spaCy para español, con los lemas de las palabras de la oración de salida. Si existe al menos un lema en común, el pictograma se considera cubierto.
 
 $$\text{Cobertura} = \frac{|\text{pictogramas cubiertos}|}{|\text{pictogramas de entrada}|}$$
 
@@ -163,7 +163,7 @@ Por ejemplo, dado el pictograma ``comer'' (lema: ``comer'') y la oración genera
 
 \subsection{BERTScore}
 
-BERTScore~\cite{zhang2020bertscore} evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o $n$-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que ``deseo'' y ``quiero'' expresan significados cercanos aunque no compartan tokens.
+BERTScore~\cite{zhang2020bertscore} evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o $n$-gramas, BERTScore captura equivalencias semánticas: por ejemplo, reconoce que ``deseo'' y ``quiero'' expresan significados cercanos aunque no compartan tokens.
 
 El cálculo alinea cada token de la predicción con su token más similar en la referencia mediante similitud coseno en el espacio de embeddings, y obtiene precisión, recall y $F_1$. Se utiliza un modelo BERT preentrenado en español en lugar del modelo por defecto en inglés, lo que mejora la captura de matices semánticos propios del castellano. Esta métrica se aplica a los seis motores de generación, siendo especialmente informativa cuando los motores producen paráfrasis válidas que las métricas de coincidencia exacta penalizarían.
 
