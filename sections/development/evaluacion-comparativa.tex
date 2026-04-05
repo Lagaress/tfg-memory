@@ -6,11 +6,11 @@ Este capítulo confronta los seis motores sobre un mismo dataset mediante un pip
 El pipeline de evaluación opera en cinco pasos secuenciales:
 
 \begin{enumerate}
-    \item \textit{Unificación del dataset}: los conjuntos de datos de las tres técnicas base se normalizan a un formato canónico y se intersectan por identificador. El resultado son 428 casos comunes que constituyen el corpus de evaluación.
-    \item \textit{Generación}: cada motor procesa los 428 casos y produce una oración por caso. Los seis motores alcanzaron cobertura completa.
-    \item \textit{Cálculo de métricas}: para cada par (predicción, referencia) se calculan las métricas descritas en la Sección~\ref{sec:metricas}. En total se obtienen 17 valores por caso y motor.
-    \item \textit{Análisis estadístico}: se aplican tests de significancia no paramétricos (Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y bootstrap pareado para intervalos de confianza) sobre las distribuciones de métricas de los seis motores.
-    \item \textit{Generación de informes}: tablas comparativas, gráficas de distribución y plantillas para evaluación humana.
+    \item Unificación del dataset: los conjuntos de datos de las tres técnicas base se normalizan a un formato canónico y se intersectan por identificador. El resultado son 428 casos comunes que constituyen el corpus de evaluación.
+    \item Generación: cada motor procesa los 428 casos y produce una oración por caso. Los seis motores alcanzaron cobertura completa.
+    \item Cálculo de métricas: para cada par (predicción, referencia) se calculan las métricas descritas en la Sección~\ref{sec:metricas}. En total se obtienen 17 valores por caso y motor.
+    \item Análisis estadístico: se aplican tests de significancia no paramétricos (Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y bootstrap pareado para intervalos de confianza) sobre las distribuciones de métricas de los seis motores.
+    \item Generación de informes: tablas comparativas, gráficas de distribución y plantillas para evaluación humana.
 \end{enumerate}
 
 \section{Resultados globales}
@@ -68,7 +68,7 @@ El LLM obtiene valores ligeramente inferiores a los híbridos en Exact Match (0,
 
 La tabla de métricas sin referencia completa el panorama. La cobertura de pictogramas converge en torno al 97-98\% para los seis motores, con valores prácticamente idénticos entre la gramática (0,972) y el LLM (0,971). La fidelidad de contenido muestra valores similares en todos los motores, con los híbridos ligeramente por encima (0,934-0,936) respecto a la gramática (0,918) y al LLM (0,920).
 
-La fidelidad ajustada (definida en la Sección~\ref{sec:metricas}), que descuenta las inferencias pragmáticas del recuento de alucinaciones, eleva todos los valores por encima de 0,96 y estrecha las diferencias entre motores: la gramática alcanza 0,969 y los híbridos 0,979-0,983, lo que indica que la mayor parte de las ``alucinaciones'' detectadas por la fidelidad estándar son inferencias legítimas como el verbo \textit{querer} a partir de pictogramas de necesidad.
+La fidelidad ajustada (definida en la Sección~\ref{sec:metricas}), que descuenta las inferencias pragmáticas del recuento de alucinaciones, eleva todos los valores por encima de 0,96 y estrecha las diferencias entre motores: la gramática alcanza 0,969 y los híbridos 0,979-0,983, lo que indica que la mayor parte de las ``alucinaciones'' detectadas por la fidelidad estándar son inferencias legítimas como el verbo ``querer'' a partir de pictogramas de necesidad.
 
 La perplejidad revela que los híbridos 1 y 2 producen texto más natural que las técnicas base: medianas de 100 y 102 frente a 161 de la gramática. El LLM obtiene una mediana de 162, comparable a la gramática. Hybrid3, con mediana de 150, se aproxima a la gramática en lugar de mejorarla, un resultado inesperado respecto a su diseño de ranking por perplejidad.
 
@@ -211,7 +211,7 @@ La Figura~\ref{fig:eval-errores} muestra la distribución de los cinco tipos de 
 
 El hallazgo más revelador es que la hibridación cambia la naturaleza de los errores, no solo su frecuencia. La gramática formal y los embeddings presentan un porcentaje notable de casos clasificados como alucinación ($\sim$30\%), lo que puede parecer contradictorio dado que producen las referencias del dataset. La explicación reside en la definición operativa de alucinación: se basa en la fidelidad de contenido, que penaliza palabras de contenido en la salida no presentes entre los pictogramas de entrada.
 
-Cuando el motor infiere correctamente un verbo como \textit{quiero} a partir del pictograma \textit{agua}, esa inferencia se contabiliza técnicamente como alucinación porque la palabra \textit{quiero} no corresponde a ningún pictograma de la secuencia de entrada.
+Cuando el motor infiere correctamente un verbo como ``quiero'' a partir del pictograma ``agua'', esa inferencia se contabiliza técnicamente como alucinación porque la palabra ``quiero'' no corresponde a ningún pictograma de la secuencia de entrada.
 
 Los híbridos, al pasar la salida de la gramática por un LLM de post-edición, tienden a reducir las alucinaciones (el LLM elimina o sustituye algunas de estas inferencias) pero introducen errores morfológicos y léxicos: conjugaciones ligeramente diferentes, artículos cambiados o sinónimos parciales. El LLM presenta un perfil intermedio: menos alucinaciones que la gramática pero más errores léxicos que los motores deterministas.
 
@@ -427,7 +427,7 @@ La gramática formal sigue siendo la opción para dispositivos offline o escenar
 
 Hybrid3 constituye un resultado negativo (sección~\ref{sec:eval-seleccion-h3}): su perplejidad (mediana 150) no mejora la de la gramática, su latencia (4,2 s) es cinco veces mayor que la de Hybrid1, y su coste por consulta triplica al de los demás híbridos. Hybrid2 obtiene resultados prácticamente idénticos a Hybrid1 (perplejidad 102, fidelidad ajustada 0,979) pero añade la dependencia de FastText sin beneficio medible.
 
-La post-edición por LLM introduce un compromiso no previsto en el diseño original: en aproximadamente 16 casos (3,7\%), el post-editor produce una frase más natural pero que pierde algún pictograma respecto a la salida del motor base. Por ejemplo, ante la entrada \texttt{[luego, dormir]}, la gramática genera \textit{Luego quiero dormir} (infiriendo el verbo modal) y el post-editor la reformula como \textit{Luego dormiré}, una frase gramaticalmente superior pero que omite el concepto \textit{querer}. Este fenómeno afecta tanto a Hybrid1 como a Hybrid2 y revela una tensión inherente al patrón \textit{plan-then-realize}: el realizador puede mejorar la forma a costa del contenido.
+La post-edición por LLM introduce un compromiso no previsto en el diseño original: en aproximadamente 16 casos (3,7\%), el post-editor produce una frase más natural pero que pierde algún pictograma respecto a la salida del motor base. Por ejemplo, ante la entrada \texttt{[luego, dormir]}, la gramática genera \textit{Luego quiero dormir} (infiriendo el verbo modal) y el post-editor la reformula como \textit{Luego dormiré}, una frase gramaticalmente superior pero que omite el concepto ``querer''. Este fenómeno afecta tanto a Hybrid1 como a Hybrid2 y revela una tensión inherente al patrón \textit{plan-then-realize}: el realizador puede mejorar la forma a costa del contenido.
 
 En un sistema de producción, una validación de cobertura posterior a la post-edición, que descarte reformulaciones que pierden pictogramas y revierta al motor base, mitigaría este efecto sin renunciar a la mejora de naturalidad en los demás casos.
 

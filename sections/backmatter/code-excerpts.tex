@@ -189,7 +189,7 @@ PREPOSICIONES_UBICACION = {
 
 \section{Concordancia de género}
 
-La concordancia de género (sección~\ref{sec:f1-postprocesamiento}) busca hacia atrás desde cada adjetivo hasta encontrar el sustantivo al que modifica, obtiene su género y transforma el adjetivo si es necesario. Los adjetivos invariables (\textit{feliz}, \textit{triste}, \textit{azul}) se mantienen inalterados.
+La concordancia de género (sección~\ref{sec:f1-postprocesamiento}) busca hacia atrás desde cada adjetivo hasta encontrar el sustantivo al que modifica, obtiene su género y transforma el adjetivo si es necesario. Los adjetivos invariables (``feliz'', ``triste'', ``azul'') se mantienen inalterados.
 
 \begin{lstlisting}[language=Python,caption={Concordancia de género en adjetivos (\texttt{postprocessor.py}).},label={lst:concordancia},basicstyle=\ttfamily\small,xleftmargin=1cm]
 def _aplicar_concordancia(self, palabras, contexto):
@@ -225,7 +225,7 @@ def _concordar_adjetivo(self, adjetivo, genero):
 
 \section{Motor de conjugación}
 
-El conjugador mantiene tablas completas para los 24 verbos irregulares y aplica reglas morfológicas para los regulares (sección~\ref{sec:f1-postprocesamiento}). El Extracto de código~\ref{lst:conjugacion} muestra tres entradas representativas de la tabla de irregulares y la lógica de conjugación regular, que extrae la raíz del infinitivo y concatena el sufijo correspondiente a la terminación (\textit{-ar}, \textit{-er}, \textit{-ir}).
+El conjugador mantiene tablas completas para los 24 verbos irregulares y aplica reglas morfológicas para los regulares (sección~\ref{sec:f1-postprocesamiento}). El Extracto de código~\ref{lst:conjugacion} muestra tres entradas representativas de la tabla de irregulares y la lógica de conjugación regular, que extrae la raíz del infinitivo y concatena el sufijo correspondiente a la terminación (``-ar'', ``-er'', ``-ir'').
 
 \begin{lstlisting}[language=Python,caption={Tabla de irregulares y conjugación regular (\texttt{conjugation.py}).},label={lst:conjugacion},basicstyle=\ttfamily\small,xleftmargin=1cm]
 self.irregulares = {

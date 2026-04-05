@@ -26,7 +26,7 @@ La \textit{fidelidad semántica} (regla 1) es la restricción más importante: l
 
 Los \textit{elementos funcionales} (regla 2) especifican qué puede añadir el modelo: artículos, preposiciones de enlace, conjugación verbal y concordancia de género. Estas son las mismas operaciones que los motores anteriores resolvían con reglas explícitas (sección~\ref{sec:f1-postprocesamiento}); aquí se delegan al LLM mediante una instrucción textual.
 
-El \textit{formato y registro} (reglas 3-5, 8, 10) restringe la salida a una única oración en registro coloquial-neutro, sin explicaciones ni alternativas. Sin estas restricciones, los LLMs frecuentemente producen texto adicional como \textit{Aquí tienes la oración:} o generan múltiples variantes.
+El \textit{formato y registro} (reglas 3-5, 8, 10) restringe la salida a una única oración en registro coloquial-neutro, sin explicaciones ni alternativas. Sin estas restricciones, los LLMs frecuentemente producen texto adicional como ``Aquí tienes la oración:'' o generan múltiples variantes.
 
 Las \textit{reglas lingüísticas} (reglas 6-7, 9, 11) cubren fenómenos específicos: interrogativas con signos ¿...?, posición de la negación, omisión del pronombre sujeto (\textit{pro-drop} del español) y concordancia de género. La regla 11, sobre concordancia, fue añadida respecto al diseño original para cubrir la categoría de concordancia del dataset de evaluación.
 
@@ -73,7 +73,7 @@ La función \texttt{build\_messages()} (véase Extracto de código~\ref{lst:prom
 
 Cada mensaje de usuario formatea los pictogramas incluyendo su categoría gramatical entre paréntesis (por ejemplo, \texttt{Pictogramas: quiero (verbo modal) + agua (sustantivo)}).
 
-Esta información desambiguadora procede del inventario de metadatos y ayuda al modelo a interpretar correctamente pictogramas polisémicos: \textit{como} puede ser verbo (primera persona de \textit{comer}) o interrogativo (\textit{¿cómo?}), y la categoría aclara la interpretación esperada.
+Esta información desambiguadora procede del inventario de metadatos y ayuda al modelo a interpretar correctamente pictogramas polisémicos: ``como'' puede ser verbo (primera persona de ``comer'') o interrogativo (``¿cómo?''), y la categoría aclara la interpretación esperada.
 
 Cada llamada consume aproximadamente 1.204 tokens de entrada, de los cuales la gran mayoría corresponden al \textit{system prompt} y los ejemplos \textit{few-shot}. La consulta del usuario aporta típicamente 10-20 tokens adicionales. Los tokens de salida son muy reducidos: 4 tokens en promedio, coherente con la brevedad de las oraciones de CAA.
 
@@ -84,9 +84,9 @@ El inventario de metadatos (\texttt{pictogram\_metadata.py}) contiene 539 entrad
 
 El número de entradas es mayor que el léxico de los motores anteriores porque incluye explícitamente las formas conjugadas más frecuentes: en lugar de resolver la conjugación en tiempo de ejecución, se registran las formas de primera, segunda y tercera persona del singular y del plural. Este diseño es necesario porque el LLM no tiene acceso al sistema de conjugación de la gramática formal, y necesita recibir la categoría gramatical exacta de cada forma para desambiguarla correctamente.
 
-La función \texttt{get\_metadata()} recibe una etiqueta y devuelve su categoría gramatical y su forma legible (reemplazando guiones bajos por espacios, de modo que \texttt{pasta\_de\_dientes} se presenta como \textit{pasta de dientes}).
+La función \texttt{get\_metadata()} recibe una etiqueta y devuelve su categoría gramatical y su forma legible (reemplazando guiones bajos por espacios, de modo que \texttt{pasta\_de\_dientes} se presenta como ``pasta de dientes'').
 
-El inventario presenta cuatro conflictos de clave duplicada donde una misma forma pertenece a dos categorías: \textit{frío} (adjetivo y sustantivo de estado), \textit{bajo} (adjetivo y preposición), \textit{como} (verbo e interrogativo) y \textit{limpio} (verbo y adjetivo).
+El inventario presenta cuatro conflictos de clave duplicada donde una misma forma pertenece a dos categorías: ``frío'' (adjetivo y sustantivo de estado), ``bajo'' (adjetivo y preposición), ``como'' (verbo e interrogativo) y ``limpio'' (verbo y adjetivo).
 
 Python resuelve las duplicaciones manteniendo la última asignación, y en la práctica el LLM interpreta correctamente el significado por contexto, por lo que estos conflictos no afectan a la calidad de la generación.
 
@@ -116,7 +116,7 @@ Las verificaciones cubren tres aspectos. La respuesta vacía genera un error inm
 
 \subsection{Algoritmo de cobertura de conceptos}
 
-El algoritmo implementa cuatro niveles de matching aplicados secuencialmente (véase Extracto de código~\ref{lst:concept-coverage} del Anexo~\ref{anx:codigo}). El primer nivel busca el pictograma como subcadena exacta del texto generado. El segundo extrae la raíz de 4 caracteres del pictograma y la busca en el texto, capturando variaciones morfológicas (\textit{querer} $\rightarrow$ raíz \textit{quer} $\rightarrow$ se encuentra en \textit{quiero}).
+El algoritmo implementa cuatro niveles de matching aplicados secuencialmente (véase Extracto de código~\ref{lst:concept-coverage} del Anexo~\ref{anx:codigo}). El primer nivel busca el pictograma como subcadena exacta del texto generado. El segundo extrae la raíz de 4 caracteres del pictograma y la busca en el texto, capturando variaciones morfológicas (``querer'' $\rightarrow$ raíz ``quer'' $\rightarrow$ se encuentra en ``quiero'').
 
 El tercer nivel mantiene una tabla de raíces irregulares para 12 verbos frecuentes en CAA, que cubren diptongaciones (e$\rightarrow$ie, o$\rightarrow$ue) y formas muy irregulares. El cuarto nivel, como fallback, busca la raíz de 3 caracteres a nivel de palabra.
 

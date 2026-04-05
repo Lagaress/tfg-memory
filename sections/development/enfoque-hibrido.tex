@@ -31,7 +31,7 @@ Para representar una secuencia de pictogramas como un único vector, el sistema 
 
 El léxico de este motor contiene 355 entradas exportadas desde el motor de gramática formal mediante un script de conversión.
 
-Las 355 entradas son el resultado de filtrar las 646 del léxico original a formas base, ya que al sistema de embeddings le interesa la similitud semántica entre conceptos, no entre formas flexionadas de un mismo concepto. Los verbos se reducen a infinitivos (las conjugaciones las sigue manejando la CFG), los adjetivos fusionan pares de género (\textit{bonito}/\textit{bonita} se unifican en una sola entrada) y los pronombres eliminan duplicados de tilde.
+Las 355 entradas son el resultado de filtrar las 646 del léxico original a formas base, ya que al sistema de embeddings le interesa la similitud semántica entre conceptos, no entre formas flexionadas de un mismo concepto. Los verbos se reducen a infinitivos (las conjugaciones las sigue manejando la CFG), los adjetivos fusionan pares de género (``bonito''/``bonita'' se unifican en una sola entrada) y los pronombres eliminan duplicados de tilde.
 
 Cada entrada se almacena como un objeto JSON con campos que varían según la categoría (véase Extracto de código~\ref{lst:lexicon-json} del Anexo~\ref{anx:codigo}): los verbos incluyen conjugaciones completas por pronombre, los lugares incluyen preposiciones de movimiento y ubicación, los adjetivos incluyen formas de género, y los objetos incluyen rasgos como \texttt{uncountable} y \texttt{definite\_article}.
 
@@ -60,13 +60,13 @@ $$\text{score} = \text{confianza}_{\text{CFG}} \times 0{,}6 + \text{score}_{\tex
 
 El score de embedding se compone a su vez de dos señales: la preferencia seleccional (60\%), que mide la similitud coseno entre cada par verbo-argumento, y la similitud vectorial a nivel de oración (40\%), que compara el vector compuesto de los pictogramas de entrada con el de la frase generada.
 
-La preferencia seleccional recibe mayor peso porque la coherencia de un par concreto como \textit{comer}--\textit{manzana} es una señal más directa que la similitud global de la oración, donde frases con casi las mismas palabras obtienen valores casi idénticos.
+La preferencia seleccional recibe mayor peso porque la coherencia de un par concreto como ``comer''--``manzana'' es una señal más directa que la similitud global de la oración, donde frases con casi las mismas palabras obtienen valores casi idénticos.
 
 Los pesos 0,6/0,4 entre CFG y embeddings reflejan una decisión deliberada: la estructura gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
 
 \subsection{Validación de preferencias seleccionales}
 
-El scorer implementa una verificación de preferencia seleccional basada en la hipótesis distribucional (véase Extracto de código~\ref{lst:selectional-preference} del Anexo~\ref{anx:codigo}): la similitud coseno entre el embedding de un verbo y el de su argumento aproxima la compatibilidad semántica de la combinación. Si la similitud supera un umbral de 0,10, la combinación se considera coherente. El umbral es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes: \textit{querer juguete} tiene menor similitud que \textit{querer agua}, pero ambas son correctas en el contexto de CAA.
+El scorer implementa una verificación de preferencia seleccional basada en la hipótesis distribucional (véase Extracto de código~\ref{lst:selectional-preference} del Anexo~\ref{anx:codigo}): la similitud coseno entre el embedding de un verbo y el de su argumento aproxima la compatibilidad semántica de la combinación. Si la similitud supera un umbral de 0,10, la combinación se considera coherente. El umbral es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes: ``querer juguete'' tiene menor similitud que ``querer agua'', pero ambas son correctas en el contexto de CAA.
 
 Esta información se reporta como metadato en el resultado pero no bloquea la generación: su propósito es informativo, no restrictivo, a diferencia de las restricciones de seguridad del motor de gramática (sección~\ref{sec:f1-limitaciones}) que sí reducen la confianza.
 
@@ -101,7 +101,7 @@ En la práctica, las preposiciones de la CFG son correctas para los 35 lugares d
 
 \subsection{Nivel 3: reglas por verbo}
 
-Como fallback final, si los prototipos no superan el umbral, el sistema consulta la preposición por defecto del verbo codificada en el léxico (\textit{ir} $\rightarrow$ \textit{a}, \textit{venir} $\rightarrow$ \textit{de}).
+Como fallback final, si los prototipos no superan el umbral, el sistema consulta la preposición por defecto del verbo codificada en el léxico (``ir'' $\rightarrow$ ``a'', ``venir'' $\rightarrow$ ``de'').
 
 Este diseño de tres niveles ejemplifica la filosofía híbrida del sistema: las reglas codificadas cubren los casos conocidos con certeza, los embeddings extienden la cobertura a combinaciones no anticipadas, y un fallback determinista garantiza que siempre se produce alguna salida.
 

@@ -5,9 +5,9 @@ La arquitectura de Dixi sigue un diseño modular: la entrada ---una lista ordena
 En cuanto al motor de síntesis de voz, tres aspectos condicionan la elección:
 
 \begin{enumerate}
-    \item \textit{Funcionamiento sin conexión}: una persona que depende de un dispositivo de comunicación no puede asumir interrupciones por falta de cobertura.
-    \item \textit{Disponibilidad de voces infantiles en español}: la única voz infantil en español ofrecida por los proveedores comerciales es es-MX-MarinaNeural de Azure, con acento mexicano y sin equivalente peninsular.
-    \item \textit{Latencia}: en una conversación presencial, un retardo superior a unos pocos cientos de milisegundos rompe el ritmo natural del diálogo.
+    \item Funcionamiento sin conexión: una persona que depende de un dispositivo de comunicación no puede asumir interrupciones por falta de cobertura.
+    \item Disponibilidad de voces infantiles en español: la única voz infantil en español ofrecida por los proveedores comerciales es es-MX-MarinaNeural de Azure, con acento mexicano y sin equivalente peninsular.
+    \item Latencia: en una conversación presencial, un retardo superior a unos pocos cientos de milisegundos rompe el ritmo natural del diálogo.
 \end{enumerate}
 
 El dominio de la aplicación está deliberadamente acotado. El vocabulario consta de 232 pictogramas ARASAAC organizados en nueve categorías cromáticas, una cantidad seleccionada para cubrir las necesidades comunicativas básicas del día a día (pedir necesidades, expresar emociones, hacer preguntas, describir estados, referirse a personas cercanas y lugares habituales) sin desbordar el alcance del proyecto. Este dominio controlado, con frases cortas y un conjunto cerrado de conceptos, es una decisión de diseño que permite explorar y comparar técnicas de generación sobre un problema acotado, sin las complejidades del lenguaje abierto.
@@ -44,7 +44,7 @@ Movimiento & Desplazamiento a lugares & 50 \\
 Descripción & Atributos de personas u objetos & 41 \\
 Concordancia & Concordancia de género y número & 35 \\
 \hline
-\textit{Total} & & \textit{428} \\
+Total & & 428 \\
 \hline
 \end{tabular}
 \caption{Distribución de los casos de prueba por categoría semántica.}
@@ -56,14 +56,14 @@ La complejidad de cada caso se determina por el número de pictogramas de entrad
 Cada categoría presenta desafíos lingüísticos específicos:
 
 \begin{itemize}
-    \item Las oraciones de \textit{necesidad} requieren inferir el verbo modal \textit{querer} cuando el usuario omite la intención.
-    \item Las de \textit{movimiento} exigen seleccionar la preposición correcta según el lugar de destino.
-    \item Las \textit{interrogativas} demandan invertir el orden sujeto-verbo y añadir los signos ¿...?.
-    \item Las \textit{negativas} requieren insertar la partícula \textit{no} en la posición correcta respecto al verbo.
-    \item Las \textit{compuestas} necesitan coordinación con conjunciones y marcadores temporales.
-    \item Las de \textit{estado} implican distinguir entre verbos copulativos (\textit{estar cansado}) y de posesión (\textit{tener hambre}).
-    \item Las de \textit{descripción} exigen concordancia entre el atributo y el sujeto (\textit{la casa es grande}).
-    \item Las de \textit{concordancia} verifican el ajuste de género y número entre sustantivos y adjetivos (\textit{manzana roja}, no \textit{manzana rojo}).
+    \item Las oraciones de necesidad requieren inferir el verbo modal ``querer'' cuando el usuario omite la intención.
+    \item Las de movimiento exigen seleccionar la preposición correcta según el lugar de destino.
+    \item Las interrogativas demandan invertir el orden sujeto-verbo y añadir los signos ¿...?.
+    \item Las negativas requieren insertar la partícula ``no'' en la posición correcta respecto al verbo.
+    \item Las compuestas necesitan coordinación con conjunciones y marcadores temporales.
+    \item Las de estado implican distinguir entre verbos copulativos (``estar cansado'') y de posesión (``tener hambre'').
+    \item Las de descripción exigen concordancia entre el atributo y el sujeto (``la casa es grande'').
+    \item Las de concordancia verifican el ajuste de género y número entre sustantivos y adjetivos (``manzana roja'', no ``manzana rojo'').
 \end{itemize}
 
 \subsection{Formato de los casos}
@@ -92,9 +92,9 @@ La entrada puede variar en longitud desde un solo pictograma, caso en el que el 
 El corpus se ha construido siguiendo tres criterios:
 
 \begin{enumerate}
-    \item \textit{Representatividad}: las categorías reflejan las necesidades comunicativas más frecuentes de los usuarios de CAA, priorizando las expresiones de necesidad y deseo que constituyen la base de la comunicación funcional.
-    \item \textit{Gradualidad}: dentro de cada categoría se incluyen casos de complejidad creciente, desde entradas mínimas que exigen máxima inferencia hasta secuencias completas donde el sistema solo debe aplicar morfología.
-    \item \textit{Cobertura gramatical}: el conjunto abarca los principales fenómenos del español relevantes para CAA (concordancia de género, contracciones, selección de preposiciones, interrogativas, negación y coordinación).
+    \item Representatividad: las categorías reflejan las necesidades comunicativas más frecuentes de los usuarios de CAA, priorizando las expresiones de necesidad y deseo que constituyen la base de la comunicación funcional.
+    \item Gradualidad: dentro de cada categoría se incluyen casos de complejidad creciente, desde entradas mínimas que exigen máxima inferencia hasta secuencias completas donde el sistema solo debe aplicar morfología.
+    \item Cobertura gramatical: el conjunto abarca los principales fenómenos del español relevantes para CAA (concordancia de género, contracciones, selección de preposiciones, interrogativas, negación y coordinación).
 \end{enumerate}
 
 \section{Métricas de evaluación}
@@ -103,10 +103,10 @@ El corpus se ha construido siguiendo tres criterios:
 La evaluación emplea métricas organizadas en cuatro categorías:
 
 \begin{enumerate}
-    \item \textit{Métricas con referencia}: comparan la predicción contra la oración gold standard.
-    \item \textit{Métricas sin referencia}: evalúan la calidad intrínseca del texto generado.
-    \item \textit{Métricas específicas de CAA}: miden la fidelidad al contenido pictográfico de entrada.
-    \item \textit{Métricas operativas}: registran latencia y coste por consulta.
+    \item Métricas con referencia: comparan la predicción contra la oración gold standard.
+    \item Métricas sin referencia: evalúan la calidad intrínseca del texto generado.
+    \item Métricas específicas de CAA: miden la fidelidad al contenido pictográfico de entrada.
+    \item Métricas operativas: registran latencia y coste por consulta.
 \end{enumerate}
 
 \subsection{Exact Match}
@@ -147,11 +147,11 @@ donde $F_\text{mean}$ es la media armónica ponderada y la penalización crece c
 
 \subsection{chrF++}
 
-chrF++~\cite{popovic2017chrf} evalúa la similitud entre predicción y referencia combinando n-gramas de caracteres con bigramas de palabras. Los n-gramas de caracteres capturan coincidencias parciales a nivel morfológico ---por ejemplo, reconocen la similitud entre \textit{quiero} y \textit{quiere} aunque difieran en su terminación---, mientras que los bigramas de palabras incorporan información sobre el orden.
+chrF++~\cite{popovic2017chrf} evalúa la similitud entre predicción y referencia combinando n-gramas de caracteres con bigramas de palabras. Los n-gramas de caracteres capturan coincidencias parciales a nivel morfológico ---por ejemplo, reconocen la similitud entre ``quiero'' y ``quiere'' aunque difieran en su terminación---, mientras que los bigramas de palabras incorporan información sobre el orden.
 
 $$\text{chrF++} = (1 + \beta^2) \cdot \frac{\text{chrP} \cdot \text{chrR}}{\beta^2 \cdot \text{chrP} + \text{chrR}}$$
 
-Donde chrP y chrR son la precisión y recall calculadas sobre n-gramas de caracteres y bigramas de palabras conjuntamente, con $\beta = 2$ por defecto. Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente ---como la diferencia entre \textit{come} y \textit{comer}--- representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
+Donde chrP y chrR son la precisión y recall calculadas sobre n-gramas de caracteres y bigramas de palabras conjuntamente, con $\beta = 2$ por defecto. Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente ---como la diferencia entre ``come'' y ``comer''--- representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
 
 \subsection{Cobertura de pictogramas}
 
@@ -161,11 +161,11 @@ La cobertura mide la fracción de pictogramas de entrada que se encuentran repre
 
 $$\text{Cobertura} = \frac{|\text{pictogramas cubiertos}|}{|\text{pictogramas de entrada}|}$$
 
-Por ejemplo, dado el pictograma \textit{comer} (lema: \textit{comer}) y la oración generada \textit{Yo como pan} (lemas: \textit{yo}, \textit{comer}, \textit{pan}), el pictograma se considera cubierto porque el lema \textit{comer} aparece en ambos conjuntos. Esta métrica es específica del dominio de CAA y complementa las métricas de coincidencia con la referencia: mientras que BLEU o ROUGE-L comparan contra una oración gold standard, la cobertura verifica directamente que el contenido pictográfico se preserve en la salida, independientemente de la formulación exacta.
+Por ejemplo, dado el pictograma ``comer'' (lema: ``comer'') y la oración generada ``Yo como pan'' (lemas: ``yo'', ``comer'', ``pan''), el pictograma se considera cubierto porque el lema ``comer'' aparece en ambos conjuntos. Esta métrica es específica del dominio de CAA y complementa las métricas de coincidencia con la referencia: mientras que BLEU o ROUGE-L comparan contra una oración gold standard, la cobertura verifica directamente que el contenido pictográfico se preserve en la salida, independientemente de la formulación exacta.
 
 \subsection{BERTScore}
 
-BERTScore~\cite{zhang2020bertscore} evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o n-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que \textit{deseo} y \textit{quiero} expresan significados cercanos aunque no compartan tokens.
+BERTScore~\cite{zhang2020bertscore} evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o n-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que ``deseo'' y ``quiero'' expresan significados cercanos aunque no compartan tokens.
 
 El cálculo alinea cada token de la predicción con su token más similar en la referencia mediante similitud coseno en el espacio de embeddings, y obtiene precisión, recall y $F_1$. Se utiliza un modelo BERT preentrenado en español en lugar del modelo por defecto en inglés, lo que mejora la captura de matices semánticos propios del castellano. Esta métrica se aplica a los seis motores de generación, siendo especialmente informativa cuando los motores producen paráfrasis válidas que las métricas de coincidencia exacta penalizarían.
 
@@ -200,9 +200,9 @@ La fidelidad complementa la cobertura: mientras la cobertura detecta omisiones (
 
 La fidelidad de contenido descrita en la subsección anterior penaliza como alucinación toda palabra de contenido que no corresponda a un pictograma de entrada. Esta definición operativa produce falsos positivos en un caso recurrente en CAA: la inferencia pragmática.
 
-Cuando un usuario selecciona únicamente el pictograma \textit{agua}, el motor puede inferir legítimamente el verbo \textit{querer} y generar \textit{Quiero agua}. La palabra \textit{quiero} no aparece entre los pictogramas de entrada, de modo que la fidelidad estándar la contabiliza como alucinación, aunque se trata de una inferencia que cualquier interlocutor humano haría rutinariamente.
+Cuando un usuario selecciona únicamente el pictograma ``agua'', el motor puede inferir legítimamente el verbo ``querer'' y generar ``Quiero agua''. La palabra ``quiero'' no aparece entre los pictogramas de entrada, de modo que la fidelidad estándar la contabiliza como alucinación, aunque se trata de una inferencia que cualquier interlocutor humano haría rutinariamente.
 
-La fidelidad ajustada corrige este efecto excluyendo del recuento de alucinaciones aquellas palabras que constituyen inferencias pragmáticas ---verbos modales como \textit{querer}, verbos de acción predecibles por el contexto y otros elementos que los usuarios de CAA omiten sistemáticamente por economía comunicativa---. El cálculo es idéntico al de la fidelidad estándar, pero el conjunto de palabras alucinadas se reduce al descontar las inferencias detectadas:
+La fidelidad ajustada corrige este efecto excluyendo del recuento de alucinaciones aquellas palabras que constituyen inferencias pragmáticas ---verbos modales como ``querer'', verbos de acción predecibles por el contexto y otros elementos que los usuarios de CAA omiten sistemáticamente por economía comunicativa---. El cálculo es idéntico al de la fidelidad estándar, pero el conjunto de palabras alucinadas se reduce al descontar las inferencias detectadas:
 
 $$\text{Fidelidad ajustada} = 1 - \frac{|\text{palabras alucinadas}| - |\text{inferencias pragmáticas}|}{|\text{palabras de contenido generadas}|}$$
 
@@ -225,11 +225,11 @@ Estas métricas son especialmente relevantes en el contexto de CAA porque captur
 El análisis de errores clasifica cada caso en una de cinco categorías mediante heurísticas basadas en los valores de cobertura y fidelidad ya calculados:
 
 \begin{itemize}
-    \item \textit{Ninguno}: la generación coincide con la referencia o no presenta errores detectables.
-    \item \textit{Omisión}: uno o más pictogramas de entrada no se reflejan en la salida (cobertura inferior a 1,0).
-    \item \textit{Alucinación}: la oración contiene palabras de contenido no justificadas por los pictogramas (fidelidad inferior a 0,8).
-    \item \textit{Morfológico}: las palabras correctas aparecen pero con forma flexiva diferente ---conjugación, género o número incorrectos--- (solapamiento léxico superior al 50\% sin coincidencia exacta).
-    \item \textit{Léxico}: el motor elige palabras diferentes para expresar el mismo concepto (solapamiento léxico inferior al 50\% con cobertura parcial).
+    \item Ninguno: la generación coincide con la referencia o no presenta errores detectables.
+    \item Omisión: uno o más pictogramas de entrada no se reflejan en la salida (cobertura inferior a 1,0).
+    \item Alucinación: la oración contiene palabras de contenido no justificadas por los pictogramas (fidelidad inferior a 0,8).
+    \item Morfológico: las palabras correctas aparecen pero con forma flexiva diferente ---conjugación, género o número incorrectos--- (solapamiento léxico superior al 50\% sin coincidencia exacta).
+    \item Léxico: el motor elige palabras diferentes para expresar el mismo concepto (solapamiento léxico inferior al 50\% con cobertura parcial).
 \end{itemize}
 
 Esta clasificación no es mutuamente excluyente: un mismo caso puede presentar simultáneamente omisión y alucinación. El análisis de errores proporciona una visión cualitativa que complementa las métricas numéricas, permitiendo identificar no solo cuánto se equivoca cada motor sino cómo se equivoca.
@@ -239,8 +239,8 @@ Esta clasificación no es mutuamente excluyente: un mismo caso puede presentar s
 Además de la calidad lingüística, se miden dos aspectos operativos relevantes para un sistema de CAA:
 
 \begin{itemize}
-    \item \textit{Latencia}: tiempo de procesamiento por consulta, medido con temporizadores de alta resolución. En un sistema de comunicación, la latencia percibida por el usuario afecta directamente la fluidez de la interacción.
-    \item \textit{Coste}: aplicable únicamente a los motores que utilizan la API de OpenAI. Se estima a partir del número de tokens procesados por consulta y las tarifas del proveedor.
+    \item Latencia: tiempo de procesamiento por consulta, medido con temporizadores de alta resolución. En un sistema de comunicación, la latencia percibida por el usuario afecta directamente la fluidez de la interacción.
+    \item Coste: aplicable únicamente a los motores que utilizan la API de OpenAI. Se estima a partir del número de tokens procesados por consulta y las tarifas del proveedor.
 \end{itemize}
 
 \subsection{Evaluación humana de naturalidad}

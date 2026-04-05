@@ -78,7 +78,7 @@ La cobertura de pictogramas se define como la proporción de pictogramas de entr
 
 $$\text{cobertura}(pictos, frase) = \frac{|\{p \in pictos : \text{representado}(p, frase)\}|}{|pictos|}$$
 
-La función $\text{representado}(p, frase)$ compara los lemas del pictograma con los lemas de las palabras de la frase, utilizando el modelo de lematización de spaCy para español (\texttt{es\_core\_news\_sm}). Si al menos un lema coincide, el pictograma se considera cubierto: el pictograma \textit{comer} (lema: \textit{comer}) se detecta en la frase \textit{Yo como pan} porque el token \textit{como} tiene el mismo lema.
+La función $\text{representado}(p, frase)$ compara los lemas del pictograma con los lemas de las palabras de la frase, utilizando el modelo de lematización de spaCy para español (\texttt{es\_core\_news\_sm}). Si al menos un lema coincide, el pictograma se considera cubierto: el pictograma ``comer'' (lema: ``comer'') se detecta en la frase ``Yo como pan'' porque el token ``como'' tiene el mismo lema.
 
 En la Hibridación 3, el umbral de fidelidad es 1,0: solo pasan al ranking las frases que cubren el 100\% de los pictogramas.
 
