@@ -271,7 +271,7 @@ El segundo grupo incluye las métricas específicas de CAA ---cobertura y fideli
 
 La perplejidad se sitúa en una dimensión propia, sin correlación significativa con ninguna otra métrica. Esto justifica su inclusión en el protocolo de evaluación: aporta información sobre la naturalidad del texto que ninguna otra métrica captura, y su independencia garantiza que no es redundante.
 
-Esta estructura de correlaciones refuerza la necesidad de un protocolo multimétrica: una evaluación basada exclusivamente en BLEU no distinguiría entre motores que difieren en naturalidad pero coinciden en n-gramas, y una evaluación basada solo en perplejidad no detectaría diferencias en fidelidad al contenido pictográfico.
+Esta estructura de correlaciones refuerza la necesidad de un protocolo multimétrica: una evaluación basada exclusivamente en BLEU no distinguiría entre motores que difieren en naturalidad pero coinciden en $n$-gramas, y una evaluación basada solo en perplejidad no detectaría diferencias en fidelidad al contenido pictográfico.
 
 \subsection{Evaluación multi-referencia}
 \label{sec:eval-multiref}
@@ -301,7 +301,7 @@ El contraste con la Tabla~\ref{tab:eval-referencia} es notable. El LLM, que obte
 
 Los seis motores son semánticamente equivalentes cuando la evaluación contempla múltiples formulaciones válidas.
 
-Las métricas de n-gramas multi-referencia sí alcanzan significancia en el test de Friedman (mr\_BLEU-4: $\chi^2 = 35{,}75$, $p < 0{,}0001$), pero las comparaciones por pares revelan que las diferencias se concentran entre la gramática y el LLM: gramática supera significativamente al LLM en mr\_BLEU-4 ($p = 0{,}0001$), mientras que los híbridos no difieren entre sí ni respecto a la gramática en la mayoría de comparaciones. Hybrid3, al seleccionar la salida de la gramática en el 88,6\% de los casos, hereda sus scores multi-referencia y se sitúa consistentemente en el grupo de cabeza.
+Las métricas de $n$-gramas multi-referencia sí alcanzan significancia en el test de Friedman (mr\_BLEU-4: $\chi^2 = 35{,}75$, $p < 0{,}0001$), pero las comparaciones por pares revelan que las diferencias se concentran entre la gramática y el LLM: gramática supera significativamente al LLM en mr\_BLEU-4 ($p = 0{,}0001$), mientras que los híbridos no difieren entre sí ni respecto a la gramática en la mayoría de comparaciones. Hybrid3, al seleccionar la salida de la gramática en el 88,6\% de los casos, hereda sus scores multi-referencia y se sitúa consistentemente en el grupo de cabeza.
 
 \subsection{Convergencia y diversidad entre motores}
 \label{sec:eval-convergencia}

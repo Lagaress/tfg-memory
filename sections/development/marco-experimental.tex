@@ -119,15 +119,13 @@ $$\text{EM}(p, r) = \begin{cases} 1 & \text{si } \text{lower}(\text{strip}(p)) =
 
 \subsection{BLEU}
 
-Exact Match es binaria; las siguientes métricas cuantifican grados de similitud.
-
-BLEU (\textit{Bilingual Evaluation Understudy})~\cite{papineni2002bleu}, la métrica más establecida en la literatura de generación de lenguaje natural, mide la precisión de n-gramas entre la predicción y la referencia. Se calculan dos variantes: BLEU-1 (unigramas), que captura si las palabras correctas están presentes, y BLEU-4 (hasta 4-gramas), que refleja también la fluidez y el orden. Una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto.
+BLEU (\textit{Bilingual Evaluation Understudy})~\cite{papineni2002bleu}, la métrica más establecida en la literatura de generación de lenguaje natural, mide la precisión de $n$-gramas entre la predicción y la referencia. Se calculan dos variantes: BLEU-1 (unigramas), que captura si las palabras correctas están presentes, y BLEU-4 (hasta 4-gramas), que refleja también la fluidez y el orden. Una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto.
 
 La implementación utiliza sacreBLEU con ajuste de orden efectivo para oraciones cortas, evitando penalizar artificialmente frases de pocas palabras.
 
 \subsection{ROUGE-L}
 
-ROUGE-L~\cite{lin2004rouge} se basa en la subsecuencia común más larga (\textit{Longest Common Subsequence}, LCS) entre la predicción y la referencia. A diferencia de BLEU, que requiere n-gramas consecutivos, ROUGE-L permite omisiones entre las palabras coincidentes, lo que la hace más tolerante con variaciones en el orden.
+ROUGE-L~\cite{lin2004rouge} se basa en la subsecuencia común más larga (\textit{Longest Common Subsequence}, LCS) entre la predicción y la referencia. A diferencia de BLEU, que requiere $n$-gramas consecutivos, ROUGE-L permite omisiones entre las palabras coincidentes, lo que la hace más tolerante con variaciones en el orden.
 
 A partir de la longitud de la LCS se calculan precisión, recall y su media armónica $F_1$:
 
@@ -147,11 +145,11 @@ donde $F_\text{mean}$ es la media armónica ponderada y la penalización crece c
 
 \subsection{chrF++}
 
-chrF++~\cite{popovic2017chrf} evalúa la similitud entre predicción y referencia combinando n-gramas de caracteres con bigramas de palabras. Los n-gramas de caracteres capturan coincidencias parciales a nivel morfológico ---por ejemplo, reconocen la similitud entre ``quiero'' y ``quiere'' aunque difieran en su terminación---, mientras que los bigramas de palabras incorporan información sobre el orden.
+chrF++~\cite{popovic2017chrf} evalúa la similitud entre predicción y referencia combinando $n$-gramas de caracteres con bigramas de palabras. Los $n$-gramas de caracteres capturan coincidencias parciales a nivel morfológico ---por ejemplo, reconocen la similitud entre ``quiero'' y ``quiere'' aunque difieran en su terminación---, mientras que los bigramas de palabras incorporan información sobre el orden.
 
 $$\text{chrF++} = (1 + \beta^2) \cdot \frac{\text{chrP} \cdot \text{chrR}}{\beta^2 \cdot \text{chrP} + \text{chrR}}$$
 
-Donde chrP y chrR son la precisión y recall calculadas sobre n-gramas de caracteres y bigramas de palabras conjuntamente, con $\beta = 2$ por defecto. Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente ---como la diferencia entre ``come'' y ``comer''--- representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
+Donde chrP y chrR son la precisión y recall calculadas sobre $n$-gramas de caracteres y bigramas de palabras conjuntamente, con $\beta = 2$ por defecto. Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente ---como la diferencia entre ``come'' y ``comer''--- representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
 
 \subsection{Cobertura de pictogramas}
 
@@ -165,7 +163,7 @@ Por ejemplo, dado el pictograma ``comer'' (lema: ``comer'') y la oración genera
 
 \subsection{BERTScore}
 
-BERTScore~\cite{zhang2020bertscore} evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o n-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que ``deseo'' y ``quiero'' expresan significados cercanos aunque no compartan tokens.
+BERTScore~\cite{zhang2020bertscore} evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o $n$-gramas, BERTScore captura equivalencias semánticas ---por ejemplo, reconoce que ``deseo'' y ``quiero'' expresan significados cercanos aunque no compartan tokens.
 
 El cálculo alinea cada token de la predicción con su token más similar en la referencia mediante similitud coseno en el espacio de embeddings, y obtiene precisión, recall y $F_1$. Se utiliza un modelo BERT preentrenado en español en lugar del modelo por defecto en inglés, lo que mejora la captura de matices semánticos propios del castellano. Esta métrica se aplica a los seis motores de generación, siendo especialmente informativa cuando los motores producen paráfrasis válidas que las métricas de coincidencia exacta penalizarían.
 
@@ -176,7 +174,7 @@ Las métricas con referencia descritas hasta aquí comparan cada predicción con
 
 La evaluación multi-referencia se introduce precisamente para mitigar este sesgo, utilizando las salidas de los seis motores como referencias alternativas para cada caso.
 
-El cálculo varía según la métrica. Para BLEU y chrF++, sacreBLEU ofrece soporte nativo de múltiples referencias: el score de un motor se calcula contra las salidas de los otros cinco motores simultáneamente, seleccionando la referencia que maximiza la precisión de n-gramas. Para METEOR, ROUGE-L y BERTScore, que aceptan una única referencia, se adopta una estrategia de máximo: se calcula el score contra cada una de las cinco referencias alternativas y se retiene el valor más alto. Para Exact Match, basta con que la predicción coincida con al menos una de las cinco referencias alternativas.
+El cálculo varía según la métrica. Para BLEU y chrF++, sacreBLEU ofrece soporte nativo de múltiples referencias: el score de un motor se calcula contra las salidas de los otros cinco motores simultáneamente, seleccionando la referencia que maximiza la precisión de $n$-gramas. Para METEOR, ROUGE-L y BERTScore, que aceptan una única referencia, se adopta una estrategia de máximo: se calcula el score contra cada una de las cinco referencias alternativas y se retiene el valor más alto. Para Exact Match, basta con que la predicción coincida con al menos una de las cinco referencias alternativas.
 
 Esta metodología introduce una circularidad parcial, ya que las salidas de un motor se usan como referencia para otro. La mitigación principal es que cada motor se evalúa exclusivamente contra los otros cinco, nunca contra sí mismo. El grado real de circularidad y su impacto en los resultados se analizan en la Sección~\ref{sec:eval-convergencia}.
 
