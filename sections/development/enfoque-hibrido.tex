@@ -1,20 +1,4 @@
-La segunda técnica surge de una limitación concreta de la gramática formal: el motor rechaza toda entrada cuya secuencia de categorías no coincida con alguno de sus 48 patrones predefinidos.
-
-Este capítulo describe un enfoque híbrido que combina las reglas gramaticales del capítulo anterior con embeddings semánticos para superar ese techo sin abandonar el control sobre la generación.
-
-\section{Planteamiento del enfoque}
-\label{sec:f2-planteamiento}
-
-El motor de gramática formal alcanza el 100\% de Exact Match en los casos que reconoce, pero ampliar su cobertura añadiendo más patrones no escala: cada nuevo patrón comunicativo exige definir explícitamente su regla y la combinatoria de posibles secuencias crece con rapidez.
-
-La solución adoptada reutiliza íntegramente el motor de gramática formal como generador estructural e importa sus 4.355 líneas de reglas como dependencia directa, de modo que cualquier mejora en la gramática se propaga automáticamente al sistema híbrido.
-
-Los embeddings intervienen como capa de refinamiento en tres puntos concretos: rankean candidatos cuando la CFG genera múltiples opciones, refinan preposiciones asignadas con reglas genéricas mediante prototipos vectoriales, y calculan un score de preferencia seleccional para cada combinación verbo-argumento.
-
-Antes de llegar a este diseño se exploró y descartó un enfoque de recuperación semántica (\textit{retrieval})~\cite{manning2008introduction}. Dado un conjunto de pictogramas, el sistema buscaba en el corpus de referencia la frase cuya representación vectorial fuese más similar a la composición de los embeddings de entrada. Este enfoque fue abandonado porque el corpus de evaluación era la misma fuente de la que se recuperaban las frases, produciendo métricas artificialmente infladas que no reflejaban capacidad real de generalización: el sistema no generaba frases sino que las copiaba.
-
-\section{Modelo de embeddings}
-\label{sec:f2-embeddings}
+La segunda técnica surge de una limitación concreta de la gramática formal: el motor rechaza toda entrada cuya secuencia de categorías no coincida con alguno de sus patrones predefinidos. Este capítulo describe un enfoque que combina las reglas gramaticales del capítulo anterior con embeddings semánticos para superar ese techo sin abandonar el control sobre la generación.
 
 El sistema utiliza el modelo preentrenado FastText~\cite{bojanowski2017fasttext} \texttt{cc.es.300.bin}, entrenado sobre Common Crawl en español. Cada palabra se representa como un vector de 300 dimensiones, y la similitud entre palabras se mide mediante similitud coseno.
 
@@ -24,37 +8,16 @@ La elección de FastText frente a alternativas como Word2Vec~\cite{mikolov2013wo
 
 Word2Vec~\cite{mikolov2013word2vec} y GloVe~\cite{pennington2014glove} carecen de esta capacidad, devolviendo un vector nulo para cualquier palabra no presente en su vocabulario. BERT~\cite{devlin2019bert} ofrece embeddings contextuales superiores pero su latencia ($\sim$50 ms por consulta frente a $\sim$0.01 ms de FastText~\cite{bojanowski2017fasttext}) y sus dependencias (PyTorch, GPU recomendada) no se justifican para un sistema de consulta puntual sobre palabras individuales.
 
-Para representar una secuencia de pictogramas como un único vector, el sistema implementa tres estrategias de composición vectorial (véase Extracto de código~\ref{lst:weighted-average} del Anexo~\ref{anx:codigo}): promedio simple, promedio ponderado, que asigna peso 1.0 a las palabras de contenido (sustantivos, verbos, adjetivos) y 0.3 a las funcionales (artículos, preposiciones, conjunciones), y SIF (\textit{Smooth Inverse Frequency})~\cite{arora2017simple}, que pondera cada palabra inversamente a su frecuencia estimada en el idioma. La estrategia utilizada por defecto es el promedio ponderado, que equilibra sencillez y sensibilidad al contenido semántico relevante.
+Para representar una secuencia de pictogramas como un único vector, el sistema implementa tres estrategias de composición vectorial : promedio simple, promedio ponderado, que asigna peso 1.0 a las palabras de contenido (sustantivos, verbos, adjetivos) y 0.3 a las funcionales (artículos, preposiciones, conjunciones), y SIF (\textit{Smooth Inverse Frequency})~\cite{arora2017simple}, que pondera cada palabra inversamente a su frecuencia estimada en el idioma. La estrategia utilizada por defecto es el promedio ponderado, que equilibra sencillez y sensibilidad al contenido semántico relevante.
 
 \section{Léxico}
 \label{sec:f2-lexico}
 
-El léxico de este motor contiene 355 entradas exportadas desde el motor de gramática formal mediante un script de conversión.
+El léxico de este motor se construye a partir del léxico de la gramática formal, filtrando las entradas a formas base: los verbos se reducen a infinitivos, los adjetivos fusionan pares de género (``bonito''/``bonita'' se unifican en una sola entrada) y los pronombres eliminan duplicados de tilde. Al sistema de embeddings le interesa la similitud semántica entre conceptos, no entre formas flexionadas de un mismo concepto.
 
-Las 355 entradas son el resultado de filtrar las 646 del léxico original a formas base, ya que al sistema de embeddings le interesa la similitud semántica entre conceptos, no entre formas flexionadas de un mismo concepto. Los verbos se reducen a infinitivos (las conjugaciones las sigue manejando la CFG), los adjetivos fusionan pares de género (``bonito''/``bonita'' se unifican en una sola entrada) y los pronombres eliminan duplicados de tilde.
+\section{Ranking semántico de candidatos}
 
-Cada entrada se almacena como un objeto JSON con campos que varían según la categoría (véase Extracto de código~\ref{lst:lexicon-json} del Anexo~\ref{anx:codigo}): los verbos incluyen conjugaciones completas por pronombre, los lugares incluyen preposiciones de movimiento y ubicación, los adjetivos incluyen formas de género, y los objetos incluyen rasgos como \texttt{uncountable} y \texttt{definite\_article}.
-
-La diferencia respecto al léxico del motor de gramática es el formato: mientras que aquel codifica las entradas como estructuras Python en memoria, este motor las serializa a JSON para independizar el léxico del código.
-
-\section{Arquitectura del pipeline}
-\label{sec:f2-pipeline}
-
-El sistema procesa cada secuencia de pictogramas a través de un pipeline de tres etapas: generación estructural, ranking y refinamiento semántico, y orquestación.
-
-La primera etapa delega toda la generación gramatical a la CFG del motor de gramática; la segunda aplica embeddings para desambiguar y refinar; la tercera coordina ambas y formatea el resultado.
-
-\subsection{Generación estructural vía CFG}
-
-El módulo \texttt{cfg\_bridge.py} encapsula la comunicación con el motor de gramática formal (véase Extracto de código~\ref{lst:cfg-bridge} del Anexo~\ref{anx:codigo}). Durante la inicialización, importa la clase \texttt{SentenceGenerator} añadiendo su ruta al \texttt{sys.path}.
-
-Para cada secuencia de pictogramas, el bridge invoca \texttt{SentenceGenerator.generate()}, que ejecuta el pipeline completo descrito en la sección~\ref{sec:f1-postprocesamiento}. Cada candidato se convierte en un diccionario plano con los campos \texttt{sentence} (la frase generada), \texttt{tipo\_oracion}, \texttt{confianza}, \texttt{patron} e \texttt{inferencias}.
-
-Cuando la CFG no reconoce la secuencia, el bridge devuelve una lista vacía. En ese caso, a diferencia del capítulo anterior donde la entrada se rechazaba sin más, el orquestador aplica un fallback: en una aplicación de CAA, dejar al usuario sin respuesta es un problema de accesibilidad mayor que devolver una frase imperfecta.
-
-\subsection{Ranking semántico de candidatos}
-
-Cuando la CFG genera múltiples candidatos para una misma entrada, como \textit{Quiero ir al colegio} y \textit{Voy al colegio} para la secuencia \texttt{[ir, colegio]}, el módulo \texttt{semantic\_scorer.py} los ordena mediante un score combinado que pondera la confianza gramatical y la coherencia semántica (véase Extracto de código~\ref{lst:ranking-candidatos} del Anexo~\ref{anx:codigo}):
+Cuando la CFG genera múltiples candidatos para una misma entrada, como \textit{Quiero ir al colegio} y \textit{Voy al colegio} para la secuencia \texttt{[ir, colegio]}, el módulo \texttt{semantic\_scorer.py} los ordena mediante un score combinado que pondera la confianza gramatical y la coherencia semántica:
 
 $$\text{score} = \text{confianza}_{\text{CFG}} \times 0.6 + \text{score}_{\text{embedding}} \times 0.4$$
 
@@ -63,18 +26,6 @@ $$\text{score} = \text{confianza}_{\text{CFG}} \times 0.6 + \text{score}_{\text{
 La preferencia seleccional recibe mayor peso porque la coherencia de un par concreto como ``comer''--``manzana'' es una señal más directa que la similitud global de la oración, donde frases con casi las mismas palabras obtienen valores casi idénticos.
 
 Los pesos 0.6/0.4 entre CFG y embeddings reflejan una decisión deliberada: la estructura gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
-
-\subsection{Validación de preferencias seleccionales}
-
-El scorer implementa una verificación de preferencia seleccional basada en la hipótesis distribucional (véase Extracto de código~\ref{lst:selectional-preference} del Anexo~\ref{anx:codigo}): la similitud coseno entre el embedding de un verbo y el de su argumento aproxima la compatibilidad semántica de la combinación. Si la similitud supera un umbral de 0.10, la combinación se considera coherente. El umbral es deliberadamente bajo para admitir combinaciones válidas pero infrecuentes: ``querer juguete'' tiene menor similitud que ``querer agua'', pero ambas son correctas en el contexto de CAA.
-
-Esta información se reporta como metadato en el resultado pero no bloquea la generación: su propósito es informativo, no restrictivo, a diferencia de las restricciones de seguridad del motor de gramática (sección~\ref{sec:f1-limitaciones}) que sí reducen la confianza.
-
-\subsection{Orquestación}
-
-El módulo \texttt{hybrid\_generator.py} coordina el pipeline completo. Su método \texttt{generate()} sigue una secuencia fija: invoca el bridge para obtener candidatos de la CFG, si hay múltiples candidatos los ordena con el scorer, selecciona el mejor, intenta refinar sus preposiciones con embeddings y calcula los scores de preferencia seleccional.
-
-Si la CFG no genera ningún candidato, el orquestador aplica el fallback mencionado: concatena las palabras de entrada capitalizando la primera y marca el método como \texttt{fallback}. Una concatenación como \textit{Ir baño} no es gramaticalmente perfecta, pero se entiende.
 
 \section{Refinamiento de preposiciones}
 \label{sec:f2-preposiciones}
@@ -108,8 +59,8 @@ Este diseño de tres niveles ejemplifica la filosofía híbrida del sistema: las
 \section{Limitaciones}
 \label{sec:f2-limitaciones}
 
-Los pesos del scoring (0.6/0.4 entre CFG y embeddings, 0.6/0.4 entre preferencia seleccional y similitud oracional) y los umbrales de confianza (0.10 para preferencia seleccional, 0.15 para prototipos, 0.3 para refinamiento de preposiciones) se fijaron manualmente. No se realizó un proceso de optimización automática, y su ajuste empírico queda como posible mejora futura.
+El enriquecimiento de una gramática formal con embeddings hereda las limitaciones de ambas técnicas sin eliminar completamente las de ninguna. La calidad de la generación sigue dependiendo de las reglas gramaticales subyacentes: los embeddings refinan y desambiguan, pero no pueden generar estructuras oracionales que la gramática no contempla. Si la gramática no reconoce una entrada, el sistema debe recurrir a un mecanismo de fallback independientemente de la información semántica disponible.
 
-La implementación de SIF~\cite{arora2017simple} incluye solo la ponderación por frecuencia inversa, sin la corrección PCA (eliminación del primer componente principal) del artículo original; para frases cortas de CAA el impacto es menor.
+Los embeddings estáticos, por su parte, capturan similitud semántica entre palabras aisladas pero no modelan el contexto oracional. La similitud coseno entre ``comer'' y ``manzana'' indica compatibilidad, pero no permite determinar si la relación es de sujeto, objeto o complemento. Para frases cortas esta limitación es menor, pero en dominios con mayor complejidad sintáctica la falta de sensibilidad al contexto reduciría la capacidad de desambiguación.
 
-La calidad de las oraciones depende directamente de la cobertura de la gramática formal: patrones no contemplados activan el fallback descrito en la sección~\ref{sec:f2-pipeline}. El sistema tampoco aprende de correcciones del usuario ni se adapta con el uso. Queda pendiente explorar si los embeddings aportarían una diferenciación mayor con vocabularios más amplios o dominios temáticos no cubiertos por las reglas de la gramática, donde la similitud semántica tendría más margen para desambiguar combinaciones no anticipadas.
+Por último, los pesos y umbrales que combinan las señales gramaticales y semánticas requieren ajuste manual para cada dominio. No existe un criterio teórico que determine la ponderación óptima entre confianza gramatical y coherencia semántica, lo que hace que la técnica sea difícilmente transferible sin un proceso de calibración específico.
