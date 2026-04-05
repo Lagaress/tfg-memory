@@ -265,7 +265,7 @@ Las métricas anteriores asumen una referencia única por caso. Las siguientes s
 
 La Figura~\ref{fig:eval-heatmap} muestra la matriz de correlación de Pearson entre las principales métricas, calculada sobre todas las observaciones (6 motores $\times$ 428 casos). Se distinguen dos grupos claramente diferenciados:
 
-El primer grupo comprende las métricas de coincidencia n-gramática ---BLEU-4, BLEU-1, METEOR, BERTScore $F_1$ y Exact Match---, que correlacionan fuertemente entre sí ($r > 0{,}92$). Esto confirma que, a pesar de sus diferentes formulaciones matemáticas, todas capturan esencialmente la misma dimensión: cuánto se parece la oración generada a la referencia a nivel de palabras y secuencias.
+El primer grupo comprende las métricas de coincidencia $n$-gramática (BLEU-4, BLEU-1, METEOR, BERTScore $F_1$ y Exact Match), que correlacionan fuertemente entre sí ($r > 0{,}92$). Esto confirma que, a pesar de sus diferentes formulaciones matemáticas, todas capturan esencialmente la misma dimensión: cuánto se parece la oración generada a la referencia a nivel de palabras y secuencias.
 
 El segundo grupo incluye las métricas específicas de CAA (cobertura y fidelidad), que presentan correlación próxima a cero con las métricas n-gramáticas ($r \approx 0$). Este resultado es coherente con el análisis anterior: todos los motores preservan el contenido pictográfico de forma similar, de modo que las diferencias entre motores en cobertura y fidelidad son ortogonales a las diferencias en coincidencia con la referencia.
 

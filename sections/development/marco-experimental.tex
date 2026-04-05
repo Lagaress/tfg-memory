@@ -200,7 +200,7 @@ La fidelidad de contenido descrita en la subsección anterior penaliza como aluc
 
 Cuando un usuario selecciona únicamente el pictograma ``agua'', el motor puede inferir legítimamente el verbo ``querer'' y generar ``Quiero agua''. La palabra ``quiero'' no aparece entre los pictogramas de entrada, de modo que la fidelidad estándar la contabiliza como alucinación, aunque se trata de una inferencia que cualquier interlocutor humano haría rutinariamente.
 
-La fidelidad ajustada corrige este efecto excluyendo del recuento de alucinaciones aquellas palabras que constituyen inferencias pragmáticas ---verbos modales como ``querer'', verbos de acción predecibles por el contexto y otros elementos que los usuarios de CAA omiten sistemáticamente por economía comunicativa---. El cálculo es idéntico al de la fidelidad estándar, pero el conjunto de palabras alucinadas se reduce al descontar las inferencias detectadas:
+La fidelidad ajustada corrige este efecto excluyendo del recuento de alucinaciones aquellas palabras que constituyen inferencias pragmáticas (verbos modales como ``querer'', verbos de acción predecibles por el contexto y otros elementos que los usuarios de CAA omiten sistemáticamente por economía comunicativa). El cálculo es idéntico al de la fidelidad estándar, pero el conjunto de palabras alucinadas se reduce al descontar las inferencias detectadas:
 
 $$\text{Fidelidad ajustada} = 1 - \frac{|\text{palabras alucinadas}| - |\text{inferencias pragmáticas}|}{|\text{palabras de contenido generadas}|}$$
 
@@ -226,7 +226,7 @@ El análisis de errores clasifica cada caso en una de cinco categorías mediante
     \item Ninguno: la generación coincide con la referencia o no presenta errores detectables.
     \item Omisión: uno o más pictogramas de entrada no se reflejan en la salida (cobertura inferior a 1,0).
     \item Alucinación: la oración contiene palabras de contenido no justificadas por los pictogramas (fidelidad inferior a 0,8).
-    \item Morfológico: las palabras correctas aparecen pero con forma flexiva diferente ---conjugación, género o número incorrectos--- (solapamiento léxico superior al 50\% sin coincidencia exacta).
+    \item Morfológico: las palabras correctas aparecen pero con forma flexiva diferente, ya sea conjugación, género o número incorrectos (solapamiento léxico superior al 50\% sin coincidencia exacta).
     \item Léxico: el motor elige palabras diferentes para expresar el mismo concepto (solapamiento léxico inferior al 50\% con cobertura parcial).
 \end{itemize}
 
