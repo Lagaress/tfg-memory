@@ -9,7 +9,7 @@ La filosofía de diseño prioriza la corrección gramatical sobre la cobertura: 
 
 El sistema no emplea una gramática libre de contexto (CFG) pura en el sentido de Chomsky~\cite{chomsky1957syntactic}. En lugar de reglas de producción clásicas del tipo $S \rightarrow NP\ VP$, implementa una CFG extendida mediante tres mecanismos complementarios.
 
-La gramática se define formalmente con Lark~\cite{lark2024}, un \textit{toolkit} de \textit{parsing} para Python que acepta gramáticas en notación EBNF. El Extracto de código~\ref{lst:cfg-producciones} muestra las producciones principales, que describen la jerarquía de tipos oracionales y las estructuras sintagmáticas que el sistema reconoce.
+La gramática se define formalmente con Lark~\cite{lark2024}, un \textit{toolkit} de \textit{parsing} para Python que acepta gramáticas en notación EBNF. Las producciones principales describen la jerarquía de tipos oracionales y las estructuras sintagmáticas que el sistema reconoce.
 
 \begin{lstlisting}[caption={Producciones principales de la gramática CFG (notación EBNF/Lark).},label={lst:cfg-producciones},basicstyle=\ttfamily\small,xleftmargin=1cm]
 oracion: oracion_compuesta | oracion_simple
@@ -49,48 +49,6 @@ Lark permitió especificar estas reglas de forma declarativa y verificar su cohe
 Los tres mecanismos que extienden la CFG operan sobre estos patrones. El \textit{pattern-matching} sobre categorías gramaticales define cada patrón sintáctico como una secuencia ordenada de categorías (por ejemplo, \texttt{[verbo\_necesidad, verbo\_accion, objeto]}), y el parser selecciona el primer patrón que coincide con la clasificación categorial de la entrada. Las restricciones de selección semánticas~\cite{resnik1996selectional} validan que los argumentos de cada verbo cumplan rasgos específicos (``comer'' requiere un objeto con el rasgo \texttt{comestible=True}, ``ir'' requiere un complemento con \texttt{lugar=True}). Las reglas de inferencia contextual completan la oración cuando la entrada del usuario es incompleta: por ejemplo, la entrada \texttt{agua} activa la inferencia del verbo ``quiero'', produciendo \textit{Quiero agua}.
 
 Esta combinación permite manejar la ambigüedad inherente a la entrada abreviada de CAA sin recurrir a modelos estadísticos o neuronales.
-
-El léxico constituye la base de conocimiento lingüístico del sistema. Se optó por un léxico manual cerrado en lugar de recurrir a recursos NLP externos como FreeLing o spaCy. La entrada del usuario no es texto libre sino una selección de pictogramas ya desambiguados, lo que elimina la necesidad de tokenización o etiquetado gramatical automático. Un léxico manual permite asignar a cada palabra rasgos semánticos específicos del dominio (\texttt{comestible}, \texttt{peligroso}, \texttt{bebible}) que ningún recurso externo proporciona de forma nativa y que son necesarios para la validación semántica y las alertas de seguridad.
-
-\subsection{Vocabulario}
-
-El vocabulario comprende 646 entradas indexadas, resultado de la expansión morfológica de los 232 pictogramas base: cada pictograma genera varias entradas para sus formas conjugadas (``comer'' $\rightarrow$ ``como'', ``comes'', ``come'', ``comemos''), variantes de género (``hermano''/``hermana'') o de número. La Tabla~\ref{tab:f1-vocabulario} muestra su distribución por categoría.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l r l}
-\hline
-Categoría & Entradas & Subcategorías principales \\
-\hline
-Pronombres & 10 & --- \\
-Verbos de necesidad & 33 & querer, necesitar, poder, deber + conjugaciones \\
-Verbos de estado & 29 & estar, tener, sentir, parecer + conjugaciones \\
-Verbos copulativos & 19 & ser, estar, parecer + conjugaciones \\
-Verbos de acción & 148 & 36 infinitivos con sus formas conjugadas \\
-Verbos de movimiento & 63 & 9 infinitivos (ir, venir, volver\ldots) \\
-Objetos & 99 & comida, bebida, cotidianos, juguetes, higiene \\
-Lugares & 35 & domésticos, educativos, comerciales, ocio \\
-Personas & 28 & familia, profesionales, amigos \\
-Adjetivos & 101 & emociones, estados físicos, cualidades, colores \\
-Interrogativos & 20 & qué, quién, dónde, cuándo, cómo, por qué \\
-Otros & 82 & conjunciones, marcadores, determinantes, preposiciones \\
-\hline
-Total & 646 & \\
-\hline
-\end{tabular}
-\caption{Distribución del vocabulario por categoría.}
-\label{tab:f1-vocabulario}
-\end{table}
-
-La inicialización del léxico sigue cinco fases: definición de los conjuntos de vocabulario por categoría, asignación de rasgos semánticos, mapeo de géneros, construcción del índice inverso de verbos (forma conjugada $\rightarrow$ infinitivo) y generación del índice principal.
-
-\subsection{Sistema de rasgos semánticos}
-
-Una gramática formal garantiza que una oración esté bien formada sintácticamente, pero no que tenga sentido: la oración ``yo bebo lejía'' cumple la estructura sujeto-verbo-objeto sin que nada la impida. Para abordar esta limitación, el sistema incorpora rasgos semánticos inspirados en las restricciones de selección de la lingüística formal~\cite{katz1963structure, resnik1996selectional}. De las 646 entradas del léxico, 171 tienen asociados ocho rasgos booleanos: \texttt{comestible}, \texttt{bebible}, \texttt{animado}, \texttt{humano}, \texttt{lugar}, \texttt{peligroso}, \texttt{legible} y \texttt{audible}.
-
-Los ocho rasgos no son arbitrarios sino los necesarios para validar las combinaciones verbo-argumento del vocabulario: \texttt{comestible} y \texttt{bebible} permiten verificar ``comer'' y ``beber'', \texttt{animado} y \texttt{humano} validan los sujetos de verbos de acción, \texttt{lugar} restringe los complementos de verbos de movimiento, \texttt{legible} y \texttt{audible} verifican ``leer'' y ``escuchar'', y \texttt{peligroso} actúa como mecanismo de seguridad para usuarios vulnerables. La asignación es automática a partir de los conjuntos de vocabulario: todos los elementos de \texttt{objetos\_comida} reciben \texttt{comestible=True}, todos los de \texttt{objetos\_bebida} reciben \texttt{bebible=True}, y así sucesivamente.
-
-Las restricciones de selección verifican la compatibilidad semántica entre verbos y argumentos: ``comer'' exige un objeto comestible y un sujeto animado. Las restricciones de seguridad generan advertencias críticas cuando se detectan combinaciones potencialmente peligrosas, como ``beber lejía'', donde el rasgo \texttt{peligroso=True} activa una alerta que reduce la confianza de la salida a 0.5 (véase Extracto de código~\ref{lst:restricciones-seguridad} del Anexo~\ref{anx:codigo}).
 
 \section{Decisiones de diseño específicas}
 \label{sec:f1-postprocesamiento}

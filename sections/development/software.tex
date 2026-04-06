@@ -1,0 +1,56 @@
+Este capítulo describe las decisiones de ingeniería de software que sustentan la implementación del proyecto: la organización del código, los patrones de diseño empleados, las metodologías de desarrollo y los repositorios donde se aloja el código fuente.
+
+\section{Organización del código}
+
+El proyecto se estructura como un conjunto de repositorios independientes, cada uno con su propio entorno de ejecución y dependencias. Esta separación permite desarrollar, probar y desplegar cada componente de forma autónoma:
+
+\begin{itemize}
+    \item Gramática formal: motor de generación basado en reglas CFG con Lark y Python.
+    \item Embeddings semánticos: motor híbrido que combina la gramática formal con FastText.
+    \item Modelos de lenguaje: motor basado en GPT-4o mediante la API de OpenAI.
+    \item Hibridación: tres técnicas que combinan los motores anteriores.
+    \item Evaluación comparativa: pipeline de métricas automáticas y tests estadísticos.
+    \item Aplicación móvil: interfaz de usuario desarrollada con React Native y Expo.
+    \item Encuestas web: monorepo con las encuestas de naturalidad y golden standard.
+\end{itemize}
+
+\section{Patrones de diseño}
+
+Los motores de generación comparten varios patrones de diseño que facilitan la composición y el mantenimiento del sistema.
+
+La separación entre generación y post-procesamiento sigue el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}: un componente simbólico decide la estructura de la oración y un componente neural refina el resultado. Este patrón se aplica en las Hibridaciones 1 y 2, donde la gramática o los embeddings producen una frase estructurada y el LLM la mejora.
+
+La Hibridación 3 implementa el patrón \textit{overgenerate-and-rank}~\cite{sharma2019overgenerate}: múltiples generadores producen candidatas, un filtro descarta las que no cumplen restricciones de fidelidad y una función de ranking selecciona la mejor. Este patrón desacopla la generación de la selección, permitiendo añadir o retirar generadores sin modificar la lógica de ranking.
+
+Los motores que dependen de recursos costosos (modelos de embeddings de varios GB, modelos de perplejidad) emplean inicialización perezosa: los recursos no se cargan al instanciar el motor sino en la primera llamada de generación. Esto permite instanciar múltiples pipelines sin consumir memoria innecesariamente.
+
+El manejo de errores sigue una estrategia de degradación progresiva: si un componente falla, el sistema recurre a un mecanismo de fallback que garantiza siempre una salida. En las hibridaciones, si la gramática no reconoce la entrada, el LLM genera la frase desde cero; en la Hibridación 3, si ninguna candidata alcanza cobertura completa, todas pasan al ranking.
+
+\section{Tecnologías y dependencias}
+
+\begin{itemize}
+    \item Python 3.13 como lenguaje principal para los motores de generación y el pipeline de evaluación.
+    \item Lark~\cite{lark2024} para la definición y validación de la gramática formal en notación EBNF.
+    \item FastText~\cite{bojanowski2017fasttext} (modelo \texttt{cc.es.300.bin}) para los embeddings semánticos.
+    \item API de OpenAI (GPT-4o, GPT-4o-mini) para el motor de LLMs y la post-edición.
+    \item spaCy (\texttt{es\_core\_news\_sm}) para la lematización en las métricas de cobertura y fidelidad.
+    \item sacreBLEU, NLTK y HuggingFace Transformers para el cálculo de métricas automáticas.
+    \item React Native y Expo para la aplicación móvil.
+    \item React, Vite y Supabase para las encuestas web.
+\end{itemize}
+
+\section{Repositorios}
+
+Todo el código fuente del proyecto está disponible en GitHub bajo la cuenta del autor:
+
+\begin{itemize}
+    \item Gramática formal: \url{https://github.com/Lagaress/tfg-formal-grammar}
+    \item Embeddings semánticos: \url{https://github.com/Lagaress/tfg-embeddings}
+    \item Modelos de lenguaje: \url{https://github.com/Lagaress/tfg-llms}
+    \item Hibridación: \url{https://github.com/Lagaress/tfg-hybridization}
+    \item Evaluación comparativa: \url{https://github.com/Lagaress/tfg-comparison}
+    \item Aplicación móvil: \url{https://github.com/Lagaress/tfg-mobile-app}
+    \item Encuestas web: \url{https://github.com/Lagaress/tfg-survey-web}
+\end{itemize}
+
+\textit{(TODO: Completar con metodología de desarrollo, gestión de versiones, y cualquier detalle adicional sobre la organización del proyecto.)}

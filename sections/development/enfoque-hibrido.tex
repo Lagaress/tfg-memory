@@ -30,31 +30,15 @@ Los pesos 0.6/0.4 entre CFG y embeddings reflejan una decisión deliberada: la e
 \section{Refinamiento de preposiciones}
 \label{sec:f2-preposiciones}
 
-La predicción de preposiciones es una de las contribuciones principales del componente de embeddings. En el pipeline híbrido, la CFG ya genera preposiciones correctas para los lugares codificados en el léxico; el rol de los embeddings es refinar aquellos casos en los que la CFG aplica una regla genérica o no dispone de información específica. El sistema implementa un predictor de tres niveles con degradación progresiva de confianza.
+La predicción de preposiciones es una de las contribuciones principales del componente de embeddings. En el pipeline híbrido, la CFG ya genera preposiciones correctas para los lugares codificados en el léxico; el rol de los embeddings es refinar aquellos casos en los que la CFG aplica una regla genérica o no dispone de información específica. El sistema implementa un predictor de tres niveles con degradación progresiva de confianza:
 
-\subsection{Nivel 1: reglas por lugar}
+\begin{itemize}
+    \item Nivel 1 (reglas por lugar): cuando el sustantivo es un lugar con preposiciones codificadas en el léxico, la gramática aplica directamente la regla. Si el verbo es de movimiento, utiliza la preposición de movimiento (``ir al colegio''); si no lo es, utiliza la de ubicación (``estar en el colegio'').
+    \item Nivel 2 (prototipos vectoriales): si no existe regla de lugar, el sistema recurre a prototipos vectoriales construidos a partir del corpus SBWCE~\cite{cardellino2019sbwce}. Para cada preposición, el prototipo es la media de los vectores de contexto extraídos de tripletas del corpus. En tiempo de ejecución, se selecciona la preposición cuyo prototipo tiene mayor similitud coseno con el par (verbo, sustantivo) de la entrada, siempre que supere un umbral mínimo de confianza.
+    \item Nivel 3 (reglas por verbo): como fallback final, el sistema consulta la preposición por defecto del verbo codificada en el léxico (``ir'' $\rightarrow$ ``a'', ``venir'' $\rightarrow$ ``de'').
+\end{itemize}
 
-Cuando el sustantivo es un lugar con preposiciones codificadas en el léxico, la CFG aplica directamente la regla durante su etapa de postprocesamiento. Si el verbo es de movimiento, utiliza la preposición de movimiento del lugar (\textit{ir al colegio}); si no lo es, utiliza la de ubicación (\textit{estar en el colegio}). La confianza de este nivel es 1.0, y el scorer no intenta sobrescribirla.
-
-\subsection{Nivel 2: prototipos vectoriales}
-
-Si no existe regla de lugar, el scorer recurre a prototipos vectoriales construidos offline (véase Extracto de código~\ref{lst:predict-preposition} del Anexo~\ref{anx:codigo}) a partir del corpus SBWCE~\cite{cardellino2019sbwce} (\textit{Spanish Billion Word Corpus and Embeddings}).
-
-Para cada preposición, el prototipo es la media de los vectores de contexto (suma de embedding del verbo y del sustantivo) extraídos de las tripletas \textit{(palabra\_antes, preposición, palabra\_después)} del corpus:
-
-$$\vec{p}_k = \frac{1}{|C_k|} \sum_{(w_a, w_d) \in C_k} (\vec{w}_a + \vec{w}_d)$$
-
-\noindent En tiempo de ejecución, dado un par (verbo, sustantivo), se calcula el vector de contexto $\vec{c} = \vec{v} + \vec{n}$ y se selecciona la preposición cuyo prototipo tiene mayor similitud coseno con $\vec{c}$, siempre que supere un umbral mínimo de confianza (0.15). Los prototipos se calculan una sola vez y se almacenan en caché como un archivo JSON.
-
-El refinamiento solo sobrescribe la preposición de la CFG si se cumplen tres condiciones: la confianza del embedding supera 0.3 (por debajo de ese umbral, la predicción vectorial no es fiable y es preferible mantener la preposición original), la preposición predicha difiere de la generada por la CFG, y la CFG no utilizó una regla específica por lugar (estas reglas tienen confianza 1.0, ya que proceden de información verificada en el léxico).
-
-En la práctica, las preposiciones de la CFG son correctas para los 35 lugares del vocabulario; los embeddings aportan valor para combinaciones nuevas o no cubiertas por el léxico.
-
-\subsection{Nivel 3: reglas por verbo}
-
-Como fallback final, si los prototipos no superan el umbral, el sistema consulta la preposición por defecto del verbo codificada en el léxico (``ir'' $\rightarrow$ ``a'', ``venir'' $\rightarrow$ ``de'').
-
-Este diseño de tres niveles ejemplifica la filosofía híbrida del sistema: las reglas codificadas cubren los casos conocidos con certeza, los embeddings extienden la cobertura a combinaciones no anticipadas, y un fallback determinista garantiza que siempre se produce alguna salida.
+Las reglas codificadas cubren los casos conocidos con certeza, los embeddings extienden la cobertura a combinaciones no anticipadas, y el fallback determinista garantiza que siempre se produce alguna salida.
 
 \section{Limitaciones}
 \label{sec:f2-limitaciones}
