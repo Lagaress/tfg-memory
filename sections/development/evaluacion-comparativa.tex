@@ -19,10 +19,7 @@ LLM (GPT-4o) & Alta & Alta & 100\% & $\sim$1600 ms \\
 
 La gramática produce salidas correctas y predecibles dentro de su dominio pero rechaza las entradas fuera de sus patrones y genera frases que, aunque correctas, suenan rígidas. Los embeddings resuelven la cobertura pero heredan la rigidez estructural de la CFG. El LLM alcanza naturalidad y cobertura máximas pero depende de una API externa con latencia y coste por llamada. Las tres hibridaciones exploran si la composición de motores supera a las partes.
 
-\section{Metodología de la evaluación}
-\label{sec:eval-metodologia}
-
-El pipeline de evaluación opera en cinco pasos secuenciales:
+La evaluación se organiza de la siguiente forma:
 
 \begin{enumerate}
     \item Unificación del dataset: los conjuntos de datos de las tres técnicas base se normalizan a un formato canónico y se intersectan por identificador. El resultado son 428 casos comunes que constituyen el corpus de evaluación.
@@ -32,8 +29,6 @@ El pipeline de evaluación opera en cinco pasos secuenciales:
     \item Generación de informes: tablas comparativas, gráficas de distribución y plantillas para evaluación humana.
 \end{enumerate}
 
-\section{Resultados globales}
-\label{sec:eval-resultados}
 
 Las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el rendimiento de los seis motores. Cada celda muestra la media $\pm$ desviación estándar sobre los 428 casos.
 
