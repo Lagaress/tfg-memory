@@ -3,7 +3,7 @@ La primera técnica de generación de lenguaje natural aborda el problema desde 
 \section{Planteamiento del enfoque}
 \label{sec:f1-planteamiento}
 
-La decisión de comenzar con una gramática formal responde a una motivación práctica: establecer una línea base determinista donde la misma entrada produce siempre la misma salida, facilitando la depuración y la evaluación. Una gramática ofrece además control total sobre la generación, ya que cada transformación lingüística está codificada explícitamente sin comportamientos emergentes que diagnosticar, e independencia de dependencias externas: el motor funciona con la biblioteca estándar de Python, sin modelos descargados ni APIs remotas, lo que lo hace viable en cualquier entorno.
+La decisión de comenzar con una gramática formal responde a una motivación práctica: establecer una modelo base determinista donde la misma entrada produce siempre la misma salida, facilitando la depuración y la evaluación. Una gramática ofrece además control total sobre la generación, ya que cada transformación lingüística está codificada explícitamente sin comportamientos emergentes que diagnosticar, e independencia de dependencias externas: el motor funciona con la biblioteca estándar de Python, sin modelos descargados ni APIs remotas, lo que lo hace viable en cualquier entorno.
 
 La filosofía de diseño prioriza la corrección gramatical sobre la cobertura: en un contexto de CAA, donde el usuario depende del sistema para comunicarse, es preferible rechazar una entrada no soportada a generar una frase incorrecta que distorsione su intención comunicativa.
 

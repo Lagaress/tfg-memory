@@ -222,6 +222,7 @@ Palabras y expresiones sobreusadas por modelos de lenguaje. No están prohibidas
 | "Si hay algo que ha transformado X, es Y" | Estructura "if there's one thing" típica de IA. |
 | "X no es solo Y, sino también Z" | Estructura "not only... but also" sistemática. |
 | "Imagina un mundo donde..." | Apertura de promesa vacía. |
+| "Un ejemplo ilustra..." / "Un ejemplo representativo es..." / "Este caso ilustra..." | Introducciones artificiales a ejemplos. Ir directamente al ejemplo: "Para la entrada X, el sistema produce Y". |
 
 **Regla**: Empieza con el tema concreto, no con una panorámica histórica o filosófica.
 

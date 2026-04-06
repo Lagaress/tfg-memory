@@ -2,156 +2,39 @@ Los capítulos anteriores han mostrado que cada técnica de generación tiene fo
 
 La hibridación parte de la hipótesis de que combinar estas técnicas puede producir resultados superiores a los de cada una por separado: una gramática que garantice la estructura, enriquecida con la naturalidad de un LLM, o un sistema que genere múltiples candidatos y seleccione el mejor. Se implementan tres estrategias de hibridación con objetivos diferenciados. Las dos primeras se basan en el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep} y en la post-edición neuronal de texto generado por reglas~\cite{chen2025axsemantics}. La tercera implementa el paradigma de sobregeneración y ranking~\cite{sharma2019overgenerate}. Los resultados de la evaluación comparativa (capítulo~\ref{ch:evaluacion-comparativa}) permitirán determinar si esta hipótesis se confirma en la práctica.
 
-\section{Arquitectura general y componentes compartidos}
-\label{sec:h-arquitectura}
-
-Las tres hibridaciones comparten una arquitectura modular que reutiliza los motores de los capítulos anteriores como componentes de un pipeline más amplio. Ningún módulo reimplementa lógica de generación: el sistema importa y orquesta los motores existentes en runtime, conectándolos mediante tres pipelines que explotan la complementariedad de las técnicas.
-
-Las dependencias externas se resuelven en tiempo de ejecución insertando las rutas de los proyectos hermanos en \texttt{sys.path}, el mismo mecanismo que ya utiliza el motor de embeddings para importar la gramática formal (sección~\ref{sec:f2-pipeline}).
-
 \textit{(TODO: Añadir diagrama de arquitectura mostrando los tres pipelines y cómo reutilizan los motores existentes.)}
-
-\subsection{Post-editor compartido}
-
-El post-editor es el componente central que comparten las Hibridaciones 1 y 2. Su diseño refleja la restricción fundamental del sistema: el LLM debe mejorar la naturalidad de la frase sin alterar su contenido semántico. El prompt define ocho reglas estrictas, resumidas en la Tabla~\ref{tab:h-reglas-prompt}.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{r l l}
-\hline
-\# & Regla & Justificación \\
-\hline
-1 & Fidelidad absoluta & No añadir conceptos ausentes en la entrada \\
-2 & No eliminar conceptos & Todos los pictogramas deben aparecer en la frase \\
-3 & Mejoras permitidas & Concordancia, artículos, orden, conjugación \\
-4 & Solo la frase & Sin explicaciones, comillas ni alternativas \\
-5 & Si ya es correcta, repetirla & Evitar ediciones innecesarias \\
-6 & Una sola oración & Consistencia con el formato CAA \\
-7 & Registro coloquial-neutro & Apropiado para comunicación cotidiana \\
-8 & Preservar modalidad verbal & No eliminar modales ni cambiar tiempo/modo verbal \\
-\hline
-\end{tabular}
-\caption{Las ocho reglas del prompt de post-edición compartido por H1 y H2.}
-\label{tab:h-reglas-prompt}
-\end{table}
-
-El post-editor ofrece dos modos de operación (véase Extracto de código~\ref{lst:post-editor-prompt} del Anexo~\ref{anx:codigo}). El primero, \texttt{post\_edit}, recibe una frase candidata y los pictogramas originales, construye un mensaje que combina ambos y envía al LLM el prompt de ocho reglas para que refine la frase.
-
-El segundo, \texttt{generate\_direct}, se activa como fallback cuando el motor upstream falla: reutiliza el prompt completo del motor de LLMs (once reglas más quince ejemplos \textit{few-shot}, sección~\ref{sec:f3-prompt}) para generar la frase desde cero. La diferencia es que \texttt{post\_edit} instruye al LLM como realizador que mejora una frase existente, mientras que \texttt{generate\_direct} lo instruye como generador autónomo.
-
-Un campo del resultado, \texttt{was\_modified}, indica si el LLM alteró la frase candidata. La detección se realiza con una comparación insensible a mayúsculas. Este campo permite calcular la tasa de modificación del post-editor: una tasa baja sugiere que el motor upstream ya produce frases de alta calidad; una tasa alta sugiere que la post-edición aporta valor significativo.
-
-\subsection{Inicialización perezosa}
-
-Todos los componentes del módulo siguen el patrón de inicialización perezosa (véase Extracto de código~\ref{lst:lazy-init} del Anexo~\ref{anx:codigo}): los motores externos (\texttt{SentenceGenerator}, \texttt{HybridGenerator}, \texttt{LLMClient}, \texttt{PerplexityScorer}) no se cargan al instanciar la clase, sino en la primera llamada a \texttt{generate()}.
-
-Dado que la carga de FastText ($\sim$4.2 GB) y el modelo GPT-2 en español ($\sim$500 MB) es costosa en tiempo y memoria, este patrón permite instanciar múltiples pipelines sin cargar modelos que quizás no se usen. En la Hibridación 3, donde se instancian los cinco motores, la verificación previa a cada carga evita duplicados.
 
 \section{Hibridación 1: Gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
 
 Las Hibridaciones 1 y 2 se basan en dos patrones complementarios. El primero es el uso de un LLM como post-editor de sistemas de reglas, documentado por Chen et al.~\cite{chen2025axsemantics} en un sistema de producción de AX Semantics: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. El segundo es el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}, que separa la generación en un planificador simbólico que decide qué decir y un realizador neural que lo transforma en texto fluido. Elder et al.~\cite{elder2019intermediate} mostraron que esta separación reduce las alucinaciones respecto a enfoques puramente neurales.
 
-La primera hibridación conecta la gramática formal (sección~\ref{sec:f1-postprocesamiento}) con el motor de LLMs en un pipeline secuencial de dos pasos (véase Extracto de código~\ref{lst:hybrid1-pipeline} del Anexo~\ref{anx:codigo}). Los pictogramas de entrada se procesan primero con la CFG, que intenta generar una frase estructurada según sus 48 patrones. Si la gramática tiene éxito, la frase resultante se envía al post-editor compartido para su refinamiento.
+La primera hibridación conecta la gramática formal con el LLM en un pipeline secuencial de dos pasos. Los pictogramas de entrada se procesan primero con la gramática, que intenta generar una frase estructurada. Si la gramática tiene éxito, la frase resultante se envía al LLM para su refinamiento. El LLM actúa como post-editor con ocho reglas estrictas que priorizan la fidelidad al contenido: no puede añadir ni eliminar conceptos, solo mejorar la concordancia, los artículos, el orden y la conjugación.
 
-Si falla (porque la secuencia contiene palabras fuera del léxico o no coincide con ningún patrón), se activa el fallback: el post-editor genera la frase desde cero usando el prompt completo del motor de LLMs (sección~\ref{sec:f3-prompt}). En una aplicación de CAA, dejar al usuario sin respuesta constituye un problema de accesibilidad más grave que devolver una frase imperfecta: la comunicación no puede quedar interrumpida porque el motor no reconozca un patrón. El fallback garantiza que la Hibridación 1 siempre produce una salida, independientemente de la entrada.
+Si la gramática no reconoce la entrada, se activa un mecanismo de fallback: el LLM genera la frase desde cero. En una aplicación de CAA, dejar al usuario sin respuesta constituye un problema de accesibilidad más grave que devolver una frase imperfecta: la comunicación no puede quedar interrumpida porque el motor no reconozca un patrón.
 
-El campo \texttt{method} del resultado discrimina entre ambos caminos: \texttt{grammar\_post\_edit} cuando la gramática funciona, o \texttt{fallback\_llm\_direct} cuando se activa el fallback. Esta distinción permite desagregar las métricas por ruta de ejecución.
+Para la entrada ``quiero, agua'', la gramática detecta el patrón de necesidad simple y produce ``Quiero agua''. El post-editor evalúa que ya es correcta y la devuelve sin modificar. Para una entrada como ``ayer, abuelo, contar, cuento'', que no encaja en ningún patrón de la gramática, el LLM genera directamente ``Ayer el abuelo contó un cuento''.
 
-Un ejemplo ilustra el camino exitoso. Para la entrada \texttt{[quiero, agua]}, la gramática detecta el patrón de necesidad simple, aplica las reglas de postprocesamiento y produce \textit{Quiero agua}. El post-editor recibe esta frase junto con los pictogramas originales, evalúa que ya es correcta según sus ocho reglas y la devuelve sin modificar. El campo \texttt{was\_modified} queda en falso. La latencia total es de aproximadamente 450 ms, dominada por la llamada a la API; la gramática contribuye menos de 1 ms.
-
-El fallback se activa en un ejemplo como \texttt{[ayer, abuelo, contar, cuento]}, donde la combinación de un marcador temporal con cuatro palabras no encaja en ningún patrón de la CFG. La gramática lanza una excepción, el pipeline la captura y delega al post-editor en modo \texttt{generate\_direct}. El LLM produce \textit{Ayer el abuelo contó un cuento}. El resultado es idéntico al que produciría el motor LLM de forma independiente, ya que reutiliza exactamente el mismo prompt y modelo.
-
-El propósito experimental de esta hibridación es servir como línea base para la comparación con H2 descrita en el planteamiento (sección~\ref{sec:h-planteamiento}).
+Esta hibridación depende de un LLM externo para la post-edición, lo que introduce latencia de red, coste por llamada y falta de disponibilidad offline. La calidad de la post-edición depende enteramente de la ingeniería de prompts, y no existe un criterio formal para determinar si el conjunto de reglas del post-editor es óptimo ni completo.
 
 \section{Hibridación 2: (Gramática + Embeddings) + LLM como post-editor}
 \label{sec:h-hybrid2}
 
-\textit{(TODO: Añadir diagrama del pipeline de H2: pictogramas $\rightarrow$ embeddings (CFG + FastText) $\rightarrow$ post-editor LLM $\rightarrow$ frase final, con el camino de fallback.)}
+La segunda hibridación replica la estructura de H1 pero sustituye la gramática pura por el motor de embeddings, que combina gramática con embeddings semánticos, como fuente de la frase inicial. La frase generada por este motor, que ya incorpora refinamiento de preposiciones y ranking semántico, se envía al mismo post-editor LLM con las mismas ocho reglas.
 
-La segunda hibridación replica la estructura de H1 pero sustituye la gramática pura por el motor de embeddings (sección~\ref{sec:f2-pipeline}), que combina CFG con embeddings semánticos, como fuente upstream.
+La única diferencia con H1 es el motor que produce la frase intermedia: gramática pura en H1, gramática enriquecida con embeddings en H2. El post-editor es idéntico en ambos casos (mismo prompt, mismo modelo), lo que convierte la comparación en un experimento controlado: cualquier diferencia en los resultados se atribuye directamente a la contribución de los embeddings.
 
-Los pictogramas se procesan con \texttt{HybridGenerator}, que ejecuta el pipeline completo descrito en la sección~\ref{sec:f2-pipeline}: generación estructural vía CFG, ranking semántico de candidatos, refinamiento de preposiciones y fallback por concatenación.
-
-Si el motor produce una frase válida (es decir, con un método distinto de \texttt{fallback}), la frase se envía al post-editor compartido. Si el motor cae a su propio fallback, la Hibridación 2 considera que la frase no es fiable y activa el mismo mecanismo de generación directa que H1.
-
-La detección de fallback difiere de la Hibridación 1. Mientras que la gramática formal lanza excepciones cuando no puede procesar una entrada, el motor de embeddings siempre produce una salida, incluyendo una concatenación simple como último recurso, y señala la ruta mediante el campo \texttt{method}. La Hibridación 2 verifica que este campo no sea \texttt{fallback} antes de considerar la frase como candidata válida para post-edición.
-
-La Tabla~\ref{tab:h-h1-vs-h2} resume la única diferencia entre ambas hibridaciones.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l l l}
-\hline
-Aspecto & Hibridación 1 & Hibridación 2 \\
-\hline
-Motor upstream & CFG pura & CFG + FastText embeddings \\
-Frase intermedia & Solo estructura gramatical & Estructura + refinamiento semántico \\
-Post-editor & Mismo prompt, mismo modelo & Mismo prompt, mismo modelo \\
-Fallback & \texttt{generate\_direct} & \texttt{generate\_direct} \\
-\hline
-\end{tabular}
-\caption{Comparación entre las Hibridaciones 1 y 2.}
-\label{tab:h-h1-vs-h2}
-\end{table}
-
-Un ejemplo representativo es la entrada \texttt{[ir, colegio]}. El motor de embeddings detecta el patrón de movimiento, genera la frase \textit{Quiero ir al colegio} con la preposición contraída correcta, y reporta el método como \texttt{hybrid}. El post-editor recibe esta frase, la evalúa según las ocho reglas y la devuelve sin modificar. El resultado es idéntico al del camino exitoso de H1 para esta misma entrada, lo que sugiere que, para frases dentro de la cobertura de la gramática, los embeddings no aportan una diferencia que el post-editor pueda explotar.
-
-Este patrón se generaliza en las métricas del dataset completo: la equivalencia en perplejidad (102 frente a 100) y en fidelidad ajustada (0.979 frente a 0.982) entre H2 y H1 indica que los embeddings no aportan una diferenciación medible cuando un LLM post-editor está presente. El LLM subsume las mejoras semánticas que los embeddings proporcionan en las técnicas base: el refinamiento de preposiciones, la selección de variantes léxicas y el reordenamiento que realiza el motor de embeddings quedan absorbidos por la capacidad del post-editor para reformular la frase completa.
-
-La identidad deliberada de la capa LLM convierte la comparación H1 versus H2 en el experimento controlado descrito en la sección~\ref{sec:h-planteamiento}.
+Las limitaciones son las mismas que las de H1: dependencia del LLM externo para la post-edición, con las implicaciones de latencia, coste y disponibilidad que ello conlleva.
 
 \section{Hibridación 3: Overgenerate-and-Rank multimotor}
 \label{sec:h-hybrid3}
 
-La tercera hibridación se basa en el paradigma \textit{Generate-Filter-Rank}, formalizado por Sharma et al.~\cite{sharma2019overgenerate}: se generan múltiples candidatas, se filtran por criterios de calidad y se selecciona la mejor según una función de ranking. La cobertura de pictogramas actúa como criterio de filtrado (solo pasan las frases que representan todos los pictogramas de entrada) y la perplejidad, calculada con un modelo de lenguaje, como función de ranking (la frase que el modelo considera más probable se selecciona como resultado final).
+La tercera hibridación se basa en el paradigma \textit{Generate-Filter-Rank}, formalizado por Sharma et al.~\cite{sharma2019overgenerate}: se generan múltiples candidatas, se filtran por criterios de calidad y se selecciona la mejor según una función de ranking. A diferencia de H1 y H2, que mejoran la salida de un motor individual, H3 busca la mejor frase entre todas las que los motores pueden producir. El pipeline se ejecuta en tres etapas secuenciales.
 
-La tercera hibridación implementa este paradigma con los cinco motores del proyecto como fuentes de candidatas (véase Extracto de código~\ref{lst:hybrid3-pipeline} del Anexo~\ref{anx:codigo}). A diferencia de H1 y H2, que mejoran la salida de un motor individual, H3 busca la mejor frase entre todas las que los motores pueden producir. El pipeline se ejecuta en tres etapas secuenciales: sobregeneración, filtrado por fidelidad y ranking por perplejidad.
+La primera etapa genera una candidata con cada uno de los cinco motores disponibles: gramática formal, embeddings, LLM, Hibridación 1 e Hibridación 2. Si algún motor falla, se descarta su candidata sin afectar al resto.
 
-\subsection{Sobregeneración}
+La segunda etapa evalúa la cobertura de pictogramas de cada candidata: se comprueba qué proporción de los pictogramas de entrada están representados en la frase generada, teniendo en cuenta las variaciones morfológicas del español. Solo pasan al ranking las candidatas que cubren el 100\% de los pictogramas. Si ninguna alcanza el umbral, todas pasan al ranking como fallback.
 
-La primera etapa genera una candidata con cada uno de los cinco motores disponibles: gramática formal, embeddings, LLM, Hibridación 1 e Hibridación 2. Cada generador se invoca dentro de un bloque de captura de errores que transforma cualquier fallo en una candidata vacía. Tras la generación, se descartan las candidatas vacías.
+La tercera etapa calcula la perplejidad de cada candidata que pasó el filtro de fidelidad mediante un modelo de lenguaje en español~\cite{deepesp2019gpt2spanish} y las ordena de menor a mayor. La candidata con menor perplejidad, es decir, la que el modelo considera más natural, se selecciona como resultado final. Se aplica una normalización de puntuación terminal antes del cálculo, ya que la presencia o ausencia de un punto final altera significativamente la perplejidad sin reflejar diferencias reales de calidad.
 
-La generación es secuencial: cada motor se invoca uno tras otro. Los motores offline (gramática y embeddings) ejecutan en menos de 100 ms; el cuello de botella son las tres llamadas a la API de OpenAI (LLM, H1 y H2), que acumulan aproximadamente 2.200 ms en total.
-
-\subsection{Filtro de fidelidad}
-
-La segunda etapa evalúa la cobertura de pictogramas de cada candidata mediante \texttt{PictogramCoverageScorer}, el mismo componente utilizado en el framework de comparación. Para cada candidata, el scorer verifica cuántos pictogramas de entrada están representados en la frase generada, aplicando la lematización con spaCy descrita en la sección~\ref{sec:h-cobertura}.
-
-El umbral es 1.0: solo pasan al ranking las candidatas que cubren el 100\% de los pictogramas. Si ninguna candidata alcanza el umbral, se aplica un fallback: todas las candidatas pasan al ranking, garantizando que el pipeline siempre produce un resultado aunque ningún motor logre cobertura perfecta.
-
-\subsection{Ranking por perplejidad}
-
-La tercera etapa calcula la perplejidad de cada candidata que pasó el filtro de fidelidad mediante el modelo \texttt{DeepESP/gpt2-spanish}~\cite{deepesp2019gpt2spanish} y las ordena de menor a mayor. La candidata con menor perplejidad se selecciona como resultado final. El campo \texttt{best\_source} del resultado identifica el motor que generó la frase ganadora, lo que permite analizar qué motor produce las candidatas más naturales con mayor frecuencia.
-
-Un detalle técnico relevante es la normalización de puntuación (véase Extracto de código~\ref{lst:perplexity-ranker} del Anexo~\ref{anx:codigo}): GPT-2 asigna perplejidad considerablemente menor a frases con punto final (por ejemplo, 70 frente a 181 para la misma frase). Sin normalizar, los candidatos del post-editor, que siempre añaden punto, ganarían el ranking independientemente de su calidad. El ranker elimina la puntuación terminal solo para el cálculo de perplejidad; la frase original se preserva intacta en la salida.
-
-\subsection{Ejemplo con convergencia}
-
-Para la entrada \texttt{[dónde, estar, mamá]}, los cinco motores convergen en la misma frase: \textit{¿Dónde está mamá?}. El filtro de fidelidad verifica que los tres pictogramas están representados y las cinco candidatas pasan con cobertura 1.0. El ranking calcula perplejidades idénticas y selecciona la primera por convención: gramática. La latencia total es de aproximadamente 2.400 ms, dominada por las tres llamadas API secuenciales.
-
-Este caso ilustra una limitación del paradigma: cuando todos los motores producen la misma salida, la sobregeneración y el ranking no aportan valor adicional respecto a cualquier motor individual, pero sí acumulan latencia.
-
-\subsection{Ejemplo con diversidad}
-
-El valor diferencial de la Hibridación 3 se manifiesta cuando los motores producen candidatas distintas. Para entradas fuera de la cobertura de la gramática o con múltiples formulaciones válidas, cada motor puede generar una variante diferente. El filtro de fidelidad descarta las que omiten pictogramas y el ranking por perplejidad selecciona la formulación más natural entre las fieles al input del usuario.
-
-En la práctica, para las frases que están dentro de la cobertura de la gramática, todos los motores tienden a converger porque la gramática ya produce la frase de referencia y tanto los embeddings como el LLM la reproducen o mantienen.
-
-La diversidad real aparece en los casos complejos (frases compuestas largas, combinaciones con marcadores temporales, secuencias que desbordan los patrones de la CFG) donde cada motor aplica estrategias diferentes de generación.
-
-\section{Decisiones de diseño}
-\label{sec:h-decisiones}
-
-La decisión de compartir el prompt de post-edición entre H1 y H2 prioriza la validez del experimento comparativo sobre la optimización individual. Un prompt específico para H1 podría dar instrucciones más detalladas sobre preposiciones, donde la CFG es más débil, y uno para H2 podría enfocarse exclusivamente en naturalidad. Sin embargo, cualquier diferencia en los prompts introduciría una variable confundente que impediría atribuir las diferencias de rendimiento a la contribución de los embeddings.
-
-La elección de GPT-4o~\cite{openai2024gpt4o} como modelo para la post-edición mantiene consistencia con la evaluación del motor de LLMs (sección~\ref{sec:f3-planteamiento}). Se priorizó la consistencia experimental sobre el ahorro de coste, que para un dataset de 428 casos es marginal.
-
-\section{Limitaciones}
-\label{sec:h-limitaciones}
-
-Las tres hibridaciones heredan la dependencia de la API de OpenAI (GPT-4o) para la post-edición o la generación directa, lo que implica coste por llamada, latencia de red y falta de disponibilidad offline.
-
-En la Hibridación 3, la generación secuencial de las cinco candidatas acumula aproximadamente tres veces la latencia de una sola llamada API; en producción, la paralelización reduciría este coste, pero los tres motores que llaman a OpenAI comparten la misma fuente y podrían provocar limitaciones de tasa.
-
-El umbral de fidelidad de 1.0 puede descartar frases naturales que omiten un pictograma con representación implícita: \textit{Quiero agua} para la entrada \texttt{[yo, quiero, agua]} podría fallar si el scorer no reconoce el sujeto implícito. El fallback mitiga este riesgo, pero no lo elimina.
+H3 acumula la latencia de todos los motores que invoca, lo que la convierte en la opción más lenta. El paradigma de sobregeneración y ranking solo aporta valor cuando las candidatas son diversas y la función de ranking tiene granularidad suficiente para discriminar entre ellas; en un dominio con frases cortas y vocabulario restringido, las candidatas tienden a converger y el ranking pierde capacidad discriminativa. El umbral de fidelidad de cobertura completa puede descartar frases naturales que omiten un pictograma con representación implícita: ``Quiero agua'' para la entrada ``yo, quiero, agua'' podría fallar si el sistema no reconoce el sujeto implícito.
