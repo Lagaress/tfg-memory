@@ -2,17 +2,6 @@ La tercera y última técnica abandona las reglas explícitas y delega la genera
 
 Este capítulo describe cómo se guía un LLM comercial mediante ingeniería de prompts~\cite{brown2020language} para resolver el mismo problema que los dos motores anteriores abordaron con gramáticas y embeddings.
 
-\section{Planteamiento del enfoque}
-\label{sec:f3-planteamiento}
-
-Los dos motores anteriores comparten una característica: todo el conocimiento lingüístico está codificado manualmente, ya sea como reglas gramaticales, patrones sintácticos, tablas de conjugación o prototipos vectoriales.
-
-Esta tercera técnica explora una alternativa: prescindir de reglas explícitas y delegar la generación a un modelo que ha aprendido las regularidades del español a partir de cantidades masivas de texto.
-
-La elección de GPT-4o~\cite{openai2024gpt4o} y GPT-4o-mini como modelos responde a factores pragmáticos. Ambos representan el estado del arte en generación de texto en español, con capacidades de seguimiento de instrucciones que permiten restringir el comportamiento al dominio CAA sin necesidad de ajuste fino. El despliegue vía API elimina la necesidad de infraestructura GPU, y la interfaz permite iterar con rapidez sobre el diseño de prompts, haciendo viable la experimentación en el contexto de un TFG.
-
-Se evalúan ambos para determinar si la mayor capacidad de GPT-4o se traduce en mejor rendimiento para esta tarea específica.
-
 \section{Diseño del prompt}
 \label{sec:f3-prompt}
 
@@ -69,8 +58,6 @@ Los criterios de selección priorizan la cobertura de patrones que requieren inf
 
 \subsection{Construcción dinámica del prompt}
 
-La función \texttt{build\_messages()} (véase Extracto de código~\ref{lst:prompt-builder} del Anexo~\ref{anx:codigo}) ensambla el arreglo de mensajes en el formato de la API de OpenAI Chat Completions. La estructura resultante tiene 32 mensajes: 1 \textit{system}, 15 pares \textit{user/assistant} (30 mensajes de ejemplos \textit{few-shot}) y 1 \textit{user} final con la consulta.
-
 Cada mensaje de usuario formatea los pictogramas incluyendo su categoría gramatical entre paréntesis (por ejemplo, \texttt{Pictogramas: quiero (verbo modal) + agua (sustantivo)}).
 
 Esta información desambiguadora procede del inventario de metadatos y ayuda al modelo a interpretar correctamente pictogramas polisémicos: ``como'' puede ser verbo (primera persona de ``comer'') o interrogativo (``¿cómo?''), y la categoría aclara la interpretación esperada.
@@ -79,21 +66,6 @@ Cada llamada consume aproximadamente 1.204 tokens de entrada, de los cuales la g
 
 \section{Metadatos de pictogramas}
 \label{sec:f3-metadatos}
-
-El inventario de metadatos (\texttt{pictogram\_metadata.py}) contiene 539 entradas que mapean etiquetas de pictogramas a 19 categorías gramaticales (véase Extracto de código~\ref{lst:pictogram-metadata} del Anexo~\ref{anx:codigo}).
-
-El número de entradas es mayor que el léxico de los motores anteriores porque incluye explícitamente las formas conjugadas más frecuentes: en lugar de resolver la conjugación en tiempo de ejecución, se registran las formas de primera, segunda y tercera persona del singular y del plural. Este diseño es necesario porque el LLM no tiene acceso al sistema de conjugación de la gramática formal, y necesita recibir la categoría gramatical exacta de cada forma para desambiguarla correctamente.
-
-La función \texttt{get\_metadata()} recibe una etiqueta y devuelve su categoría gramatical y su forma legible (reemplazando guiones bajos por espacios, de modo que \texttt{pasta\_de\_dientes} se presenta como ``pasta de dientes'').
-
-El inventario presenta cuatro conflictos de clave duplicada donde una misma forma pertenece a dos categorías: ``frío'' (adjetivo y sustantivo de estado), ``bajo'' (adjetivo y preposición), ``como'' (verbo e interrogativo) y ``limpio'' (verbo y adjetivo).
-
-Python resuelve las duplicaciones manteniendo la última asignación, y en la práctica el LLM interpreta correctamente el significado por contexto, por lo que estos conflictos no afectan a la calidad de la generación.
-
-\section{Cliente de API}
-\label{sec:f3-cliente}
-
-Los modelos se configuran mediante una \textit{dataclass} \texttt{ModelConfig} que encapsula seis parámetros (véase Extracto de código~\ref{lst:model-config} del Anexo~\ref{anx:codigo}): nombre del modelo, \texttt{max\_tokens} (100), temperatura (0.3), \texttt{top\_p} (0.9), timeout (10 segundos) y reintentos máximos (2).
 
 La temperatura de 0.3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0.3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
 
@@ -108,45 +80,9 @@ Con los aproximadamente 1.204 tokens de entrada y 4 de salida descritos en la se
 \section{Validación post-generación}
 \label{sec:f3-validacion}
 
-A diferencia de los motores anteriores, donde la corrección de la salida está garantizada por las reglas (secciones~\ref{sec:f1-postprocesamiento} y~\ref{sec:f2-pipeline}), el LLM puede producir respuestas vacías, omitir pictogramas de la entrada o ignorar instrucciones del prompt como los signos de interrogación. El motor requiere por tanto un sistema de validación que verifique la calidad de cada respuesta generada.
+A diferencia de los motores basados en reglas, donde la corrección de la salida es consecuencia directa de las reglas aplicadas, un LLM puede producir respuestas vacías, omitir pictogramas de la entrada o ignorar instrucciones del prompt. En el contexto de CAA, donde el usuario depende del sistema para comunicarse, una salida que no refleje los pictogramas seleccionados es un fallo funcional. Por este motivo, el motor incorpora un validador específico que verifica dos aspectos que los LLMs no garantizan por diseño.
 
-El validador implementa un sistema de dos niveles: errores (bloqueantes, que invalidan la respuesta) y advertencias (informativas).
-
-Las verificaciones cubren tres aspectos. La respuesta vacía genera un error inmediato. El formato interrogativo comprueba que, si la entrada contiene un pictograma interrogativo, la respuesta incluya el signo \textit{?}. La cobertura de conceptos, la verificación más compleja, mide qué proporción de los pictogramas de entrada están representados en la oración generada.
-
-\subsection{Algoritmo de cobertura de conceptos}
-
-El algoritmo implementa cuatro niveles de matching aplicados secuencialmente (véase Extracto de código~\ref{lst:concept-coverage} del Anexo~\ref{anx:codigo}). El primer nivel busca el pictograma como subcadena exacta del texto generado. El segundo extrae la raíz de 4 caracteres del pictograma y la busca en el texto, capturando variaciones morfológicas (``querer'' $\rightarrow$ raíz ``quer'' $\rightarrow$ se encuentra en ``quiero'').
-
-El tercer nivel mantiene una tabla de raíces irregulares para 12 verbos frecuentes en CAA, que cubren diptongaciones (e$\rightarrow$ie, o$\rightarrow$ue) y formas muy irregulares. El cuarto nivel, como fallback, busca la raíz de 3 caracteres a nivel de palabra.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l l}
-\hline
-Verbo & Raíces alternativas \\
-\hline
-querer & quier \\
-poder & pued \\
-tener & teng, tien \\
-venir & veng, vien \\
-dormir & duerm \\
-jugar & jueg \\
-volver & vuelv \\
-sentir & sient \\
-cerrar & cierr \\
-encender & enciend \\
-ir & voy, vas, va, vamos, van \\
-ser & soy, eres, es, somos, son \\
-\hline
-\end{tabular}
-\caption{Raíces irregulares para el algoritmo de cobertura de conceptos.}
-\label{tab:f3-raices-irregulares}
-\end{table}
-
-Se excluyen 36 palabras funcionales del conteo de cobertura (preposiciones, determinantes, conjunciones), ya que el modelo las añade por su cuenta según las reglas del prompt.
-
-Los umbrales son: cobertura inferior al 50\% genera un error bloqueante; entre 50\% y 75\%, una advertencia; por encima del 75\%, la respuesta se acepta sin observaciones.
+El primero es la cobertura de conceptos: el validador comprueba que cada pictograma seleccionado por el usuario esté representado en la oración generada, teniendo en cuenta las variaciones morfológicas del español (el pictograma ``querer'' puede aparecer como ``quiero'' o ``quiere'' en la salida). El segundo es el formato interrogativo: cuando la entrada contiene un pictograma interrogativo, se verifica que la respuesta incluya los signos de interrogación correspondientes, una convención ortográfica del español que el modelo no siempre respeta.
 
 \section{Limitaciones}
 \label{sec:f3-limitaciones}
