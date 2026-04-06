@@ -76,6 +76,30 @@ Latencia (ms) & 0.02 & 1643 & & 811 & 915 & 4179 \\
 \label{tab:eval-sin-referencia}
 \end{table}
 
+La Tabla~\ref{tab:eval-ranking} resume qué motor obtiene los mejores resultados en cada dimensión evaluada.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{l l l}
+\hline
+Dimensión & Mejor motor & Observación \\
+\hline
+Coincidencia con referencia & Gramática / Embeddings & EM = 1.00, BLEU-4 = 1.00 (sesgo de referencia) \\
+Naturalidad (perplejidad) & Híbrido 1 & Mediana PPL = 100 (frente a 161 de gramática) \\
+Cobertura de pictogramas & Híbrido 3 & 98.7\% (frente a 97.2\% de gramática) \\
+Fidelidad ajustada & Híbrido 3 & 0.983 (frente a 0.969 de gramática) \\
+Latencia & Gramática & 0.02 ms (frente a 4179 ms de Híbrido 3) \\
+\hline
+\end{tabular}
+\caption{Resumen: mejor motor por dimensión evaluada.}
+\label{tab:eval-ranking}
+\end{table}
+
+\noindent Ningún motor domina en todas las dimensiones simultáneamente. La gramática es la más rápida y alcanza las mejores métricas de coincidencia, pero produce las frases menos naturales. El Híbrido 1 ofrece el mejor compromiso global: naturalidad superior a la gramática (perplejidad de 100 frente a 161), cobertura y fidelidad altas (0.983 y 0.982), y latencia moderada (811 ms). El Híbrido 3, pese a obtener la mejor cobertura y fidelidad, acumula una latencia de 4.2 segundos que difícilmente se justifica ante mejoras marginales.
+
+\textit{(TODO: Este ranking deberá revisarse cuando se incorporen los resultados de las encuestas de naturalidad y golden standard, que aportarán una dimensión de evaluación humana no recogida por las métricas automáticas.)}
+
 La tabla de métricas con referencia revela un patrón claro. Los motores base de gramática formal y embeddings semánticos alcanzan el techo del dataset por el sesgo de referencia (sección~\ref{sec:multi-referencia}). El LLM y los tres híbridos se sitúan en un rango alto y estadísticamente equivalente entre sí: Exact Match del 85-89\%, BLEU-4 del 91-93\% y BERTScore de 0.99, lo que indica que en la mayoría de los casos reproducen formulaciones muy próximas a la referencia.
 
 El LLM obtiene valores ligeramente inferiores a los híbridos en Exact Match (0.85 frente a 0.89 de Hybrid3) pero equivalentes en ROUGE-L y BERTScore, lo que confirma que sus reformulaciones preservan el contenido semántico aunque difieran en la forma exacta.
