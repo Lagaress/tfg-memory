@@ -1,11 +1,9 @@
-La tercera y última técnica abandona las reglas explícitas y delega la generación lingüística a modelos de lenguaje grandes.
+Un Modelo de Lenguaje de Gran Escala (LLM, por sus siglas en inglés) es un modelo de inteligencia artificial entrenado sobre cantidades masivas de texto que ha aprendido las regularidades estadísticas del lenguaje: la conjugación verbal, la concordancia de género, el orden natural de las palabras y las relaciones semánticas entre conceptos. A diferencia de una gramática formal, donde cada regla se codifica manualmente, un LLM genera texto a partir de patrones aprendidos durante su entrenamiento, lo que le permite producir oraciones naturales sin necesidad de reglas explícitas.
 
-Este capítulo describe cómo se guía un LLM comercial mediante ingeniería de prompts~\cite{brown2020language} para resolver el mismo problema que los dos motores anteriores abordaron con gramáticas y embeddings.
+En este proyecto, el LLM (GPT-4o de OpenAI) se adapta al dominio de CAA mediante ingeniería de prompts~\cite{brown2020language}: un conjunto de instrucciones y ejemplos que se envían al modelo en cada consulta para restringir su comportamiento. El modelo no se reentrena ni se ajusta; toda la adaptación reside en el prompt. Esta aproximación permite iterar con rapidez sobre el diseño sin necesidad de infraestructura GPU ni datasets de entrenamiento específicos.
 
 \section{Diseño del prompt}
 \label{sec:f3-prompt}
-
-La ingeniería de prompts es el componente central de este motor. A diferencia de un modelo ajustado (\textit{fine-tuned})~\cite{brown2020language}, toda la adaptación al dominio CAA se codifica en el prompt enviado en cada llamada a la API.
 
 
 El \textit{system prompt} define el rol del modelo como motor de lenguaje de una aplicación CAA y establece once reglas estrictas que gobiernan la generación. Las reglas cubren cuatro aspectos.

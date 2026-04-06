@@ -1,9 +1,11 @@
-La primera técnica de generación de lenguaje natural aborda el problema desde un enfoque puramente simbólico: una gramática formal extendida con restricciones de selección semánticas. Este capítulo describe su diseño e implementación.
+Una gramática formal es un conjunto de reglas que definen cómo se construyen las oraciones válidas de un lenguaje. En lingüística computacional, las gramáticas libres de contexto (CFG) describen la estructura sintáctica de las oraciones mediante reglas de producción que descomponen cada oración en constituyentes (sujeto, verbo, complemento) y estos a su vez en palabras. A partir de estas reglas, un sistema puede generar automáticamente oraciones correctas dada una entrada estructurada.
+
+En este proyecto, la gramática formal se aplica al problema de CAA: dada una secuencia de pictogramas seleccionados por el usuario, las reglas de producción determinan qué tipo de oración construir (afirmativa, interrogativa, negativa), conjugan los verbos, insertan los artículos y preposiciones necesarios, y producen una oración gramaticalmente correcta en español. La gramática se ha extendido con restricciones de selección semánticas que verifican la compatibilidad entre verbos y argumentos (por ejemplo, que ``comer'' requiere un objeto comestible) y con reglas de inferencia contextual que completan la oración cuando la entrada del usuario es incompleta.
 
 \section{Planteamiento del enfoque}
 \label{sec:f1-planteamiento}
 
-La decisión de comenzar con una gramática formal responde a una motivación práctica: establecer una modelo base determinista donde la misma entrada produce siempre la misma salida, facilitando la depuración y la evaluación. Una gramática ofrece además control total sobre la generación, ya que cada transformación lingüística está codificada explícitamente sin comportamientos emergentes que diagnosticar, e independencia de dependencias externas: el motor funciona con la biblioteca estándar de Python, sin modelos descargados ni APIs remotas, lo que lo hace viable en cualquier entorno.
+La decisión de comenzar con una gramática formal responde a una motivación práctica: establecer un modelo base determinista donde la misma entrada produce siempre la misma salida, facilitando la evaluación. Una gramática ofrece control total sobre la generación, ya que cada transformación lingüística está codificada explícitamente, e independencia de dependencias externas.
 
 La filosofía de diseño prioriza la corrección gramatical sobre la cobertura: en un contexto de CAA, donde el usuario depende del sistema para comunicarse, es preferible rechazar una entrada no soportada a generar una frase incorrecta que distorsione su intención comunicativa.
 
