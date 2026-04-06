@@ -18,85 +18,6 @@ Para responderla, se han implementado seis motores independientes que reciben ex
 
 La comparación directa entre los seis permite identificar qué enfoque, o combinación de enfoques, ofrece el mejor compromiso para un sistema de CAA real.
 
-\section{Conjunto de datos de evaluación}
-\label{sec:dataset}
-
-La evaluación de los seis motores se realiza sobre un corpus de 428 casos de prueba diseñado específicamente para este proyecto. Los casos se generaron mediante combinación sistemática de los 232 pictogramas del vocabulario, utilizando la gramática formal como generador de pares (entrada, referencia). Cada caso consiste en una secuencia de pictogramas de entrada y la oración de referencia esperada como salida.
-
-Esta decisión tiene una consecuencia directa sobre la interpretación de los resultados: las referencias son salidas de la gramática, por lo que los motores basados en reglas obtienen coincidencia perfecta por diseño, no por superioridad (véase la Sección~\ref{sec:eval-discusion}).
-
-\subsection{Estructura y categorías}
-
-Los 428 casos se distribuyen en ocho categorías semánticas que cubren los principales patrones comunicativos de un usuario de CAA:
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l l r}
-\hline
-Categoría & Descripción & Casos \\
-\hline
-Necesidad & Expresiones de deseo o necesidad & 73 \\
-Compuesta & Coordinación de elementos & 61 \\
-Interrogativa & Preguntas con partícula interrogativa & 61 \\
-Estado & Estados físicos o emocionales & 55 \\
-Negativa & Oraciones con negación & 52 \\
-Movimiento & Desplazamiento a lugares & 50 \\
-Descripción & Atributos de personas u objetos & 41 \\
-Concordancia & Concordancia de género y número & 35 \\
-\hline
-Total & & 428 \\
-\hline
-\end{tabular}
-\caption{Distribución de los casos de prueba por categoría semántica.}
-\label{tab:dataset-categorias}
-\end{table}
-
-La complejidad de cada caso se determina por el número de pictogramas de entrada y el grado de inferencia que el motor debe realizar. El corpus contiene 192 casos simples (1-2 pictogramas, alta inferencia), 181 de complejidad media (3 pictogramas) y 55 complejos (4-5 pictogramas, estructura más rígida). Las longitudes de entrada van desde un solo pictograma (17 casos) hasta cinco (12 casos), pasando por dos (102 casos), tres (239 casos) y cuatro pictogramas (58 casos).
-
-Cada categoría presenta desafíos lingüísticos específicos:
-
-\begin{itemize}
-    \item Las oraciones de necesidad requieren inferir el verbo modal ``querer'' cuando el usuario omite la intención.
-    \item Las de movimiento exigen seleccionar la preposición correcta según el lugar de destino.
-    \item Las interrogativas demandan invertir el orden sujeto-verbo y añadir los signos ¿...?.
-    \item Las negativas requieren insertar la partícula ``no'' en la posición correcta respecto al verbo.
-    \item Las compuestas necesitan coordinación con conjunciones y marcadores temporales.
-    \item Las de estado implican distinguir entre verbos copulativos (``estar cansado'') y de posesión (``tener hambre'').
-    \item Las de descripción exigen concordancia entre el atributo y el sujeto (``la casa es grande'').
-    \item Las de concordancia verifican el ajuste de género y número entre sustantivos y adjetivos (``manzana roja'', no ``manzana rojo'').
-\end{itemize}
-
-\subsection{Formato de los casos}
-
-Cada caso de prueba se define como un par (entrada, referencia). La entrada es una lista de cadenas que representan las etiquetas de los pictogramas seleccionados por el usuario, y la referencia es la oración esperada en español natural. Por ejemplo:
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l l l}
-\hline
-Entrada & Referencia \\
-\hline
-\texttt{[agua]} & Quiero agua \\
-\texttt{[yo, querer, comer, manzana]} & Yo quiero comer una manzana \\
-\texttt{[donde, estar, mama]} & ¿Dónde está mamá? \\
-\hline
-\end{tabular}
-\caption{Ejemplos de casos de prueba del corpus de evaluación.}
-\label{tab:ejemplos-corpus}
-\end{table}
-
-La entrada puede variar en longitud desde un solo pictograma, caso en el que el sistema debe inferir elementos omitidos, hasta secuencias de cuatro o más pictogramas donde la tarea consiste principalmente en añadir los elementos funcionales (artículos, preposiciones, conjugaciones) que los pictogramas no codifican.
-
-\subsection{Criterios de diseño del corpus}
-
-El corpus se ha construido siguiendo tres criterios:
-
-\begin{enumerate}
-    \item Representatividad: las categorías reflejan las necesidades comunicativas más frecuentes de los usuarios de CAA, priorizando las expresiones de necesidad y deseo que constituyen la base de la comunicación funcional.
-    \item Gradualidad: dentro de cada categoría se incluyen casos de complejidad creciente, desde entradas mínimas que exigen máxima inferencia hasta secuencias completas donde el sistema solo debe aplicar morfología.
-    \item Cobertura gramatical: el conjunto abarca los principales fenómenos del español relevantes para CAA (concordancia de género, contracciones, selección de preposiciones, interrogativas, negación y coordinación).
-\end{enumerate}
-
 \section{Métricas de evaluación}
 \label{sec:metricas}
 
@@ -109,7 +30,7 @@ La evaluación emplea métricas organizadas en cuatro categorías:
     \item Métricas operativas: registran latencia y coste por consulta.
 \end{enumerate}
 
-\subsection{Exact Match}
+\subsection{Métricas con referencia}
 
 En un sistema de CAA con vocabulario acotado y frases cortas, reproducir exactamente la oración esperada es un objetivo alcanzable y verificable. Exact Match es la métrica más estricta: compara la predicción con la referencia carácter a carácter, tras normalizar a minúsculas y eliminar espacios sobrantes. Devuelve 1 si la oración generada es idéntica a la referencia y 0 en cualquier otro caso.
 
@@ -117,13 +38,13 @@ Su valor reside en que una coincidencia exacta garantiza corrección completa, p
 
 $$\text{EM}(p, r) = \begin{cases} 1 & \text{si } \text{lower}(\text{strip}(p)) = \text{lower}(\text{strip}(r)) \\ 0 & \text{en otro caso} \end{cases}$$
 
-\subsection{BLEU}
+
 
 BLEU (\textit{Bilingual Evaluation Understudy})~\cite{papineni2002bleu}, la métrica más establecida en la literatura de generación de lenguaje natural, mide la precisión de $n$-gramas entre la predicción y la referencia. Se calculan dos variantes: BLEU-1 (unigramas), que captura si las palabras correctas están presentes, y BLEU-4 (hasta 4-gramas), que refleja también la fluidez y el orden. Una predicción puede obtener BLEU-1 alto pero BLEU-4 bajo si contiene las palabras correctas en un orden incorrecto.
 
 La implementación utiliza sacreBLEU con ajuste de orden efectivo para oraciones cortas, evitando penalizar artificialmente frases de pocas palabras.
 
-\subsection{ROUGE-L}
+
 
 ROUGE-L~\cite{lin2004rouge} se basa en la subsecuencia común más larga (\textit{Longest Common Subsequence}, LCS) entre la predicción y la referencia. A diferencia de BLEU, que requiere $n$-gramas consecutivos, ROUGE-L permite omisiones entre las palabras coincidentes, lo que la hace más tolerante con variaciones en el orden.
 
@@ -135,7 +56,7 @@ $$F_1 = \frac{2 \cdot \text{precisión} \cdot \text{recall}}{\text{precisión} +
 
 \noindent ROUGE-L resulta especialmente útil en este contexto porque captura la estructura secuencial de la oración sin penalizar la inserción de elementos adicionales (como artículos que el sistema añade correctamente pero que no figuran en la referencia de la misma forma).
 
-\subsection{METEOR}
+
 
 METEOR (\textit{Metric for Evaluation of Translation with Explicit ORdering})~\cite{banerjee2005meteor} complementa a BLEU incorporando el recall directamente en su formulación, lo que la hace sensible a omisiones que BLEU no detecta. Calcula la media armónica de la precisión y el recall de unigramas, y aplica una penalización por fragmentación que castiga las coincidencias dispersas frente a las contiguas:
 
@@ -143,7 +64,7 @@ $$\text{METEOR} = F_\text{mean} \cdot (1 - \text{penalty})$$
 
 \noindent donde $F_\text{mean}$ es la media armónica ponderada y la \textit{penalty} crece con el número de fragmentos no contiguos en la alineación. METEOR captura tanto la presencia de las palabras correctas como su contigüidad en la oración generada.
 
-\subsection{chrF++}
+
 
 chrF++~\cite{popovic2017chrf} evalúa la similitud entre predicción y referencia combinando $n$-gramas de caracteres con bigramas de palabras. Los $n$-gramas de caracteres capturan coincidencias parciales a nivel morfológico: por ejemplo, reconocen la similitud entre ``quiero'' y ``quiere'' aunque difieran en su terminación. Los bigramas de palabras, por su parte, incorporan información sobre el orden.
 
@@ -151,7 +72,7 @@ $$\text{chrF++} = (1 + \beta^2) \cdot \frac{\text{chrP} \cdot \text{chrR}}{\beta
 
 \noindent Donde chrP y chrR son la precisión y recall calculadas sobre $n$-gramas de caracteres y bigramas de palabras conjuntamente, y $\beta$ es un parámetro que controla el peso relativo del recall frente a la precisión (con valor 2 por defecto, lo que da mayor importancia al recall). Esta métrica resulta especialmente útil para lenguas con morfología rica como el español, donde variaciones flexivas que las métricas de palabras completas penalizan severamente (como la diferencia entre ``come'' y ``comer'') representan divergencias menores a nivel de caracteres. La implementación utiliza sacreBLEU con el parámetro \texttt{word\_order=2}.
 
-\subsection{Cobertura de pictogramas}
+\subsection{Métricas específicas de CAA}
 
 Las métricas anteriores comparan contra una referencia textual, pero en CAA existe una pregunta más directa: ¿se han preservado los pictogramas que el usuario seleccionó?
 
@@ -161,13 +82,13 @@ $$\text{Cobertura} = \frac{|\text{pictogramas cubiertos}|}{|\text{pictogramas de
 
 \noindent Por ejemplo, dado el pictograma ``comer'' (lema: ``comer'') y la oración generada ``Yo como pan'' (lemas: ``yo'', ``comer'', ``pan''), el pictograma se considera cubierto porque el lema ``comer'' aparece en ambos conjuntos. Esta métrica es específica del dominio de CAA y complementa las métricas de coincidencia con la referencia: mientras que BLEU o ROUGE-L comparan contra una oración gold standard, la cobertura verifica directamente que el contenido pictográfico se preserve en la salida, independientemente de la formulación exacta.
 
-\subsection{BERTScore}
+
 
 BERTScore~\cite{zhang2020bertscore} evalúa la similitud semántica entre la predicción y la referencia utilizando embeddings contextuales de un modelo BERT preentrenado en español (\texttt{dccuchile/bert-base-spanish-wwm-cased}). A diferencia de las métricas anteriores, que operan a nivel de tokens o $n$-gramas, BERTScore captura equivalencias semánticas: por ejemplo, reconoce que ``deseo'' y ``quiero'' expresan significados cercanos aunque no compartan tokens.
 
 El cálculo alinea cada token de la predicción con su token más similar en la referencia mediante similitud coseno en el espacio de embeddings, y obtiene precisión, recall y $F_1$. Se utiliza un modelo BERT preentrenado en español en lugar del modelo por defecto en inglés, lo que mejora la captura de matices semánticos propios del castellano. Esta métrica se aplica a los seis motores de generación, siendo especialmente informativa cuando los motores producen formulaciones válidas pero diferentes a la referencia, que las métricas de coincidencia exacta penalizarían.
 
-\subsection{Fidelidad de contenido}
+
 
 La fidelidad de contenido mide la proporción de palabras de contenido en la oración generada que provienen efectivamente de los pictogramas de entrada, detectando así las alucinaciones: palabras que el motor introduce sin que exista un pictograma que las justifique. Una definición estricta de fidelidad penalizaría como alucinación toda palabra de contenido que no corresponda a un pictograma de entrada, pero esta aproximación produce falsos positivos en un caso recurrente en CAA: la inferencia pragmática.
 
@@ -179,7 +100,7 @@ $$\text{Fidelidad} = 1 - \frac{|\text{palabras alucinadas}| - |\text{inferencias
 
 \noindent La fidelidad complementa la cobertura: mientras la cobertura detecta omisiones (pictogramas de entrada que no aparecen en la salida), la fidelidad detecta adiciones (palabras de contenido en la salida que no provienen de la entrada). Un motor ideal obtendría cobertura y fidelidad de 1.0 simultáneamente.
 
-\subsection{Perplejidad y pseudo-perplejidad}
+\subsection{Métricas sin referencia}
 
 Las métricas anteriores requieren una oración de referencia o los pictogramas de entrada. La perplejidad y la pseudo-perplejidad operan sin ninguna de las dos: evalúan la naturalidad del texto generado midiendo cuán probable lo considera un modelo de lenguaje preentrenado. Ambas miden cuán probable considera un modelo de lenguaje preentrenado la oración generada: valores menores indican texto más natural y fluido.
 
@@ -193,7 +114,7 @@ La pseudo-perplejidad~\cite{salazar2020masked} utiliza un modelo BERT enmascarad
 
 Estas métricas son especialmente relevantes en el contexto de CAA porque capturan la fluidez percibida del texto independientemente de la referencia. Un motor puede generar una oración semánticamente correcta pero con una estructura gramatical poco natural, algo que las métricas de coincidencia con la referencia no detectan pero que la perplejidad sí penaliza.
 
-\subsection{Análisis de errores}
+\subsection{Análisis complementario}
 
 El análisis de errores clasifica cada caso en una de cinco categorías mediante heurísticas basadas en los valores de cobertura y fidelidad ya calculados:
 
@@ -207,7 +128,7 @@ El análisis de errores clasifica cada caso en una de cinco categorías mediante
 
 Esta clasificación no es mutuamente excluyente: un mismo caso puede presentar simultáneamente omisión y alucinación. El análisis de errores proporciona una visión cualitativa que complementa las métricas numéricas, permitiendo identificar no solo cuánto se equivoca cada motor sino cómo se equivoca.
 
-\subsection{Métricas operativas}
+
 
 Además de la calidad lingüística, se miden dos aspectos operativos relevantes para un sistema de CAA:
 
