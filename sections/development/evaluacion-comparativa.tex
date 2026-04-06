@@ -352,8 +352,6 @@ Latencia & $<$1 ms & $<$1 ms & 1643 ms & 811 ms & 915 ms & 4.2 s \\
 Coste & Gratis & Gratis & \$0.003 & \$0.003 & \$0.003 & \$0.009 \\
 Determinismo & Total & Total & Parcial & Parcial & Parcial & Parcial \\
 Offline & Sí & Sí & No & No & No & No \\
-Cobertura & 97.2\% & 97.2\% & 97.1\% & 98.3\% & 98.0\% & 98.6\% \\
-Éxito & 100\% & 100\% & 100\% & 100\% & 100\% & 100\% \\
 Dependencias & Ninguna & FastText & API OpenAI & API OpenAI & API+FastText & API OpenAI \\
 \hline
 \end{tabular}
@@ -361,7 +359,7 @@ Dependencias & Ninguna & FastText & API OpenAI & API OpenAI & API+FastText & API
 \label{tab:eval-compromisos}
 \end{table}
 
-La Tabla~\ref{tab:eval-compromisos} amplía la comparación a dimensiones operativas que las métricas de calidad lingüística no capturan. Los seis motores alcanzan una tasa de éxito del 100\%. La latencia establece tres niveles diferenciados: los motores deterministas (gramática y embeddings) operan en sub-milisegundos, los híbridos 1 y 2 se sitúan en el rango de 800-915 ms (una sola llamada LLM para post-edición), el LLM puro en $\sim$1.6 s y Hybrid3 alcanza los 4.2 segundos debido a las múltiples generaciones y el paso de ranking por perplejidad.
+La Tabla~\ref{tab:eval-compromisos} amplía la comparación a dimensiones operativas que las métricas de calidad lingüística no capturan. La latencia establece tres niveles diferenciados: los motores deterministas (gramática y embeddings) operan en sub-milisegundos, los híbridos 1 y 2 se sitúan en el rango de 800-915 ms (una sola llamada LLM para post-edición), el LLM puro en $\sim$1.6 s y Hybrid3 alcanza los 4.2 segundos debido a las múltiples generaciones y el paso de ranking por perplejidad.
 
 El coste económico diferencia los motores offline (gratis) de los que dependen de la API de OpenAI. Los híbridos 1 y 2 realizan una llamada al LLM por caso, igualando el coste del LLM puro. Hybrid3 triplica este coste al generar múltiples candidatos.
 
