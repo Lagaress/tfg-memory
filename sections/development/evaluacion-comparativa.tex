@@ -459,3 +459,15 @@ La equivalencia semántica que BERTScore refleja no resta importancia a las mét
 La evaluación presenta limitaciones. Aunque el corpus de 428 casos cubre ocho categorías semánticas y tres niveles de complejidad, los 313 casos añadidos fueron generados por el propio \texttt{SentenceGenerator} de la gramática formal, lo que refuerza la circularidad entre las referencias y las salidas de los motores basados en gramática. Las referencias fueron creadas por un único anotador, lo que introduce un sesgo hacia sus preferencias de formulación.
 
 Las métricas de perplejidad, aunque alcanzan alta significancia estadística ($\chi^2 = 423.12$), presentan desviaciones estándar extremadamente altas que dificultan la interpretación de diferencias entre motores cercanos. La recomendación de Hybrid1 como opción de producción se sustenta en las métricas automáticas; la evaluación humana descrita en el capítulo siguiente permitirá contrastar esta recomendación con la percepción de usuarios y profesionales.
+
+
+\section{Evaluación humana}
+\label{sec:eval-humana}
+
+La evaluación automática descrita en las secciones anteriores proporciona métricas objetivas y reproducibles, pero no captura directamente si las frases generadas suenan naturales a un ser humano. Para cubrir esta dimensión, se han diseñado dos encuestas complementarias.
+
+La primera, la encuesta de naturalidad, presenta a los evaluadores una secuencia de pictogramas junto con las frases generadas por los distintos motores y les pide seleccionar la que suene más natural en español. Esta encuesta mide la preferencia subjetiva entre formulaciones alternativas para una misma entrada.
+
+La segunda, la encuesta de golden standard, presenta únicamente los pictogramas y pide a los evaluadores que escriban la frase que ellos dirían al ver esa secuencia. Las respuestas recogidas constituyen un corpus de referencias humanas independiente de la gramática formal, lo que permite recalcular las métricas automáticas contra referencias no sesgadas y verificar si las conclusiones de la evaluación automática se mantienen.
+
+\textit{(TODO: Completar con el diseño detallado de ambas encuestas, sus resultados y el análisis comparativo contra las métricas automáticas.)}
