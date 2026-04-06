@@ -1,6 +1,6 @@
 La segunda técnica surge de una limitación concreta de la gramática formal: el motor rechaza toda entrada cuya secuencia de categorías no coincida con alguno de sus patrones predefinidos. Este capítulo describe un enfoque que combina las reglas gramaticales del capítulo anterior con embeddings semánticos para superar ese techo sin abandonar el control sobre la generación.
 
-El sistema utiliza el modelo preentrenado FastText~\cite{bojanowski2017fasttext} \texttt{cc.es.300.bin}, entrenado sobre Common Crawl en español. Cada palabra se representa como un vector de 300 dimensiones, y la similitud entre palabras se mide mediante similitud coseno.
+El sistema utiliza el modelo preentrenado FastText~\cite{bojanowski2017fasttext}, entrenado sobre Common Crawl en español. Cada palabra se representa como un vector de 300 dimensiones, y la similitud entre palabras se mide mediante similitud coseno.
 
 Se optó por utilizar un modelo preentrenado en lugar de entrenar embeddings propios porque el volumen de datos del proyecto es insuficiente para producir representaciones de calidad, y hacerlo contaminaría la evaluación de la técnica con la baja calidad del recurso base.
 
@@ -17,7 +17,7 @@ El léxico de este motor se construye a partir del léxico de la gramática form
 
 \section{Ranking semántico de candidatos}
 
-Cuando la CFG genera múltiples candidatos para una misma entrada, como \textit{Quiero ir al colegio} y \textit{Voy al colegio} para la secuencia \texttt{[ir, colegio]}, el módulo \texttt{semantic\_scorer.py} los ordena mediante un score combinado que pondera la confianza gramatical y la coherencia semántica:
+Cuando la gramática genera múltiples candidatos para una misma entrada, como ``Quiero ir al colegio'' y ``Voy al colegio'' para la secuencia ``ir, colegio'', el sistema los ordena mediante un score combinado que pondera la confianza gramatical y la coherencia semántica:
 
 $$\text{score} = \text{confianza}_{\text{CFG}} \times 0.6 + \text{score}_{\text{embedding}} \times 0.4$$
 
