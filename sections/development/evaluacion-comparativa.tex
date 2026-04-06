@@ -1,5 +1,16 @@
 Este capítulo confronta los seis motores sobre un mismo dataset mediante un pipeline de evaluación automatizado que aplica métricas con referencia, sin referencia y específicas de CAA, complementadas con tests de significancia estadística.
 
+\section{Métricas de evaluación}
+\label{sec:metricas}
+
+La evaluación emplea métricas organizadas en cuatro categorías. Las métricas con referencia comparan cada predicción contra la oración gold standard: Exact Match (coincidencia exacta carácter a carácter), BLEU~\cite{papineni2002bleu} (precisión de $n$-gramas, en variantes BLEU-1 y BLEU-4), ROUGE-L~\cite{lin2004rouge} (subsecuencia común más larga), METEOR~\cite{banerjee2005meteor} (media armónica de precisión y recall con penalización por fragmentación), chrF++~\cite{popovic2017chrf} (similitud a nivel de caracteres, útil para la morfología del español) y BERTScore~\cite{zhang2020bertscore} (similitud semántica mediante embeddings contextuales de un modelo BERT en español).
+
+Las métricas específicas de CAA miden la fidelidad al contenido pictográfico. La cobertura verifica qué proporción de los pictogramas de entrada están representados en la salida, comparando lemas mediante spaCy. La fidelidad detecta alucinaciones (palabras de contenido no justificadas por los pictogramas), excluyendo las inferencias pragmáticas legítimas como la inserción del verbo ``querer'' a partir del pictograma ``agua''.
+
+Las métricas sin referencia evalúan la naturalidad intrínseca del texto. La perplejidad, calculada con GPT-2 Spanish~\cite{deepesp2019gpt2spanish}, mide cuán probable considera un modelo autoregresivo la oración generada. La pseudo-perplejidad~\cite{salazar2020masked} complementa esta medida con un modelo bidireccional (BETO). Valores menores indican texto más natural.
+
+Las métricas operativas registran la latencia por consulta y el coste económico de los motores que dependen de APIs externas.
+
 Ninguno de los tres motores base domina simultáneamente en fidelidad, naturalidad, cobertura y latencia. La Tabla~\ref{tab:perfil-motores} resume el perfil de cada uno en estas cuatro dimensiones.
 
 \begin{table}[H]
