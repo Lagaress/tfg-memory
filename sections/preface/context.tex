@@ -77,6 +77,26 @@ El ecosistema de modelos de lenguaje en español ha madurado con proyectos como 
 
 Pese a estos avances, la dirección pictograma a texto permanece significativamente menos investigada que la inversa. La mayoría del trabajo reciente con modelos de lenguaje aborda la traducción de texto o habla a secuencias de pictogramas~\cite{imageclef2024topicto}, mientras que la expansión de pictogramas en oraciones naturales sigue siendo tratada principalmente por sistemas basados en reglas~\cite{curtis2022stateofart}. No existe, hasta donde alcanza esta revisión, ningún trabajo publicado que aplique modelos de lenguaje a la generación de oraciones en español a partir de pictogramas ARASAAC.
 
+Existen, no obstante, patrones híbridos que combinan técnicas simbólicas y neurales para la generación de lenguaje natural. La Tabla~\ref{tab:h-patrones-descartados} recoge cinco de estos patrones y las razones por las que no resultan aplicables en el contexto de este proyecto.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{p{4.5cm} p{7.5cm}}
+\hline
+Patrón & Limitación para este contexto \\
+\hline
+Decodificación restringida (Fang et al.) & Requiere acceso a los logits del modelo, interfaz no expuesta por las APIs comerciales. \\
+NeuroLogic Decoding~\cite{lu2021neurologic} & Misma limitación: necesita modificar la distribución de probabilidad token a token. \\
+Híbridos \textit{template-neural} (Wiseman et al.) & Exige entrenar modelos propios sobre un corpus pictograma-texto inexistente en español con volumen suficiente. \\
+LLM como generador de reglas & Proyecto de investigación completo, fuera del alcance de un TFG. \\
+\textit{Grammar Prompting} & Técnica experimental no probada para español ni para CAA. \\
+\hline
+\end{tabular}
+\caption{Patrones híbridos analizados y descartados.}
+\label{tab:h-patrones-descartados}
+\end{table}
+
 \section{Aplicaciones actuales de comunicación aumentativa}
 
 Aplicaciones comerciales como \textit{LetMeTalk}~\cite{letmetalk2024} o \textit{Proloquo2Go}~\cite{proloquo2go2024} ofrecen tableros de pictogramas con síntesis de voz, permitiendo al usuario seleccionar símbolos que el sistema convierte en audio. Sin embargo, se limitan a concatenar las etiquetas sin procesamiento lingüístico.

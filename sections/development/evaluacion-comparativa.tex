@@ -1,5 +1,24 @@
 Este capítulo confronta los seis motores sobre un mismo dataset mediante un pipeline de evaluación automatizado que aplica métricas con referencia, sin referencia y específicas de CAA, complementadas con tests de significancia estadística.
 
+Ninguno de los tres motores base domina simultáneamente en fidelidad, naturalidad, cobertura y latencia. La Tabla~\ref{tab:perfil-motores} resume el perfil de cada uno en estas cuatro dimensiones.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l c c c c}
+\hline
+Motor & Fidelidad & Naturalidad & Cobertura & Latencia \\
+\hline
+Gramática formal (CFG) & Alta & Baja & 96.6\% & $<$1 ms \\
+Embeddings (CFG + FastText) & Alta & Media & 100\% & $<$1 ms \\
+LLM (GPT-4o) & Alta & Alta & 100\% & $\sim$1600 ms \\
+\hline
+\end{tabular}
+\caption{Perfil de cada motor base en las dimensiones relevantes para CAA.}
+\label{tab:perfil-motores}
+\end{table}
+
+La gramática produce salidas correctas y predecibles dentro de su dominio pero rechaza las entradas fuera de sus patrones y genera frases que, aunque correctas, suenan rígidas. Los embeddings resuelven la cobertura pero heredan la rigidez estructural de la CFG. El LLM alcanza naturalidad y cobertura máximas pero depende de una API externa con latencia y coste por llamada. Las tres hibridaciones exploran si la composición de motores supera a las partes.
+
 \section{Metodología de la evaluación}
 \label{sec:eval-metodologia}
 
