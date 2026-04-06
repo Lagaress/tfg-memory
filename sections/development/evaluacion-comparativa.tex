@@ -76,30 +76,6 @@ Latencia (ms) & 0.02 & 1643 & & 811 & 915 & 4179 \\
 \label{tab:eval-sin-referencia}
 \end{table}
 
-La Tabla~\ref{tab:eval-ranking} resume qué motor obtiene los mejores resultados en cada dimensión evaluada.
-
-\begin{table}[ht]
-\centering
-\small
-\begin{tabular}{l l l}
-\hline
-Dimensión & Mejor motor & Observación \\
-\hline
-Coincidencia con referencia & Gramática / Embeddings & EM = 1.00, BLEU-4 = 1.00 (sesgo de referencia) \\
-Naturalidad (perplejidad) & Híbrido 1 & Mediana PPL = 100 (frente a 161 de gramática) \\
-Cobertura de pictogramas & Híbrido 3 & 98.7\% (frente a 97.2\% de gramática) \\
-Fidelidad ajustada & Híbrido 3 & 0.983 (frente a 0.969 de gramática) \\
-Latencia & Gramática & 0.02 ms (frente a 4179 ms de Híbrido 3) \\
-\hline
-\end{tabular}
-\caption{Resumen: mejor motor por dimensión evaluada.}
-\label{tab:eval-ranking}
-\end{table}
-
-\noindent Ningún motor domina en todas las dimensiones simultáneamente. La gramática es la más rápida y alcanza las mejores métricas de coincidencia, pero produce las frases menos naturales. El Híbrido 1 ofrece el mejor compromiso global: naturalidad superior a la gramática (perplejidad de 100 frente a 161), cobertura y fidelidad altas (0.983 y 0.982), y latencia moderada (811 ms). El Híbrido 3, pese a obtener la mejor cobertura y fidelidad, acumula una latencia de 4.2 segundos que difícilmente se justifica ante mejoras marginales.
-
-\textit{(TODO: Este ranking deberá revisarse cuando se incorporen los resultados de las encuestas de naturalidad y golden standard, que aportarán una dimensión de evaluación humana no recogida por las métricas automáticas.)}
-
 La tabla de métricas con referencia revela un patrón claro. Los motores base de gramática formal y embeddings semánticos alcanzan el techo del dataset por el sesgo de referencia (sección~\ref{sec:multi-referencia}). El LLM y los tres híbridos se sitúan en un rango alto y estadísticamente equivalente entre sí: Exact Match del 85-89\%, BLEU-4 del 91-93\% y BERTScore de 0.99, lo que indica que en la mayoría de los casos reproducen formulaciones muy próximas a la referencia.
 
 El LLM obtiene valores ligeramente inferiores a los híbridos en Exact Match (0.85 frente a 0.89 de Hybrid3) pero equivalentes en ROUGE-L y BERTScore, lo que confirma que sus reformulaciones preservan el contenido semántico aunque difieran en la forma exacta.
@@ -365,6 +341,43 @@ El coste económico diferencia los motores offline (gratis) de los que dependen 
 
 El determinismo (la propiedad de que la misma entrada produce siempre la misma salida) se pierde en cualquier motor que involucre al LLM, lo que incluye los tres híbridos. Para un usuario de CAA, la previsibilidad de la salida es un factor de confianza: saber que al seleccionar los mismos pictogramas obtendrá siempre la misma oración facilita el aprendizaje del sistema.
 
+\section{Evaluación humana}
+\label{sec:eval-humana}
+
+La evaluación automática descrita en las secciones anteriores proporciona métricas objetivas y reproducibles, pero no captura directamente si las frases generadas suenan naturales a un ser humano. Para cubrir esta dimensión, se han diseñado dos encuestas complementarias.
+
+La primera, la encuesta de naturalidad, presenta a los evaluadores una secuencia de pictogramas junto con las frases generadas por los distintos motores y les pide seleccionar la que suene más natural en español. Esta encuesta mide la preferencia subjetiva entre formulaciones alternativas para una misma entrada.
+
+La segunda, la encuesta de golden standard, presenta únicamente los pictogramas y pide a los evaluadores que escriban la frase que ellos dirían al ver esa secuencia. Las respuestas recogidas constituyen un corpus de referencias humanas independiente de la gramática formal, lo que permite recalcular las métricas automáticas contra referencias no sesgadas y verificar si las conclusiones de la evaluación automática se mantienen.
+
+\textit{(TODO: Completar con el diseño detallado de ambas encuestas, sus resultados y el análisis comparativo contra las métricas automáticas.)}
+
+\section{Resumen de resultados}
+
+La Tabla~\ref{tab:eval-ranking} resume qué motor obtiene los mejores resultados en cada dimensión evaluada.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{l l l}
+\hline
+Dimensión & Mejor motor & Observación \\
+\hline
+Coincidencia con referencia & Gramática / Embeddings & EM = 1.00, BLEU-4 = 1.00 (sesgo de referencia) \\
+Naturalidad (perplejidad) & Híbrido 1 & Mediana PPL = 100 (frente a 161 de gramática) \\
+Cobertura de pictogramas & Híbrido 3 & 98.7\% (frente a 97.2\% de gramática) \\
+Fidelidad ajustada & Híbrido 3 & 0.983 (frente a 0.969 de gramática) \\
+Latencia & Gramática & 0.02 ms (frente a 4179 ms de Híbrido 3) \\
+\hline
+\end{tabular}
+\caption{Resumen: mejor motor por dimensión evaluada.}
+\label{tab:eval-ranking}
+\end{table}
+
+\noindent Ningún motor domina en todas las dimensiones simultáneamente. La gramática es la más rápida y alcanza las mejores métricas de coincidencia, pero produce las frases menos naturales. El Híbrido 1 ofrece el mejor compromiso global: naturalidad superior a la gramática (perplejidad de 100 frente a 161), cobertura y fidelidad altas (0.983 y 0.982), y latencia moderada (811 ms). El Híbrido 3, pese a obtener la mejor cobertura y fidelidad, acumula una latencia de 4.2 segundos que difícilmente se justifica ante mejoras marginales.
+
+\textit{(TODO: Este ranking deberá revisarse cuando se incorporen los resultados de las encuestas de naturalidad y golden standard, que aportarán una dimensión de evaluación humana no recogida por las métricas automáticas.)}
+
 \section{Discusión}
 \label{sec:eval-discusion}
 
@@ -394,16 +407,4 @@ La equivalencia semántica que BERTScore refleja no resta importancia a las mét
 
 La evaluación presenta limitaciones. Aunque el corpus de 428 casos cubre ocho categorías semánticas y tres niveles de complejidad, los 313 casos añadidos fueron generados por el propio \texttt{SentenceGenerator} de la gramática formal, lo que refuerza la circularidad entre las referencias y las salidas de los motores basados en gramática. Las referencias fueron creadas por un único anotador, lo que introduce un sesgo hacia sus preferencias de formulación.
 
-Las métricas de perplejidad, aunque alcanzan alta significancia estadística ($\chi^2 = 423.12$), presentan desviaciones estándar extremadamente altas que dificultan la interpretación de diferencias entre motores cercanos. La recomendación de Hybrid1 como opción de producción se sustenta en las métricas automáticas; la evaluación humana descrita en el capítulo siguiente permitirá contrastar esta recomendación con la percepción de usuarios y profesionales.
-
-
-\section{Evaluación humana}
-\label{sec:eval-humana}
-
-La evaluación automática descrita en las secciones anteriores proporciona métricas objetivas y reproducibles, pero no captura directamente si las frases generadas suenan naturales a un ser humano. Para cubrir esta dimensión, se han diseñado dos encuestas complementarias.
-
-La primera, la encuesta de naturalidad, presenta a los evaluadores una secuencia de pictogramas junto con las frases generadas por los distintos motores y les pide seleccionar la que suene más natural en español. Esta encuesta mide la preferencia subjetiva entre formulaciones alternativas para una misma entrada.
-
-La segunda, la encuesta de golden standard, presenta únicamente los pictogramas y pide a los evaluadores que escriban la frase que ellos dirían al ver esa secuencia. Las respuestas recogidas constituyen un corpus de referencias humanas independiente de la gramática formal, lo que permite recalcular las métricas automáticas contra referencias no sesgadas y verificar si las conclusiones de la evaluación automática se mantienen.
-
-\textit{(TODO: Completar con el diseño detallado de ambas encuestas, sus resultados y el análisis comparativo contra las métricas automáticas.)}
+Las métricas de perplejidad, aunque alcanzan alta significancia estadística ($\chi^2 = 423.12$), presentan desviaciones estándar extremadamente altas que dificultan la interpretación de diferencias entre motores cercanos. La recomendación de Hybrid1 como opción de producción se sustenta en las métricas automáticas; la evaluación humana permitirá contrastar esta recomendación con la percepción de usuarios y profesionales.
