@@ -1,30 +1,106 @@
-En esta sección se describen todos los aspectos relativos a la gestión del proyecto: metodología, organización, costes, planificación, riesgos y aseguramiento de la calidad.
+Este capítulo describe la gestión del proyecto: la metodología de desarrollo adoptada, las tecnologías y herramientas empleadas, la planificación temporal, los costes estimados, los riesgos identificados, la gestión de la configuración y las prácticas de aseguramiento de la calidad.
 
 \section{Metodología de desarrollo}
-Definición del proceso de desarrollo, ciclo de vida y metodología empleada durante la elaboración del proyecto. Las fases y/o iteraciones que proponga el método empleado deberán quedar recogidas en la planificación que se detalle más adelante.
+\label{sec:metodologia}
 
-\section{Tecnologías}
+El desarrollo del proyecto sigue un modelo incremental organizado en bloques de trabajo secuenciales. Cada bloque produce un entregable funcional que se integra con los anteriores: primero los motores de generación de oraciones, después la evaluación comparativa, a continuación la aplicación móvil y, en paralelo, la redacción de la memoria.
 
-Deben resumirse (usando las referencias adecuadas) y justificarse las tecnologías/software que se van a aplicar en el proyecto.
+La elección de este modelo responde a las características del proyecto. Al tratarse de un trabajo individual sin equipo de desarrollo, las metodologías ágiles basadas en equipos multidisciplinares (Scrum, Kanban) resultan artificiales: no hay \textit{daily standups} cuando el equipo es una sola persona, ni tiene sentido definir roles de \textit{product owner} y \textit{scrum master} cuando recaen en el mismo individuo. El modelo incremental, en cambio, permite avanzar de forma ordenada sin la sobrecarga ceremonial de un \textit{framework} ágil, manteniendo la flexibilidad necesaria para incorporar cambios a medida que se obtienen resultados.
 
-\section{Planificación del proyecto}
-Estimación temporal y definición del calendario básico (hitos principales e iteraciones). Desarrollo de la planificación detallada, utilizando un diagrama de Gantt. Los diagramas de Gantt que se vean correctamente (girados y divididos si hace falta).\\
+Las revisiones periódicas con las tutoras del TFG funcionan como puntos de control. Cada revisión evalúa el trabajo completado hasta la fecha, identifica problemas y reorienta las siguientes fases si es necesario. Se han planificado cuatro hitos de revisión a lo largo del proyecto:
 
-Se debe incluir una comparación cuantitativa del tiempo y el esfuerzo realmente invertido frente al estimado y planificado. Estos datos pueden recogerse del sistema de gestión de tareas empleado para el seguimiento del proyecto.
+\begin{enumerate}
+    \item Revisión del prolegómeno de la memoria (enero de 2026).
+    \item Revisión de la memoria sobre el desarrollo de los motores de generación de oraciones (marzo de 2026).
+    \item Revisión de la memoria sobre el desarrollo de la aplicación móvil (abril de 2026).
+    \item Revisión de la memoria final completa (mayo de 2026).
+\end{enumerate}
 
-\section{Organización}
-Relación de las personas (roles) involucradas en el proyecto y de cómo se estructuran las relaciones entre las mismas para ejecutar el proyecto. Relación de los recursos inventariables utilizados en el proyecto: equipamiento informático (hardware y software), herramientas empleadas, etc. \\
+Los roles del proyecto se reparten de la siguiente forma. El alumno asume el desarrollo técnico completo (diseño, implementación, pruebas) y la redacción de la memoria. La tutora, Almudena del Pilar Márquez Lozano, supervisa el rigor académico de la memoria y proporciona retroalimentación sobre la estructura y el contenido del documento. La cotutora, Miriam Mengíbar Rodríguez, supervisa los aspectos técnicos del proyecto, gestiona el acceso a la base de datos de pictogramas de ARASAAC y valida las decisiones de diseño.
 
-\section{Costes}
-Estudio y presupuesto de los costes de los recursos (humanos y materiales) descritos anteriormente, necesarios para el proyecto. Para el cálculo de costes de personal puede consultarse alguna fuente disponible en Internet ajustada a la realidad del mercado laboral en España. El cálculo del coste del personal del proyecto puede hacerse en personas-mes, y luego hacer la correspondencia al coste monetario.\\
+\section{Tecnologías y herramientas}
+\label{sec:tecnologias-herramientas}
 
-\section{Riesgos}
-Enumeración de los riesgos del proyecto, indicando su posible impacto (efecto que la ocurrencia del citado riesgo tendría en el desarrollo del proyecto) y la probabilidad de ocurrencia. Una vez los riesgos son identificados y priorizados, hay que definir los planes necesarios para reducir los efectos del riesgo una vez se haya materializado o disminuir que este ocurra.\\
+El proyecto combina tecnologías de generación de lenguaje natural, desarrollo móvil y despliegue de servicios. Esta sección ofrece una visión de conjunto; los detalles de cada tecnología se desarrollan en los capítulos correspondientes.
+
+Los motores de generación de oraciones están implementados en Python 3.13. La gramática formal utiliza Lark~\cite{lark2024} como \textit{toolkit} de \textit{parsing} para definir las producciones en notación EBNF (sección~\ref{ch:gramatica-formal}). El enfoque basado en embeddings emplea FastText~\cite{bojanowski2017fasttext} con un modelo preentrenado sobre un corpus en español para calcular similitudes semánticas entre palabras (sección~\ref{ch:enfoque-hibrido}). El motor de modelos de lenguaje se apoya en la API de OpenAI, concretamente en GPT-4o-mini~\cite{openai2024gpt4o}, con técnicas de \textit{prompt engineering} adaptadas al dominio de la CAA (sección~\ref{ch:modelos-lenguaje}). Las tres técnicas de hibridación combinan los enfoques anteriores mediante distintas estrategias de composición (sección~\ref{ch:hibridacion}).
+
+La aplicación móvil está desarrollada con React Native 0.81~\cite{reactnative2024} y Expo 54~\cite{expo2024}, con TypeScript como lenguaje principal (capítulo~\ref{ch:aplicacion-movil}). El servidor que conecta la app con los motores de generación utiliza FastAPI~\cite{fastapi2024} y se despliega mediante Docker~\cite{docker2024} (sección~\ref{ch:software}).
+
+Las herramientas de gestión y soporte del proyecto son cuatro. GitHub aloja los repositorios del código fuente, organizados de forma independiente por componente (la estructura se detalla en la sección~\ref{sec:configuracion}). Google Sheets se emplea como cronograma de seguimiento, donde se registran las tareas planificadas, sus fechas estimadas y su estado. Overleaf es el entorno de edición de la memoria en LaTeX, con sincronización automática contra un repositorio Git. Claude Code actúa como asistente de desarrollo con inteligencia artificial durante la implementación y la redacción.
+
+\section{Planificación temporal}
+\label{sec:planificacion}
+
+El proyecto se desarrolla entre diciembre de 2025 y julio de 2026, con dos posibles convocatorias de defensa (junio y julio). El trabajo se organiza en seis bloques, algunos secuenciales y otros parcialmente solapados.
+
+Las dos primeras semanas de diciembre de 2025 se dedican a tareas preliminares: gestionar el acceso a la base de datos de pictogramas de ARASAAC a través de la cotutora, formalizar la propuesta del TFG en la plataforma de la Universidad y realizar una primera investigación exploratoria sobre los sistemas de CAA existentes.
+
+A continuación, entre la tercera semana de diciembre y la primera de enero de 2026, se aborda la preparación de los datos: elección del motor de base de datos, descarga del catálogo de ARASAAC y preparación del vocabulario que consumirán los motores de generación.
+
+La generación de oraciones constituye el bloque más extenso del proyecto, desde la primera semana de enero hasta la segunda de marzo de 2026. Abarca el análisis del estado del arte en generación de lenguaje natural para CAA, el desarrollo de los tres enfoques base (gramática formal, embeddings semánticos y modelos de lenguaje), las técnicas de hibridación y la evaluación comparativa de los seis sistemas resultantes.
+
+Entre la segunda semana de marzo y la primera de mayo de 2026 se desarrolla la aplicación móvil. Esta fase comprende el análisis de las aplicaciones de CAA existentes, el diseño de la arquitectura, la implementación del servidor REST como conector con los motores de generación, el desarrollo de la interfaz en React Native, la integración del motor de síntesis de voz y las pruebas de la aplicación.
+
+El trabajo sobre texto a voz se solapa parcialmente con la aplicación y transcurre entre abril y mayo de 2026, período en el que se analizan los motores de síntesis disponibles y se selecciona e integra el más adecuado.
+
+La redacción de la memoria avanza en paralelo con todos los bloques anteriores, desde enero hasta julio de 2026. Sus cuatro fases coinciden con los hitos de revisión descritos en la sección~\ref{sec:metodologia}: prolegómeno, desarrollo de la generación de oraciones, desarrollo de la aplicación móvil y epílogo con los anexos.
+
+% TODO: Incluir diagrama de Gantt como figura (chronosys o pgfgantt)
+
+% TODO: Completar con el análisis de desviaciones (planificado vs. real) cuando termine el proyecto
+
+\section{Estimación de costes}
+\label{sec:costes}
+
+La estimación de costes del proyecto contempla tres categorías: costes de personal, amortización del equipo informático y costes de servicios externos.
+
+% TODO: Completar con las horas reales cuando termine el proyecto
+El coste de personal se calcula a partir de las horas dedicadas por el alumno, único desarrollador del proyecto. Tomando como referencia una tarifa de 15 \euro{}/hora, habitual para un perfil \textit{junior} de ingeniería informática en España, el coste total de personal depende de las horas efectivas invertidas, que se registrarán al finalizar el proyecto.
+
+El equipo de desarrollo es un MacBook Pro con chip M4 Pro, con un precio de adquisición aproximado de 2.499 \euro{}. Aplicando una amortización lineal a cuatro años y un período de uso estimado de ocho meses, el coste imputable al proyecto es de aproximadamente 416 \euro{}.
+
+Los servicios externos con coste incluyen tres partidas. La API de OpenAI se utiliza para el motor de generación basado en modelos de lenguaje y para las técnicas de hibridación que lo incorporan. La suscripción a Claude Code proporciona asistencia con inteligencia artificial durante el desarrollo. La API de ElevenLabs está prevista para la síntesis de voz neuronal en la aplicación móvil.
+
+% TODO: Añadir importes reales de OpenAI, Claude Code y ElevenLabs cuando se tengan las facturas
+
+El resto de herramientas y tecnologías empleadas son gratuitas o de código abierto: Python, Lark, FastText, React Native, Expo, FastAPI, Docker, Git, GitHub y Overleaf.
+
+% TODO: Calcular coste total cuando se tengan las horas y los importes de los servicios
+
+\section{Gestión de riesgos}
+\label{sec:riesgos}
+
+El análisis de riesgos del proyecto identifica cinco factores que podrían haber afectado al desarrollo o al resultado final.
+
+El primer riesgo es el tamaño del modelo de FastText utilizado por el enfoque de embeddings. El modelo preentrenado sobre el corpus \textit{Spanish Billion Words} ocupa 6,7 GB en disco, lo que descarta opciones de despliegue como funciones \textit{serverless} o servicios con restricciones de memoria. La probabilidad de materialización era alta (el modelo ya se conocía antes de elegirlo) y el impacto moderado, limitado a las opciones de despliegue del servidor. La mitigación adoptada fue asumir un despliegue basado en contenedores Docker con acceso a disco suficiente, lo que restringe la infraestructura pero no impide el funcionamiento del sistema.
+
+La dependencia de APIs externas afecta al motor de modelos de lenguaje, que requiere conexión a la API de OpenAI para funcionar. Sin acceso a internet, las tres técnicas que incorporan este motor (el enfoque de LLMs y las dos hibridaciones que lo incluyen) dejan de operar. La probabilidad es baja (las APIs comerciales tienen alta disponibilidad) pero el impacto es alto: la mitad de las técnicas del proyecto quedan inutilizadas. La mitigación consiste en que las técnicas sin dependencia externa (gramática formal y gramática enriquecida con embeddings) siguen funcionando como respaldo, y el servidor implementa \textit{fallback} automático a estas técnicas cuando la API no responde.
+
+El vocabulario cerrado del sistema, limitado a 232 pictogramas de ARASAAC, restringe la cobertura del sistema. Cualquier concepto no representado por uno de estos pictogramas queda fuera del alcance de la generación. La probabilidad de impacto es segura (el vocabulario es finito por definición) y el efecto varía según el contexto de uso. La mitigación se abordó en la fase de selección de pictogramas, priorizando los conceptos más frecuentes en la comunicación cotidiana de usuarios de CAA, cubriendo nueve categorías semánticas.
+
+La evaluación comparativa de seis técnicas requiere un \textit{pipeline} de métricas robusto y reproducible, con tests de significancia estadística para determinar si las diferencias observadas son genuinas. La probabilidad de que la evaluación produzca resultados inconcluyentes es moderada, y el impacto sería alto al comprometer las conclusiones del proyecto. La mitigación consistió en combinar métricas automáticas (BLEU, ROUGE, BERTScore, perplejidad) con evaluación humana mediante encuestas, y en aplicar tests de Wilcoxon~\cite{wilcoxon1945individual} con corrección para comparaciones múltiples.
+
+La compatibilidad multiplataforma de la aplicación móvil introduce un riesgo inherente al desarrollo con React Native: diferencias de comportamiento entre iOS y Android en renderizado, animaciones o acceso a APIs nativas. La probabilidad es moderada y el impacto variable según el componente afectado. La mitigación se basa en el uso de Expo como capa de abstracción, que reduce las diferencias entre plataformas al proporcionar APIs unificadas para la mayoría de funcionalidades que la aplicación necesita.
 
 \section{Gestión de la configuración}
-Descripción de las estrategias a seguir para el control de las versiones del código fuente, así como de la gestión de las \textit{releases}.\\
+\label{sec:configuracion}
 
-\section{Aseguramiento de calidad}
-En esta sección se incluirán las actividades y tareas relacionadas con el aseguramiento de calidad a realizar durante el desarrollo del software. Se incluirán los estándares, prácticas y normas aplicables durante el desarrollo del software.\\
+El código fuente del proyecto se distribuye en siete repositorios Git independientes alojados en GitHub, uno por cada componente: gramática formal, embeddings, modelos de lenguaje, hibridación, evaluación comparativa, aplicación móvil y encuestas de evaluación humana. La memoria del TFG reside en un octavo repositorio sincronizado con Overleaf.
 
-También, deberán recogerse los diferentes tipos de revisiones, verificaciones y validaciones que se van a llevar a cabo, los criterios para la aceptación o rechazo de cada producto y los procedimientos para implementar acciones correctoras o preventivas.
+La decisión de separar los componentes en repositorios independientes responde a la naturaleza modular del proyecto. Cada motor de generación tiene sus propias dependencias, su propio entorno de ejecución y sus propios tests. Agruparlos en un monorrepo habría complicado la gestión de dependencias (Python para los motores, TypeScript para la app) y habría generado historiales de cambios entrelazados que dificultan el seguimiento del progreso de cada componente.
+
+Cada repositorio mantiene su propio fichero de configuración de dependencias y su documentación interna. El control de versiones sigue un modelo simple de trabajo directo sobre la rama principal, sin estrategias de \textit{branching} complejas, acorde con el carácter individual del desarrollo.
+
+\section{Aseguramiento de la calidad}
+\label{sec:calidad}
+
+Las prácticas de aseguramiento de la calidad del proyecto abarcan cuatro niveles: verificación unitaria de los motores, evaluación comparativa automatizada, evaluación humana y verificación del servidor y la aplicación.
+
+Los motores de generación de oraciones incorporan tests unitarios que verifican el comportamiento de cada componente de forma aislada: concordancias de género y número, inserción de determinantes y preposiciones, conjugación verbal, restricciones de selección semánticas e inferencia de elementos faltantes, entre otros. Estos tests permiten detectar regresiones cuando se modifican las reglas o los parámetros de los motores.
+
+La evaluación comparativa automatizada constituye el segundo nivel de verificación. Un \textit{pipeline} ejecuta los seis motores sobre un conjunto de 130 casos de prueba y calcula para cada uno las métricas BLEU~\cite{papineni2002bleu}, ROUGE~\cite{lin2004rouge}, BERTScore~\cite{zhang2020bertscore} y perplejidad, entre otras. Los resultados se someten a tests de significancia estadística (Wilcoxon~\cite{wilcoxon1945individual} con corrección de Holm) para determinar si las diferencias entre técnicas son estadísticamente significativas. Los detalles de este proceso se describen en la sección~\ref{ch:evaluacion-comparativa}.
+
+La evaluación humana complementa las métricas automáticas con la percepción de personas reales. Se diseñaron encuestas con escalas Likert de 7 puntos para medir la naturalidad percibida de las oraciones generadas y su proximidad a una referencia \textit{gold standard}. Este proceso, junto con sus resultados, se detalla en la sección~\ref{ch:evaluacion-comparativa}.
+
+En la aplicación móvil, el uso de TypeScript como lenguaje de desarrollo proporciona tipado estático que detecta inconsistencias de tipos en tiempo de compilación. El servidor REST implementa \textit{endpoints} de salud (\textit{liveness} y \textit{readiness}) que permiten verificar automáticamente si el servicio está operativo y si los motores de generación están cargados y listos para procesar peticiones.
