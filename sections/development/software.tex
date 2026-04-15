@@ -1,6 +1,6 @@
 Este capítulo describe las decisiones de ingeniería de software que sustentan la implementación del proyecto: la organización del código, los patrones de diseño empleados, las metodologías de desarrollo y los repositorios donde se aloja el código fuente.
 
-\section{Organización del código}
+\subsection{Organización del código}
 
 El proyecto se estructura como un conjunto de repositorios independientes, cada uno con su propio entorno de ejecución y dependencias. Esta separación permite desarrollar, probar y desplegar cada componente de forma autónoma:
 
@@ -14,7 +14,7 @@ El proyecto se estructura como un conjunto de repositorios independientes, cada 
     \item Encuestas web: monorepo con las encuestas de naturalidad y golden standard.
 \end{itemize}
 
-\section{Patrones de diseño}
+\subsection{Patrones de diseño}
 
 Los motores de generación comparten varios patrones de diseño que facilitan la composición y el mantenimiento del sistema.
 
@@ -26,7 +26,7 @@ Los motores que dependen de recursos costosos (modelos de embeddings de varios G
 
 El manejo de errores sigue una estrategia de degradación progresiva: si un componente falla, el sistema recurre a un mecanismo de fallback que garantiza siempre una salida. En las hibridaciones, si la gramática no reconoce la entrada, el LLM genera la frase desde cero; en la Hibridación 3, si ninguna candidata alcanza cobertura completa, todas pasan al ranking.
 
-\section{Tecnologías y dependencias}
+\subsection{Tecnologías y dependencias}
 
 \begin{itemize}
     \item Python 3.13 como lenguaje principal para los motores de generación y el pipeline de evaluación.
@@ -39,7 +39,7 @@ El manejo de errores sigue una estrategia de degradación progresiva: si un comp
     \item React, Vite y Supabase para las encuestas web.
 \end{itemize}
 
-\section{Repositorios}
+\subsection{Repositorios}
 
 Todo el código fuente del proyecto está disponible en GitHub bajo la cuenta del autor:
 

@@ -8,7 +8,7 @@ Para abordar estos problemas, la gramática de este proyecto extiende la CFG con
 
 La elección de una gramática formal como primera técnica responde a una motivación deliberada. Una gramática ofrece determinismo (la misma entrada produce siempre la misma salida), transparencia (cada transformación lingüística está codificada explícitamente y puede inspeccionarse) e independencia de servicios externos. Estas propiedades la convierten en una base de comparación sólida frente a las técnicas estadísticas y neuronales que se exploran en capítulos posteriores. La filosofía de diseño que guía este enfoque prioriza la corrección gramatical sobre la cobertura: en un contexto donde el usuario depende del sistema para comunicarse, es preferible rechazar una entrada no soportada a generar una frase incorrecta que distorsione su intención.
 
-\section{Planteamiento del enfoque}
+\subsection{Planteamiento del enfoque}
 \label{sec:f1-planteamiento}
 
 El sistema no emplea una gramática libre de contexto (CFG) pura en el sentido de Chomsky~\cite{chomsky1957syntactic}. En lugar de reglas de producción clásicas del tipo $S \rightarrow NP\ VP$, implementa una CFG extendida mediante tres mecanismos complementarios.
@@ -54,12 +54,12 @@ Los tres mecanismos que extienden la CFG operan sobre estos patrones. El \textit
 
 Esta combinación permite manejar la ambigüedad inherente a la entrada abreviada de CAA sin recurrir a modelos estadísticos o neuronales.
 
-\section{Decisiones de diseño específicas}
+\subsection{Decisiones de diseño específicas}
 \label{sec:f1-postprocesamiento}
 
 El postprocesador transforma la secuencia tokenizada en una oración natural. Tres de sus etapas incorporan decisiones de diseño específicas de este proyecto que van más allá de lo que una gramática formal estándar resolvería.
 
-\subsection{Inferencia de elementos faltantes}
+\subsubsection{Inferencia de elementos faltantes}
 
 Esta etapa detecta elementos implícitos en la entrada del usuario y los añade explícitamente, siguiendo reglas que priorizan la inferencia conservadora:
 
@@ -71,15 +71,15 @@ Esta etapa detecta elementos implícitos en la entrada del usuario y los añade 
 
 La inferencia opera exclusivamente en primera persona y no se activa en interrogativas, evitando asumir la intención del usuario cuando pregunta sobre terceros. Esta lógica es específica del dominio de CAA: en la comunicación aumentativa, el usuario selecciona los pictogramas mínimos necesarios y el sistema debe completar la intención comunicativa implícita.
 
-\subsection{Inserción de determinantes}
+\subsubsection{Inserción de determinantes}
 
 La decisión de qué determinante acompaña a cada sustantivo depende de reglas específicas del dominio. Los sustantivos incontables (agua, pan, leche) no reciben determinante tras verbos de necesidad. Los objetos con artículo definido (televisión, teléfono, música) usan ``el/la'' en lugar de ``un/una''. En interrogativas se utiliza artículo definido (``¿Dónde está el perro?''). En coordinaciones, la coherencia entre los miembros determina el tratamiento: si un elemento es incontable, el otro también omite el determinante.
 
-\subsection{Inserción de preposiciones}
+\subsubsection{Inserción de preposiciones}
 
 La selección de la preposición correcta para complementos de lugar utiliza tres diccionarios construidos manualmente: preposiciones por verbo de movimiento (9 verbos: ``ir'' $\rightarrow$ ``a'', ``venir'' $\rightarrow$ ``de''), preposiciones por lugar con verbos de movimiento (35 lugares: ``baño'' $\rightarrow$ ``al'', ``escuela'' $\rightarrow$ ``a la'') y preposiciones de ubicación para verbos de estado (19 lugares: ``colegio'' $\rightarrow$ ``en el''). La lógica busca hacia atrás desde el lugar hasta encontrar el verbo que lo rige, y selecciona el diccionario apropiado según el tipo de verbo.
 
-\section{Limitaciones}
+\subsection{Limitaciones}
 \label{sec:f1-limitaciones}
 
 Las gramáticas formales presentan limitaciones inherentes al enfoque simbólico. En primer lugar, operan sobre un vocabulario cerrado: toda palabra no incluida en el léxico se rechaza, lo que impide al sistema adaptarse a vocabulario nuevo sin intervención manual. En segundo lugar, las reglas de producción capturan la estructura sintáctica pero no el significado ni el contexto pragmático: una gramática no puede distinguir entre dos oraciones sintácticamente idénticas pero semánticamente diferentes, ni resolver ambigüedades que dependen del contexto comunicativo. En tercer lugar, la cobertura lingüística depende enteramente de las reglas codificadas: cada nueva estructura oracional, tiempo verbal o fenómeno morfológico requiere añadir reglas explícitamente, un esfuerzo de mantenimiento que crece con la complejidad del dominio. Por último, y quizá la limitación más relevante, las reglas son específicas de un idioma y un dominio concretos: las decisiones sobre inferencia de verbos modales, selección de preposiciones o inserción de determinantes están codificadas para el español y para el vocabulario de CAA de este proyecto. Extender el sistema a otro idioma o a un dominio comunicativo diferente requeriría reescribir la práctica totalidad de las reglas, ya que ninguna de ellas es transferible. Esta falta de portabilidad es inherente a las gramáticas formales aplicadas a la generación de lenguaje natural, y es precisamente lo que motiva y justifica la exploración de técnicas complementarias (embeddings semánticos, modelos de lenguaje) que puedan generalizar más allá del dominio para el que fueron diseñadas.
