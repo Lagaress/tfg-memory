@@ -64,7 +64,7 @@ La compatibilidad multiplataforma de la aplicación móvil introduce diferencias
 
 El aseguramiento de la calidad combina cuatro prácticas: pruebas unitarias sobre los motores de generación, evaluación comparativa automatizada, evaluación humana y pruebas unitarias sobre el servidor y la aplicación móvil.
 
-Los motores de generación incorporan tests unitarios que verifican cada componente de forma aislada ---concordancia de género y número, inserción de determinantes y preposiciones, conjugación verbal o inferencia de elementos faltantes, entre otros fenómenos--- y actúan como red de seguridad frente a regresiones cuando se modifican reglas o parámetros.
+Los motores de generación incorporan tests unitarios que verifican cada componente de forma aislada (concordancia de género y número, inserción de determinantes y preposiciones, conjugación verbal o inferencia de elementos faltantes, entre otros fenómenos) y actúan como red de seguridad frente a regresiones cuando se modifican reglas o parámetros.
 
 La evaluación comparativa automatizada ejecuta los seis motores sobre un conjunto de 428 casos de prueba y calcula para cada uno métricas como BLEU~\cite{papineni2002bleu}, ROUGE~\cite{lin2004rouge}, BERTScore~\cite{zhang2020bertscore} o perplejidad. Las diferencias observadas se someten al test de Wilcoxon~\cite{wilcoxon1945individual} con corrección de Holm para discriminar las estadísticamente significativas. El detalle del proceso se recoge en la sección~\ref{ch:evaluacion-comparativa}.
 
