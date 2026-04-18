@@ -60,6 +60,17 @@ Consulta `antipatterns.md` y verifica que no aparece ninguno de los siguientes:
 - Las referencias bibliográficas existen en `bibliography.bib`.
 - Los archivos referenciados en `\input{}` o `\includegraphics{}` existen.
 
+### 6. Figuras y tablas referenciadas
+
+Regla de oro: **ninguna figura ni tabla puede estar huérfana**. Si se añade o modifica un `\begin{figure}` o `\begin{table}`, verificar que su `\label{fig:...}` o `\label{tab:...}` aparece citado al menos una vez en el texto mediante `\ref{}`, `Figura~\ref{}` o `Tabla~\ref{}`. La `\caption{}` no cuenta como referencia.
+
+Procedimiento rápido:
+1. Localizar el `\label{}` de la figura o tabla editada.
+2. Buscar ese label en todo `sections/` con `\ref{label}` (excluyendo la propia línea del `\label{}`).
+3. Si no aparece, añadir una frase en el texto del capítulo que cite la figura/tabla con la forma habitual `Figura~\ref{fig:...}` o `Tabla~\ref{tab:...}`.
+
+Esta comprobación debe hacerse también cuando se introducen figuras o tablas nuevas, no solo al editar prosa.
+
 ## Output
 
 - **Si todo correcto**: Indicar "Verificación superada" con un resumen breve de lo revisado.

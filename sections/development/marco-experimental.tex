@@ -1,6 +1,11 @@
-La arquitectura de Dixi sigue un diseño modular: la entrada (una lista ordenada de etiquetas de pictogramas) atraviesa un motor de generación de lenguaje natural que produce una oración gramaticalmente correcta, y un motor de síntesis de voz la convierte en audio.
+La arquitectura de Dixi sigue un diseño modular: la entrada (una lista ordenada de etiquetas de pictogramas) atraviesa un motor de generación de lenguaje natural que produce una oración gramaticalmente correcta, y un motor de síntesis de voz la convierte en audio. La Figura~\ref{fig:arquitectura-modular} resume este flujo.
 
-\textit{(TODO: Añadir diagrama de la arquitectura modular: pictogramas $\rightarrow$ motor de generación $\rightarrow$ oración $\rightarrow$ TTS $\rightarrow$ audio)}
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{figures/arquitectura-modular.png}
+    \caption{Arquitectura modular de Dixi. La secuencia de pictogramas ARASAAC atraviesa un motor de generación de lenguaje natural intercambiable ---gramática formal, embeddings, modelo de lenguaje o cualquiera de las tres hibridaciones--- y la oración resultante se reproduce mediante el motor de síntesis de voz.}
+    \label{fig:arquitectura-modular}
+\end{figure}
 
 En cuanto al motor de síntesis de voz, tres aspectos condicionan la elección:
 
