@@ -21,7 +21,7 @@ Las revisiones periódicas con las tutoras del TFG funcionan como puntos de cont
 \section{Herramientas de gestión y soporte}
 \label{sec:tecnologias-herramientas}
 
-Las tecnologías empleadas en cada una de las implementaciones se describen en los capítulos de desarrollo correspondientes. Para la gestión y el soporte del proyecto se utilizan cuatro herramientas. GitHub aloja los repositorios del código fuente, organizados de forma independiente por componente (la estructura se detalla en la sección~\ref{sec:configuracion}). Google Sheets se emplea como cronograma de seguimiento, donde se registran las tareas planificadas, sus fechas estimadas y su estado. Overleaf es el entorno de edición de la memoria en LaTeX, con sincronización automática contra un repositorio Git. Claude Code actúa como asistente de desarrollo con inteligencia artificial durante la implementación y la redacción.
+Las tecnologías empleadas en cada una de las implementaciones se describen en los capítulos de desarrollo correspondientes. Para la gestión y el soporte del proyecto se utilizan cuatro herramientas. GitHub aloja los repositorios del código fuente, organizados de forma independiente por componente. Google Sheets se emplea como cronograma de seguimiento, donde se registran las tareas planificadas, sus fechas estimadas y su estado. Overleaf es el entorno de edición de la memoria en LaTeX, con sincronización automática contra un repositorio Git. Claude Code actúa como asistente de desarrollo con inteligencia artificial durante la implementación y la redacción.
 
 \section{Planificación temporal}
 \label{sec:planificacion}
@@ -38,44 +38,26 @@ El proyecto se desarrolla entre diciembre de 2025 y julio de 2026, con dos posib
 \section{Estimación de costes}
 \label{sec:costes}
 
-La estimación de costes del proyecto contempla tres categorías: costes de personal, amortización del equipo informático y costes de servicios externos.
+Al tratarse de un Trabajo de Fin de Grado, la estimación de costes se limita a los servicios externos que el sistema consume en ejecución. El trabajo del alumno, la supervisión de las tutoras y el equipo de desarrollo no se computan como gasto al formar parte de la dedicación académica propia del TFG, y el resto de herramientas empleadas son gratuitas o de código abierto.
 
-% TODO: Completar con las horas reales cuando termine el proyecto
-El coste de personal se calcula a partir de las horas dedicadas por el alumno, único desarrollador del proyecto. Tomando como referencia una tarifa de 15 \euro{}/hora, habitual para un perfil \textit{junior} de ingeniería informática en España, el coste total de personal depende de las horas efectivas invertidas, que se registrarán al finalizar el proyecto.
+La API de OpenAI~\cite{openai2024pricing} se utiliza en el motor de modelos de lenguaje y en las hibridaciones que lo incorporan. A precios de abril de 2026, GPT-4o factura \$2.50 por millón de tokens de entrada y \$10.00 por millón de salida, mientras que GPT-4o-mini se queda en \$0.15 y \$0.60 respectivamente; el desglose del coste por consulta aparece en la sección~\ref{ch:modelos-lenguaje}.
 
-El equipo de desarrollo es un MacBook Pro con chip M4 Pro, con un precio de adquisición aproximado de 2.499 \euro{}. Aplicando una amortización lineal a cuatro años y un período de uso estimado de ocho meses, el coste imputable al proyecto es de aproximadamente 416 \euro{}.
-
-Los servicios externos con coste incluyen tres partidas. La API de OpenAI se utiliza para el motor de generación basado en modelos de lenguaje y para las técnicas de hibridación que lo incorporan. La suscripción a Claude Code proporciona asistencia con inteligencia artificial durante el desarrollo. La API de ElevenLabs está prevista para la síntesis de voz neuronal en la aplicación móvil.
-
-% TODO: Añadir importes reales de OpenAI, Claude Code y ElevenLabs cuando se tengan las facturas
-
-El resto de herramientas y tecnologías empleadas son gratuitas o de código abierto: Python, Lark, FastText, React Native, Expo, FastAPI, Docker, Git, GitHub y Overleaf.
-
-% TODO: Calcular coste total cuando se tengan las horas y los importes de los servicios
+La API de ElevenLabs~\cite{elevenlabs2026pricing}, prevista para la síntesis de voz neuronal en la aplicación móvil, factura por caracteres: \$0.06 por cada 1.000 caracteres con los modelos \textit{Flash} y \textit{Turbo}, y \$0.12 con los modelos \textit{Multilingual v2} y \textit{v3}.
 
 \section{Gestión de riesgos}
 \label{sec:riesgos}
 
-El análisis de riesgos del proyecto identifica cinco factores que podrían haber afectado al desarrollo o al resultado final.
+El desarrollo del proyecto está condicionado por cinco riesgos relevantes.
 
-El primer riesgo es el tamaño del modelo de FastText utilizado por el enfoque de embeddings. El modelo preentrenado sobre el corpus \textit{Spanish Billion Words} ocupa 6,7 GB en disco, lo que descarta opciones de despliegue como funciones \textit{serverless} o servicios con restricciones de memoria. La probabilidad de materialización era alta (el modelo ya se conocía antes de elegirlo) y el impacto moderado, limitado a las opciones de despliegue del servidor. La mitigación adoptada fue asumir un despliegue basado en contenedores Docker con acceso a disco suficiente, lo que restringe la infraestructura pero no impide el funcionamiento del sistema.
+El tamaño del modelo de FastText utilizado por el enfoque de embeddings condiciona el despliegue. El modelo preentrenado sobre el corpus \textit{Spanish Billion Words} ocupa 6,7 GB en disco, lo que descarta funciones \textit{serverless} y servicios con restricciones de memoria. La mitigación consiste en desplegar el servidor mediante contenedores Docker con disco suficiente, lo que restringe la infraestructura pero no impide el funcionamiento.
 
-La dependencia de APIs externas afecta al motor de modelos de lenguaje, que requiere conexión a la API de OpenAI para funcionar. Sin acceso a internet, las tres técnicas que incorporan este motor (el enfoque de LLMs y las dos hibridaciones que lo incluyen) dejan de operar. La probabilidad es baja (las APIs comerciales tienen alta disponibilidad) pero el impacto es alto: la mitad de las técnicas del proyecto quedan inutilizadas. La mitigación consiste en que las técnicas sin dependencia externa (gramática formal y gramática enriquecida con embeddings) siguen funcionando como respaldo, y el servidor implementa \textit{fallback} automático a estas técnicas cuando la API no responde.
+La dependencia de la API de OpenAI afecta al motor de modelos de lenguaje y a las dos hibridaciones que lo incorporan: sin acceso a Internet, la mitad de las técnicas deja de operar. El servidor implementa \textit{fallback} automático a la gramática formal y a la gramática enriquecida con embeddings, que funcionan en local y permiten seguir dando servicio.
 
-El vocabulario cerrado del sistema, limitado a 232 pictogramas de ARASAAC, restringe la cobertura del sistema. Cualquier concepto no representado por uno de estos pictogramas queda fuera del alcance de la generación. La probabilidad de impacto es segura (el vocabulario es finito por definición) y el efecto varía según el contexto de uso. La mitigación se abordó en la fase de selección de pictogramas, priorizando los conceptos más frecuentes en la comunicación cotidiana de usuarios de CAA, cubriendo nueve categorías semánticas.
+El vocabulario cerrado del sistema, limitado a 232 pictogramas de ARASAAC, deja fuera cualquier concepto no representado. La mitigación se abordó en la fase de selección, priorizando los conceptos más frecuentes en la comunicación cotidiana de usuarios de CAA y cubriendo nueve categorías semánticas.
 
-La evaluación comparativa de seis técnicas requiere un \textit{pipeline} de métricas robusto y reproducible, con tests de significancia estadística para determinar si las diferencias observadas son genuinas. La probabilidad de que la evaluación produzca resultados inconcluyentes es moderada, y el impacto sería alto al comprometer las conclusiones del proyecto. La mitigación consistió en combinar métricas automáticas (BLEU, ROUGE, BERTScore, perplejidad) con evaluación humana mediante encuestas, y en aplicar tests de Wilcoxon~\cite{wilcoxon1945individual} con corrección para comparaciones múltiples.
+La evaluación comparativa podría producir resultados inconcluyentes y comprometer las conclusiones del proyecto. Para minimizar este riesgo se combinan métricas automáticas (BLEU, ROUGE, BERTScore, perplejidad) con evaluación humana mediante encuestas, y se aplica el test de Wilcoxon~\cite{wilcoxon1945individual} con corrección para comparaciones múltiples, que permite discriminar qué diferencias entre técnicas son estadísticamente significativas.
 
-La compatibilidad multiplataforma de la aplicación móvil introduce un riesgo inherente al desarrollo con React Native: diferencias de comportamiento entre iOS y Android en renderizado, animaciones o acceso a APIs nativas. La probabilidad es moderada y el impacto variable según el componente afectado. La mitigación se basa en el uso de Expo como capa de abstracción, que reduce las diferencias entre plataformas al proporcionar APIs unificadas para la mayoría de funcionalidades que la aplicación necesita.
-
-\section{Gestión de la configuración}
-\label{sec:configuracion}
-
-El código fuente del proyecto se distribuye en siete repositorios Git independientes alojados en GitHub, uno por cada componente: gramática formal, embeddings, modelos de lenguaje, hibridación, evaluación comparativa, aplicación móvil y encuestas de evaluación humana. La memoria del TFG reside en un octavo repositorio sincronizado con Overleaf.
-
-La decisión de separar los componentes en repositorios independientes responde a la naturaleza modular del proyecto. Cada motor de generación tiene sus propias dependencias, su propio entorno de ejecución y sus propios tests. Agruparlos en un monorrepo habría complicado la gestión de dependencias (Python para los motores, TypeScript para la app) y habría generado historiales de cambios entrelazados que dificultan el seguimiento del progreso de cada componente.
-
-Cada repositorio mantiene su propio fichero de configuración de dependencias y su documentación interna. El control de versiones sigue un modelo simple de trabajo directo sobre la rama principal, sin estrategias de \textit{branching} complejas, acorde con el carácter individual del desarrollo.
+La compatibilidad multiplataforma de la aplicación móvil introduce diferencias de comportamiento entre iOS y Android en renderizado, animaciones y acceso a APIs nativas. Se mitiga apoyándose en Expo como capa de abstracción, que unifica las APIs para la mayoría de funcionalidades que la aplicación necesita.
 
 \section{Aseguramiento de la calidad}
 \label{sec:calidad}
