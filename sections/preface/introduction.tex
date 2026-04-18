@@ -50,6 +50,8 @@ El sistema está pensado principalmente para personas con TEA que presentan difi
 \begin{description}
     \item[Alucinación] En el contexto de la inteligencia artificial, palabra o concepto que un modelo genera sin que esté justificado por la entrada. En este proyecto, una oración que incluye ``quiero'' cuando el usuario solo seleccionó el pictograma ``agua'' contiene una alucinación técnica, aunque la inferencia sea comunicativamente razonable.
 
+    \item[API (\textit{Application Programming Interface})] Interfaz de programación de aplicaciones. Conjunto de funciones y protocolos que permite que dos sistemas informáticos se comuniquen. En este proyecto se accede a los modelos de lenguaje y a los motores de síntesis de voz mediante APIs REST ofrecidas por terceros.
+
     \item[ARASAAC] Centro Aragonés para la Comunicación Aumentativa y Alternativa. Ofrece pictogramas y recursos de forma gratuita bajo licencia Creative Commons. Es la referencia más utilizada en el mundo hispanohablante.
 
     \item[BERTScore] Métrica de evaluación de texto que mide la similitud semántica entre dos oraciones utilizando embeddings contextuales de un modelo BERT. A diferencia de BLEU o ROUGE, reconoce sinónimos y paráfrasis.
@@ -60,15 +62,25 @@ El sistema está pensado principalmente para personas con TEA que presentan difi
 
     \item[CFG (\textit{Context-Free Grammar})] Gramática libre de contexto. Formalismo que define un lenguaje mediante reglas de producción. En este proyecto, la CFG se extiende con restricciones semánticas para generar oraciones a partir de pictogramas.
 
+    \item[Docker] Plataforma de contenedores que empaqueta una aplicación junto con sus dependencias en una unidad portable. Se utiliza para garantizar que el entorno de ejecución de los experimentos sea reproducible en cualquier máquina.
+
+    \item[EBNF (\textit{Extended Backus-Naur Form})] Notación estándar para describir gramáticas formales. Las reglas de la gramática libre de contexto de este proyecto se expresan en una variante de EBNF soportada por la biblioteca Lark.
+
     \item[\textit{Embedding}] Representación de palabras o conceptos como vectores numéricos en un espacio donde elementos similares quedan cerca entre sí. Permite a los algoritmos trabajar con el significado de las palabras.
 
     \item[FastText] Modelo de embeddings de palabras desarrollado por Meta que representa cada palabra a partir de sus fragmentos de caracteres ($n$-gramas). Esto le permite generar vectores para palabras no vistas durante el entrenamiento, una propiedad útil para la morfología del español.
+
+    \item[\textit{Few-shot}] Técnica de uso de modelos de lenguaje que consiste en incluir unos pocos ejemplos resueltos dentro del propio prompt para que el modelo infiera el patrón esperado. A diferencia del \textit{fine-tuning}, no modifica los pesos del modelo.
+
+    \item[\textit{Fine-tuning}] Reentrenamiento de un modelo preentrenado sobre un conjunto de datos específico para adaptar sus pesos a una tarea concreta. En este proyecto no se emplea: se prefiere la combinación de \textit{prompt engineering} y \textit{few-shot} por su flexibilidad y menor coste.
 
     \item[GLN / NLG] Generación de Lenguaje Natural (\textit{Natural Language Generation}). Subcampo del PLN enfocado en producir texto a partir de datos o representaciones estructuradas.
 
     \item[Gramática formal] Conjunto de reglas que definen cómo construir oraciones válidas en un lenguaje. En este proyecto, se usa para generar frases correctas a partir de pictogramas.
 
     \item[Ingeniería de prompts] (\textit{Prompt engineering}) Técnica que consiste en diseñar las instrucciones textuales que se proporcionan a un modelo de lenguaje para guiar su comportamiento. En este proyecto, el prompt define reglas de fidelidad, formato y registro que restringen la generación al dominio de CAA.
+
+    \item[Lark] Biblioteca de Python para definir y ejecutar analizadores sintácticos a partir de gramáticas formales escritas en EBNF. Es la base sobre la que se construye el motor de la técnica de gramática formal.
 
     \item[Lematización] Proceso de reducir una palabra a su forma base o lema (``comer'' es el lema de ``como'', ``comí'', ``comerá''). Se utiliza en este proyecto para verificar si un pictograma está representado en la oración generada independientemente de la forma flexiva.
 
@@ -82,13 +94,21 @@ El sistema está pensado principalmente para personas con TEA que presentan difi
 
     \item[PLN] Procesamiento del Lenguaje Natural. Área de la inteligencia artificial que trabaja con la comprensión y generación de lenguaje humano por parte de máquinas.
 
+    \item[\textit{Pro-drop}] Propiedad de los idiomas que permiten omitir el sujeto cuando puede deducirse del contexto o de la flexión verbal. El español es una lengua \textit{pro-drop}, lo que condiciona la generación de oraciones naturales: ``quiero agua'' suena más natural que ``yo quiero agua''.
+
     \item[Realización superficial] (\textit{Surface realization}) Etapa final de la generación de lenguaje natural donde una representación abstracta se convierte en texto gramaticalmente correcto.
 
     \item[ROUGE] \textit{Recall-Oriented Understudy for Gisting Evaluation}. Métrica que mide la coincidencia entre una oración generada y una de referencia. ROUGE-L se basa en la subsecuencia común más larga, lo que la hace más tolerante con variaciones de orden que BLEU.
 
     \item[SAAC] Sistema Aumentativo y Alternativo de Comunicación. Herramientas y estrategias que facilitan la comunicación a personas con dificultades en el habla.
 
+    \item[spaCy] Biblioteca de código abierto para procesamiento del lenguaje natural en Python. En este proyecto se utiliza para tareas como tokenización, etiquetado morfosintáctico y lematización en español.
+
     \item[TEA] Trastorno del Espectro Autista. Condición del desarrollo que afecta a la comunicación e interacción social, con un amplio rango de manifestaciones.
+
+    \item[Temperatura] Parámetro de los modelos de lenguaje que controla la aleatoriedad de la generación. Valores cercanos a 0 producen salidas deterministas y conservadoras; valores más altos favorecen la variabilidad a costa de la consistencia.
+
+    \item[\textit{Token}] Unidad mínima con la que un modelo de lenguaje procesa el texto. No coincide necesariamente con una palabra: puede ser una palabra, un fragmento o un signo de puntuación. El coste y la longitud máxima de los modelos comerciales se miden en \textit{tokens}.
 
     \item[TTS (\textit{Text-to-Speech})] Tecnología que convierte texto en voz sintetizada.
 \end{description}
