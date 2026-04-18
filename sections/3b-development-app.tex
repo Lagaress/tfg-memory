@@ -30,8 +30,7 @@ La decisión de interponer un servidor entre la app y los motores tiene una moti
 
 El frontend se apoya en bibliotecas nativas de Expo y React Native. Las imágenes de pictogramas se cargan con \texttt{expo-image}, que cachea en disco y recicla vistas para contener el consumo de memoria cuando el usuario desplaza la cuadrícula. Las animaciones de retroalimentación táctil corren en el hilo nativo gracias a \texttt{react-native-reanimated} 4.1, manteniendo 60 fotogramas por segundo incluso en dispositivos de gama baja.
 
-Para la síntesis de voz la app usa \texttt{expo-speech} 14.0, que da acceso a los motores nativos de cada plataforma (AVSpeechSynthesizer en iOS, TextToSpeech en Android). % TODO: ampliar cuando se conecte con TTS externo (ElevenLabs u otro)
-La retroalimentación háptica se gestiona con \texttt{expo-haptics} 15.0, y las listas de pictogramas con \texttt{@shopify/flash-list} 2.0, que mejora el rendimiento de desplazamiento respecto al FlatList estándar de React Native.
+La síntesis de voz de respaldo se apoya en \texttt{expo-speech} 14.0, que da acceso a los motores nativos de cada plataforma (AVSpeechSynthesizer en iOS, TextToSpeech en Android); los detalles del motor principal se describen en la sección de flujo completo. La retroalimentación háptica se gestiona con \texttt{expo-haptics} 15.0, y las listas de pictogramas con \texttt{@shopify/flash-list} 2.0, que mejora el rendimiento de desplazamiento respecto al FlatList estándar de React Native.
 
 \section{Arquitectura del sistema}
 \label{sec:app-arquitectura}
@@ -45,17 +44,24 @@ El flujo de comunicación completo atraviesa cuatro etapas:
     \item La app muestra la frase y, si el usuario lo solicita, la reproduce como voz.
 \end{enumerate}
 
-% TODO: sustituir el ejemplo textual por un diagrama de flujo visual
-% TODO: actualizar ejemplo cuando se elija la técnica definitiva
-Por ejemplo, si el usuario toca los pictogramas ``yo'', ``querer'' y ``agua'', la app los envía al servidor, que genera la oración ``Yo quiero agua'' y la devuelve junto con el tiempo de procesamiento y un indicador de éxito. La app muestra la frase en la barra de construcción.
+La Figura~\ref{fig:flujo-app} detalla el intercambio entre cada actor, incluidas las dos rutas de síntesis de voz: la llamada mediada por el servidor al servicio externo y el respaldo local con los motores nativos.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{figures/flujo-app.png}
+    \caption{Flujo de comunicación entre los actores del sistema. El usuario construye la frase en el tablero, la app la envía al servidor y este delega la generación al motor configurado. Para la reproducción por voz, la app intenta primero la síntesis neuronal mediante el servidor y recurre al motor nativo como respaldo cuando no hay conexión.}
+    \label{fig:flujo-app}
+\end{figure}
 
 El servidor organiza los motores de generación mediante dos patrones de diseño complementarios: \textit{Strategy}~\cite{refactoringguru_strategy} y \textit{Registry}~\cite{refactoringguru_registry}. Todos los motores implementan una misma interfaz abstracta que define tres operaciones: cargar los recursos necesarios al arrancar (modelos, conexiones a APIs externas), generar una oración a partir de una lista de pictogramas, e identificarse con un nombre único. La respuesta de cada motor incluye la oración generada, el tiempo de procesamiento, un indicador de éxito y, opcionalmente, un mensaje de error o metadatos adicionales.
 
 Un registro central mantiene la relación entre nombres de motores y sus implementaciones. Al arrancar, el servidor lee de sus variables de entorno la lista de motores que debe cargar, los instancia y ejecuta su carga de recursos. Cada motor se inicializa una sola vez y atiende todas las peticiones posteriores como \textit{singleton}~\cite{refactoringguru_registry}. Añadir un motor nuevo consiste en implementar la interfaz abstracta, registrarlo e incluir su nombre en la configuración, sin modificar el código existente.
 
-% TODO: reescribir este párrafo cuando se integre ElevenLabs u otro TTS externo.
-% Entonces la síntesis principal será vía servidor y el motor nativo pasará a ser fallback offline.
-La última etapa del flujo es la síntesis de voz. Actualmente la app utiliza los motores nativos de cada plataforma (iOS y Android) para reproducir la frase generada como audio. Esta solución es provisional: la voz definitiva procederá de un servicio de síntesis neuronal (ElevenLabs u otro similar) que produzca locuciones más naturales, y al que la app accederá a través de una ruta del servidor. Los motores nativos quedarán entonces como fallback para situaciones sin conexión a Internet. La pantalla de ajustes ya permite seleccionar voz, velocidad y tono, parámetros que se mantendrán independientemente del motor subyacente.
+La última etapa del flujo es la síntesis de voz. La app combina dos motores complementarios: un servicio neuronal externo como motor principal cuando hay conexión a Internet y los motores nativos de la plataforma como respaldo \textit{offline}. Esta duplicidad responde a un principio fundamental en CAA: un usuario que depende del dispositivo para comunicarse no puede quedarse sin voz porque falle la red.
+
+El motor principal se apoya en la API de ElevenLabs~\cite{elevenlabs2026pricing}, concretamente en el modelo \textit{Flash v2.5}, diseñado para agentes conversacionales en tiempo real con una latencia de inferencia en torno a 75~ms. La app nunca contacta con ElevenLabs directamente: envía la frase al servidor a través de una ruta dedicada, el servidor realiza la llamada a la API con la clave almacenada en su configuración, recibe el audio sintetizado y lo devuelve al cliente, que lo reproduce. Este intermediario cumple la misma función de seguridad que con la API de OpenAI ---proteger la clave frente a extracción por ingeniería inversa del binario--- y permite además aplicar caché de frases frecuentes en el servidor para reducir coste y latencia.
+
+Cuando la petición al servidor falla o no hay conexión, la app recurre a los motores nativos descritos antes mediante \texttt{expo-speech}. La naturalidad es inferior, pero la respuesta es inmediata y completamente local. La pantalla de ajustes permite seleccionar voz, velocidad y tono; la app traduce esos parámetros a los atributos correspondientes de ElevenLabs o de \texttt{expo-speech} según el motor activo, manteniendo la configuración coherente para el usuario.
 
 Con esta arquitectura definida, las secciones siguientes describen los detalles concretos de cada lado: primero el servidor y después la app.
 
