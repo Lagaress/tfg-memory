@@ -5,7 +5,9 @@ Este capítulo describe la gestión del proyecto: la metodología de desarrollo 
 
 El desarrollo del proyecto sigue un modelo incremental organizado en bloques de trabajo secuenciales. Cada bloque produce un entregable funcional que se integra con los anteriores: primero los motores de generación de oraciones, después la evaluación comparativa, a continuación la aplicación móvil y, en paralelo, la redacción de la memoria.
 
-La elección de este modelo responde a las características del proyecto. Al tratarse de un trabajo individual sin equipo de desarrollo, las metodologías ágiles basadas en equipos multidisciplinares (Scrum, Kanban) resultan artificiales: no hay \textit{daily standups} cuando el equipo es una sola persona, ni tiene sentido definir roles de \textit{product owner} y \textit{scrum master} cuando recaen en el mismo individuo. El modelo incremental, en cambio, permite avanzar de forma ordenada sin la sobrecarga ceremonial de un \textit{framework} ágil, manteniendo la flexibilidad necesaria para incorporar cambios a medida que se obtienen resultados.
+Al tratarse de un trabajo individual sin equipo de desarrollo, las metodologías ágiles basadas en equipos multidisciplinares (Scrum, Kanban) resultan artificiales: no hay \textit{daily standups} cuando el equipo es una sola persona, ni tiene sentido definir roles de \textit{product owner} y \textit{scrum master} cuando recaen en el mismo individuo.
+
+El modelo incremental, en cambio, permite avanzar de forma ordenada sin la sobrecarga ceremonial de un \textit{framework} ágil, manteniendo la flexibilidad necesaria para incorporar cambios a medida que se obtienen resultados.
 
 Las revisiones periódicas con las tutoras del TFG funcionan como puntos de control. Cada revisión evalúa el trabajo completado hasta la fecha, identifica problemas y reorienta las siguientes fases si es necesario. Se han planificado cuatro hitos de revisión a lo largo del proyecto:
 
@@ -16,39 +18,22 @@ Las revisiones periódicas con las tutoras del TFG funcionan como puntos de cont
     \item Revisión de la memoria final completa (mayo de 2026).
 \end{enumerate}
 
-Los roles del proyecto se reparten de la siguiente forma. El alumno asume el desarrollo técnico completo (diseño, implementación, pruebas) y la redacción de la memoria. La tutora, Almudena del Pilar Márquez Lozano, supervisa el rigor académico de la memoria y proporciona retroalimentación sobre la estructura y el contenido del documento. La cotutora, Miriam Mengíbar Rodríguez, supervisa los aspectos técnicos del proyecto, gestiona el acceso a la base de datos de pictogramas de ARASAAC y valida las decisiones de diseño.
-
-\section{Tecnologías y herramientas}
+\section{Herramientas de gestión y soporte}
 \label{sec:tecnologias-herramientas}
 
-El proyecto combina tecnologías de generación de lenguaje natural, desarrollo móvil y despliegue de servicios. Esta sección ofrece una visión de conjunto; los detalles de cada tecnología se desarrollan en los capítulos correspondientes.
-
-Los motores de generación de oraciones están implementados en Python 3.13. La gramática formal utiliza Lark~\cite{lark2024} como \textit{toolkit} de \textit{parsing} para definir las producciones en notación EBNF (sección~\ref{ch:gramatica-formal}). El enfoque basado en embeddings emplea FastText~\cite{bojanowski2017fasttext} con un modelo preentrenado sobre un corpus en español para calcular similitudes semánticas entre palabras (sección~\ref{ch:enfoque-hibrido}). El motor de modelos de lenguaje se apoya en la API de OpenAI, concretamente en GPT-4o-mini~\cite{openai2024gpt4o}, con técnicas de \textit{prompt engineering} adaptadas al dominio de la CAA (sección~\ref{ch:modelos-lenguaje}). Las tres técnicas de hibridación combinan los enfoques anteriores mediante distintas estrategias de composición (sección~\ref{ch:hibridacion}).
-
-La aplicación móvil está desarrollada con React Native 0.81~\cite{reactnative2024} y Expo 54~\cite{expo2024}, con TypeScript como lenguaje principal (capítulo~\ref{ch:aplicacion-movil}). El servidor que conecta la app con los motores de generación utiliza FastAPI~\cite{fastapi2024} y se despliega mediante Docker~\cite{docker2024} (sección~\ref{ch:software}).
-
-Las herramientas de gestión y soporte del proyecto son cuatro. GitHub aloja los repositorios del código fuente, organizados de forma independiente por componente (la estructura se detalla en la sección~\ref{sec:configuracion}). Google Sheets se emplea como cronograma de seguimiento, donde se registran las tareas planificadas, sus fechas estimadas y su estado. Overleaf es el entorno de edición de la memoria en LaTeX, con sincronización automática contra un repositorio Git. Claude Code actúa como asistente de desarrollo con inteligencia artificial durante la implementación y la redacción.
+Las tecnologías empleadas en cada una de las implementaciones se describen en los capítulos de desarrollo correspondientes. Para la gestión y el soporte del proyecto se utilizan cuatro herramientas. GitHub aloja los repositorios del código fuente, organizados de forma independiente por componente (la estructura se detalla en la sección~\ref{sec:configuracion}). Google Sheets se emplea como cronograma de seguimiento, donde se registran las tareas planificadas, sus fechas estimadas y su estado. Overleaf es el entorno de edición de la memoria en LaTeX, con sincronización automática contra un repositorio Git. Claude Code actúa como asistente de desarrollo con inteligencia artificial durante la implementación y la redacción.
 
 \section{Planificación temporal}
 \label{sec:planificacion}
 
-El proyecto se desarrolla entre diciembre de 2025 y julio de 2026, con dos posibles convocatorias de defensa (junio y julio). El trabajo se organiza en seis bloques, algunos secuenciales y otros parcialmente solapados.
+El proyecto se desarrolla entre diciembre de 2025 y julio de 2026, con dos posibles convocatorias de defensa (junio y julio). La distribución de las tareas y los solapamientos entre los distintos bloques de trabajo se recogen en el diagrama de la Figura~\ref{fig:gantt}.
 
-Las dos primeras semanas de diciembre de 2025 se dedican a tareas preliminares: gestionar el acceso a la base de datos de pictogramas de ARASAAC a través de la cotutora, formalizar la propuesta del TFG en la plataforma de la Universidad y realizar una primera investigación exploratoria sobre los sistemas de CAA existentes.
-
-A continuación, entre la tercera semana de diciembre y la primera de enero de 2026, se aborda la preparación de los datos: elección del motor de base de datos, descarga del catálogo de ARASAAC y preparación del vocabulario que consumirán los motores de generación.
-
-La generación de oraciones constituye el bloque más extenso del proyecto, desde la primera semana de enero hasta la segunda de marzo de 2026. Abarca el análisis del estado del arte en generación de lenguaje natural para CAA, el desarrollo de los tres enfoques base (gramática formal, embeddings semánticos y modelos de lenguaje), las técnicas de hibridación y la evaluación comparativa de los seis sistemas resultantes.
-
-Entre la segunda semana de marzo y la primera de mayo de 2026 se desarrolla la aplicación móvil. Esta fase comprende el análisis de las aplicaciones de CAA existentes, el diseño de la arquitectura, la implementación del servidor REST como conector con los motores de generación, el desarrollo de la interfaz en React Native, la integración del motor de síntesis de voz y las pruebas de la aplicación.
-
-El trabajo sobre texto a voz se solapa parcialmente con la aplicación y transcurre entre abril y mayo de 2026, período en el que se analizan los motores de síntesis disponibles y se selecciona e integra el más adecuado.
-
-La redacción de la memoria avanza en paralelo con todos los bloques anteriores, desde enero hasta julio de 2026. Sus cuatro fases coinciden con los hitos de revisión descritos en la sección~\ref{sec:metodologia}: prolegómeno, desarrollo de la generación de oraciones, desarrollo de la aplicación móvil y epílogo con los anexos.
-
-% TODO: Incluir diagrama de Gantt como figura (chronosys o pgfgantt)
-
-% TODO: Completar con el análisis de desviaciones (planificado vs. real) cuando termine el proyecto
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{figures/gantt.png}
+    \caption{Diagrama de Gantt con la planificación temporal del proyecto. Las franjas rojas marcan las dos convocatorias de defensa (junio y julio de 2026) y los números sobre las filas inferiores identifican los cuatro hitos de revisión de la memoria.}
+    \label{fig:gantt}
+\end{figure}
 
 \section{Estimación de costes}
 \label{sec:costes}
