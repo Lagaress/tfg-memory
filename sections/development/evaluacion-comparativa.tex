@@ -392,6 +392,13 @@ La encuesta se diseña con 164 ítems, una cifra que responde a requisitos estad
 
 La encuesta se organiza en 10 bloques de 16 ítems únicos más 4 anchors compartidos, de modo que cada participante ve 20 ítems (16 + 4) dentro del umbral de fatiga de 20 minutos que Van der Lee et al.~\cite{vanderlee2021human} recomiendan no exceder en tareas de evaluación de texto generado. Este diseño produce un total de 164 ítems distintos (10 $\times$ 16 + 4). Cada respondente ve una secuencia de pictogramas ARASAAC y escribe libremente la frase que diría, sin restricciones de vocabulario ni de estructura, y no ve ninguna salida de los motores ni la referencia original. El objetivo es recabar entre 3 y 5 referencias por caso.
 
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/eval-golden-encuesta.png}
+    \caption{Interfaz de la encuesta de \textit{golden standard}. El respondente ve la secuencia de pictogramas con sus etiquetas y dispone de un campo libre para escribir la frase que diría.}
+    \label{fig:eval-golden-encuesta}
+\end{figure}
+
 La evaluación multi-referencia se apoya en la evidencia de que múltiples referencias mejoran la correlación de las métricas automáticas con el juicio humano. Zouhar y Bojar~\cite{zouhar2024quality} encontraron que hasta 7 referencias por segmento incrementan esta correlación, porque cada referencia captura una formulación alternativa válida y reduce la penalización a las reformulaciones legítimas. Con 3 referencias por caso, el \textit{golden standard} equivale en potencia estadística a un corpus de aproximadamente 1500 juicios con una sola referencia, lo que proporciona una base suficiente para detectar diferencias entre motores que las métricas con referencia única no distinguen.
 
 Las referencias recogidas se utilizarán para recalcular BLEU, chrF y TER con sacreBLEU multi-referencia, usando las referencias humanas como \textit{ground truth} independiente. El corpus permitirá cuantificar la variabilidad inherente de la tarea: cuántas formulaciones válidas produce una misma secuencia de pictogramas y en qué medida esta variabilidad depende de la complejidad de la entrada o de la función comunicativa. El análisis por función comunicativa revelará si determinados tipos de enunciado (preguntas, negaciones, descripciones) presentan mayor o menor convergencia entre hablantes.
