@@ -386,9 +386,7 @@ El análisis previsto incluye la decodificación de respuestas, la agregación d
 \subsubsection{Encuesta de golden standard}
 \label{sec:eval-golden}
 
-El problema del sesgo de referencia, descrito al inicio de esta sección, tiene una solución directa: obtener referencias humanas independientes. La encuesta de \textit{golden standard} pide a hablantes nativos de español que, al ver una secuencia de pictogramas, escriban la frase que dirían en esa situación. Los respondentes no ven ninguna frase generada por los motores. Las frases recogidas constituyen un corpus de referencias independiente que permite recalcular las métricas automáticas con sacreBLEU multi-referencia, eliminando el sesgo hacia la formulación del anotador original.
-
-La diferencia con la encuesta de naturalidad es de naturaleza cognitiva. La de naturalidad pide \textit{elegir} entre opciones (consumir texto); la de \textit{golden standard} pide \textit{producir} texto (generar). Son tareas distintas que capturan dimensiones diferentes: la primera mide preferencia entre formulaciones existentes; la segunda mide qué formulaciones produce un hablante nativo sin influencia de los motores.
+Para neutralizar el sesgo de referencia se diseñó la encuesta de \textit{golden standard}: un corpus de referencias humanas independientes, producidas por hablantes nativos de español sin exposición alguna a las salidas de los motores.
 
 La encuesta incluye 200 casos seleccionados del dataset de 428 mediante muestreo estratificado. La cifra de 200 responde a requisitos estadísticos: cada subgrupo (8 funciones comunicativas $\times$ 3 niveles de complejidad) necesita al menos 15-20 observaciones para que las métricas de NLG sean interpretables~\cite{reiter2009investigation}. Con 200 casos hay entre 17 y 34 observaciones por función comunicativa. Con un mínimo de 3 referencias por caso, se obtienen 600 juicios de referencia, suficientes para \textit{bootstrap resampling} con corrección de Bonferroni para las 15 comparaciones pareadas entre los 6 motores~\cite{koehn2004statistical}.
 
