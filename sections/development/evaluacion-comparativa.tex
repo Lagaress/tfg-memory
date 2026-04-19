@@ -425,7 +425,13 @@ La convergencia entre participantes es la señal más clara de que el corpus cap
 
 El \textit{golden standard} final contiene los 164 ítems del diseño: los 160 no-anchor más los 4 anchors, todos con referencias humanas recogidas. Cada ítem lleva asociada su lista de referencias únicas, lista para alimentar BLEU y chrF multi-referencia, junto con la frecuencia con la que cada formulación fue producida por los participantes.
 
-El corpus recogido presenta tres limitaciones. La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica. De los 160 ítems no-anchor, 55 cuentan con dos referencias únicas o menos, lo que aumentará la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore en el recálculo y reportar intervalos de confianza por \textit{bootstrap} pareado. Por último, el esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
+El corpus recogido presenta tres limitaciones:
+
+\begin{enumerate}
+    \item La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica.
+    \item De los 160 ítems no-anchor, 55 cuentan con dos referencias únicas o menos, lo que aumentará la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore en el recálculo y reportar intervalos de confianza por \textit{bootstrap} pareado.
+    \item El esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
+\end{enumerate}
 
 \textit{(TODO: cifras del recálculo multi-referencia ---BLEU, chrF y BERTScore por motor sobre los 164 ítems cubiertos--- y contraste con los valores de la Tabla~\ref{tab:eval-referencia}.)}
 
