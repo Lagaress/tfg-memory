@@ -36,7 +36,7 @@ La evaluación se organiza de la siguiente forma:
     \item Unificación del dataset: los conjuntos de datos de las tres técnicas base se normalizan a un formato canónico y se intersectan por identificador. El resultado son 428 casos comunes que constituyen el corpus de evaluación.
     \item Generación: cada motor procesa los 428 casos y produce una oración por caso. Los seis motores alcanzaron cobertura completa.
     \item Cálculo de métricas: para cada par (predicción, referencia) se calculan las métricas descritas en la Sección~\ref{sec:metricas}. En total se obtienen 17 valores por caso y motor.
-    \item Análisis estadístico: se aplican tests de significancia no paramétricos (Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y bootstrap pareado para intervalos de confianza) sobre las distribuciones de métricas de los seis motores.
+    \item Análisis estadístico: se aplican tests de significancia no paramétricos (Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y \textit{bootstrap} pareado ---remuestreo con reemplazo de los casos para estimar la incertidumbre de cada métrica sin asumir una distribución paramétrica--- para intervalos de confianza) sobre las distribuciones de métricas de los seis motores.
     \item Generación de informes: tablas comparativas, gráficas de distribución y plantillas para evaluación humana.
 \end{enumerate}
 
