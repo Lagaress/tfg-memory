@@ -427,8 +427,6 @@ El \textit{golden standard} final contiene los 164 ítems del diseño: los 160 n
 
 El corpus recogido presenta tres limitaciones que conviene declarar antes del recálculo. La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica. De los 160 ítems no-anchor, 55 cuentan con dos referencias únicas o menos, lo que aumentará la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore en el recálculo y reportar intervalos de confianza por \textit{bootstrap} pareado. Por último, el esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
 
-Con el \textit{golden standard} de 164 ítems disponible se procederá a recalcular las métricas con referencia múltiple (BLEU y chrF con sacreBLEU multi-ref, BERTScore sobre el conjunto de referencias humanas) para los seis motores sobre esos 164 ítems. Las cifras concretas del recálculo se reportarán en la subsección correspondiente una vez ejecutado el \textit{pipeline}.
-
 \textit{(TODO: cifras del recálculo multi-referencia ---BLEU, chrF y BERTScore por motor sobre los 164 ítems cubiertos--- y contraste con los valores de la Tabla~\ref{tab:eval-referencia}.)}
 
 \subsection{Resumen de resultados}
