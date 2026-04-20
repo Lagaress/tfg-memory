@@ -49,13 +49,13 @@ La API de ElevenLabs~\cite{elevenlabs2026pricing}, prevista para la síntesis de
 
 El desarrollo del proyecto está condicionado por cinco riesgos relevantes.
 
-El tamaño del modelo de FastText utilizado por el enfoque de embeddings condiciona el despliegue. El modelo preentrenado sobre el corpus \textit{Spanish Billion Words} ocupa 6,7 GB en disco, lo que descarta funciones \textit{serverless} y servicios con restricciones de memoria. La mitigación consiste en desplegar el servidor mediante contenedores Docker con disco suficiente, lo que restringe la infraestructura pero no impide el funcionamiento.
+El tamaño del modelo de FastText utilizado por el enfoque de embeddings condiciona el despliegue. El modelo preentrenado sobre \textit{Common Crawl} en español (\texttt{cc.es.300.bin}) ocupa alrededor de 7 GB en disco, lo que descarta funciones \textit{serverless} y servicios con restricciones de memoria. La mitigación consiste en desplegar el servidor mediante contenedores Docker con disco suficiente, lo que restringe la infraestructura pero no impide el funcionamiento.
 
 La dependencia de la API de OpenAI afecta al motor de modelos de lenguaje y a las dos hibridaciones que lo incorporan: sin acceso a Internet, la mitad de las técnicas deja de operar. El servidor implementa \textit{fallback} automático a la gramática formal y a la gramática enriquecida con embeddings, que funcionan en local y permiten seguir dando servicio.
 
 El vocabulario cerrado del sistema, limitado a 232 pictogramas de ARASAAC, deja fuera cualquier concepto no representado. La mitigación se abordó en la fase de selección, priorizando los conceptos más frecuentes en la comunicación cotidiana de usuarios de CAA y cubriendo nueve categorías semánticas.
 
-La evaluación comparativa podría producir resultados inconcluyentes y comprometer las conclusiones del proyecto. Para minimizar este riesgo se combinan métricas automáticas (BLEU, ROUGE, BERTScore, perplejidad) con evaluación humana mediante encuestas, y se aplica el test de Wilcoxon~\cite{wilcoxon1945individual} con corrección para comparaciones múltiples, que permite discriminar qué diferencias entre técnicas son estadísticamente significativas.
+La evaluación comparativa podría producir resultados inconcluyentes y comprometer las conclusiones del proyecto. Para minimizar este riesgo se combinan once métricas automáticas (entre ellas BLEU, ROUGE, BERTScore y perplejidad) con evaluación humana mediante encuestas, y se aplica el test de Wilcoxon~\cite{wilcoxon1945individual} con corrección para comparaciones múltiples, que permite discriminar qué diferencias entre técnicas son estadísticamente significativas.
 
 La compatibilidad multiplataforma de la aplicación móvil introduce diferencias de comportamiento entre iOS y Android en renderizado, animaciones y acceso a APIs nativas. Se mitiga apoyándose en Expo como capa de abstracción, que unifica las APIs para la mayoría de funcionalidades que la aplicación necesita.
 

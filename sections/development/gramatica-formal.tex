@@ -48,7 +48,7 @@ sintagma_preposicional: preposicion sintagma_nominal
 objeto_con_modificador: determinante? objeto adjetivo?
 \end{lstlisting}
 
-La gramática completa incluye además las definiciones de los terminales léxicos (pronombres, verbos por subcategoría, objetos, lugares, personas, adjetivos, interrogativos, marcadores temporales y modificadores), que en conjunto conforman las 646 entradas del léxico descrito en la sección~\ref{sec:f1-lexico}.
+La gramática completa incluye además las definiciones de los terminales léxicos (pronombres, verbos por subcategoría, objetos, lugares, personas, adjetivos, interrogativos, marcadores temporales y modificadores), que en conjunto conforman las 646 entradas del léxico del motor.
 
 Lark permitió especificar estas reglas de forma declarativa y verificar su coherencia, pero el motor de generación no utiliza el \textit{parser} Earley ni el árbol de sintaxis que Lark produce. Las entradas de CAA son secuencias cortas (entre una y cinco palabras) extraídas de un vocabulario cerrado de 232 pictogramas, lo que hace que el conjunto de patrones válidos sea finito y enumerable. En este escenario, un \textit{parser} formal resulta sobredimensionado: la implementación traduce la gramática a 48 patrones sintácticos codificados como secuencias de categorías gramaticales y los reconoce por \textit{matching} directo. El resultado es más simple de depurar, determinista por construcción y suficiente para la complejidad del dominio.
 

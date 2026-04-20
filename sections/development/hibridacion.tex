@@ -2,10 +2,10 @@ Los capítulos anteriores han mostrado que cada técnica de generación tiene fo
 
 La hibridación parte de la hipótesis de que combinar estas técnicas puede producir resultados superiores a los de cada una por separado: una gramática que garantice la estructura, enriquecida con la naturalidad de un LLM, o un sistema que genere múltiples candidatos y seleccione el mejor. Se implementan tres estrategias de hibridación con objetivos diferenciados. Las dos primeras se basan en el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep} y en la post-edición neuronal de texto generado por reglas~\cite{chen2025axsemantics}. La tercera implementa el paradigma de sobregeneración y ranking~\cite{sharma2019overgenerate}. Los resultados de la evaluación comparativa (sección~\ref{ch:evaluacion-comparativa}) permitirán determinar si esta hipótesis se confirma en la práctica.
 
-\subsection{Hibridación 1: Gramática + LLM como post-editor}
+\subsection{Hybrid1: Gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
 
-Las Hibridaciones 1 y 2 se basan en dos patrones complementarios. El primero es el uso de un LLM como post-editor de sistemas de reglas, documentado por Chen et al.~\cite{chen2025axsemantics} en un sistema de producción de AX Semantics: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. El segundo es el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}, que separa la generación en un planificador simbólico que decide qué decir y un realizador neural que lo transforma en texto fluido. Elder et al.~\cite{elder2019intermediate} mostraron que esta separación reduce las alucinaciones respecto a enfoques puramente neurales.
+Hybrid1 y Hybrid2 se basan en dos patrones complementarios. El primero es el uso de un LLM como post-editor de sistemas de reglas, documentado por Chen et al.~\cite{chen2025axsemantics} en un sistema de producción de AX Semantics: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. El segundo es el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}, que separa la generación en un planificador simbólico que decide qué decir y un realizador neural que lo transforma en texto fluido. Elder et al.~\cite{elder2019intermediate} mostraron que esta separación reduce las alucinaciones respecto a enfoques puramente neurales.
 
 La primera hibridación conecta la gramática formal con el LLM en un pipeline secuencial de dos pasos (Figura~\ref{fig:hibridacion1}). Los pictogramas de entrada se procesan primero con la gramática, que intenta generar una frase estructurada. Si la gramática tiene éxito, la frase resultante se envía al LLM para su refinamiento. El LLM actúa como post-editor con ocho reglas estrictas que priorizan la fidelidad al contenido: no puede añadir ni eliminar conceptos, solo mejorar la concordancia, los artículos, el orden y la conjugación.
 
@@ -14,7 +14,7 @@ Si la gramática no reconoce la entrada, se activa un mecanismo de fallback: el 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/hibridacion1.png}
-    \caption{Pipeline de la Hibridación 1: la gramática formal produce la frase inicial y el LLM la pos-edita con ocho reglas de fidelidad; si la gramática no reconoce la entrada, el LLM la genera desde cero como \textit{fallback}.}
+    \caption{Pipeline de Hybrid1: la gramática formal produce la frase inicial y el LLM la pos-edita con ocho reglas de fidelidad; si la gramática no reconoce la entrada, el LLM la genera desde cero como \textit{fallback}.}
     \label{fig:hibridacion1}
 \end{figure}
 
@@ -22,38 +22,38 @@ Para la entrada ``quiero, agua'', la gramática detecta el patrón de necesidad 
 
 Esta hibridación depende de un LLM externo para la post-edición, lo que introduce latencia de red, coste por llamada y falta de disponibilidad offline. La calidad de la post-edición depende enteramente de la ingeniería de prompts, y no existe un criterio formal para determinar si el conjunto de reglas del post-editor es óptimo ni completo.
 
-\subsection{Hibridación 2: (Gramática + Embeddings) + LLM como post-editor}
+\subsection{Hybrid2: (Gramática + Embeddings) + LLM como post-editor}
 \label{sec:h-hybrid2}
 
-La segunda hibridación replica la estructura de H1 pero sustituye la gramática pura por el motor de embeddings, que combina gramática con embeddings semánticos, como fuente de la frase inicial (Figura~\ref{fig:hibridacion2}). La frase generada por este motor, que ya incorpora refinamiento de preposiciones y ranking semántico, se envía al mismo post-editor LLM con las mismas ocho reglas.
+Hybrid2 replica la estructura de Hybrid1 pero sustituye la gramática pura por el motor de embeddings, que combina gramática con embeddings semánticos, como fuente de la frase inicial (Figura~\ref{fig:hibridacion2}). La frase generada por este motor, que ya incorpora refinamiento de preposiciones y ranking semántico, se envía al mismo post-editor LLM con las mismas ocho reglas.
 
-La única diferencia con H1 es el motor que produce la frase intermedia: gramática pura en H1, gramática enriquecida con embeddings en H2. El post-editor es idéntico en ambos casos (mismo prompt, mismo modelo), lo que convierte la comparación en un experimento controlado: cualquier diferencia en los resultados se atribuye directamente a la contribución de los embeddings.
+La única diferencia con Hybrid1 es el motor que produce la frase intermedia: gramática pura en Hybrid1, gramática enriquecida con embeddings en Hybrid2. El post-editor es idéntico en ambos casos (mismo prompt, mismo modelo), lo que convierte la comparación en un experimento controlado: cualquier diferencia en los resultados se atribuye directamente a la contribución de los embeddings.
 
-Las limitaciones son las mismas que las de H1: dependencia del LLM externo para la post-edición, con las implicaciones de latencia, coste y disponibilidad que ello conlleva.
+Las limitaciones son las mismas que las de Hybrid1: dependencia del LLM externo para la post-edición, con las implicaciones de latencia, coste y disponibilidad que ello conlleva.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/hibridacion2.png}
-    \caption{Pipeline de la Hibridación 2: el motor de gramática enriquecida con embeddings produce la frase inicial y el mismo post-editor LLM la refina con ocho reglas de fidelidad; el \textit{fallback} es idéntico al de H1.}
+    \caption{Pipeline de Hybrid2: el motor de gramática enriquecida con embeddings produce la frase inicial y el mismo post-editor LLM la refina con ocho reglas de fidelidad; el \textit{fallback} es idéntico al de Hybrid1.}
     \label{fig:hibridacion2}
 \end{figure}
 
-\subsection{Hibridación 3: Overgenerate-and-Rank multimotor}
+\subsection{Hybrid3: Overgenerate-and-Rank multimotor}
 \label{sec:h-hybrid3}
 
-La tercera hibridación se basa en el paradigma \textit{Generate-Filter-Rank}, formalizado por Sharma et al.~\cite{sharma2019overgenerate}: se generan múltiples candidatas, se filtran por criterios de calidad y se selecciona la mejor según una función de ranking. A diferencia de H1 y H2, que mejoran la salida de un motor individual, H3 busca la mejor frase entre todas las que los motores pueden producir. El pipeline se ejecuta en tres etapas secuenciales (Figura~\ref{fig:hibridacion3}).
+Hybrid3 se basa en el paradigma \textit{Generate-Filter-Rank}, formalizado por Sharma et al.~\cite{sharma2019overgenerate}: se generan múltiples candidatas, se filtran por criterios de calidad y se selecciona la mejor según una función de ranking. A diferencia de Hybrid1 y Hybrid2, que mejoran la salida de un motor individual, Hybrid3 busca la mejor frase entre todas las que los motores pueden producir. El pipeline se ejecuta en tres etapas secuenciales (Figura~\ref{fig:hibridacion3}).
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/hibridacion3.png}
-    \caption{Pipeline de la Hibridación 3 (\textit{Overgenerate-and-Rank}): cinco generadores (gramática formal, embeddings, LLM, H1 y H2) producen una candidata cada uno; el filtro de fidelidad selecciona las que cubren el 100\,\% de los pictogramas de entrada y el ranking por perplejidad (GPT-2 en español) elige la más natural.}
+    \caption{Pipeline de Hybrid3 (\textit{Overgenerate-and-Rank}): cinco generadores (gramática formal, embeddings, LLM, Hybrid1 y Hybrid2) producen una candidata cada uno; el filtro de fidelidad selecciona las que cubren el 100\,\% de los pictogramas de entrada y el ranking por perplejidad (GPT-2 en español) elige la más natural.}
     \label{fig:hibridacion3}
 \end{figure}
 
-La primera etapa genera una candidata con cada uno de los cinco motores disponibles: gramática formal, embeddings, LLM, Hibridación 1 e Hibridación 2. Si algún motor falla, se descarta su candidata sin afectar al resto.
+La primera etapa genera una candidata con cada uno de los cinco motores disponibles: gramática formal, embeddings, LLM, Hybrid1 y Hybrid2. Si algún motor falla, se descarta su candidata sin afectar al resto.
 
 La segunda etapa evalúa la cobertura de pictogramas de cada candidata: se comprueba qué proporción de los pictogramas de entrada están representados en la frase generada, teniendo en cuenta las variaciones morfológicas del español. Solo pasan al ranking las candidatas que cubren el 100\% de los pictogramas. Si ninguna alcanza el umbral, todas pasan al ranking como fallback.
 
 La tercera etapa calcula la perplejidad de cada candidata que pasó el filtro de fidelidad mediante un modelo de lenguaje en español~\cite{deepesp2019gpt2spanish} y las ordena de menor a mayor. La candidata con menor perplejidad, es decir, la que el modelo considera más natural, se selecciona como resultado final. Se aplica una normalización de puntuación terminal antes del cálculo, ya que la presencia o ausencia de un punto final altera significativamente la perplejidad sin reflejar diferencias reales de calidad.
 
-H3 acumula la latencia de todos los motores que invoca, lo que la convierte en la opción más lenta. El paradigma de sobregeneración y ranking solo aporta valor cuando las candidatas son diversas y la función de ranking tiene granularidad suficiente para discriminar entre ellas; en un dominio con frases cortas y vocabulario restringido, las candidatas tienden a converger y el ranking pierde capacidad discriminativa. El umbral de fidelidad de cobertura completa puede descartar frases naturales que omiten un pictograma con representación implícita: ``Quiero agua'' para la entrada ``yo, quiero, agua'' podría fallar si el sistema no reconoce el sujeto implícito.
+Hybrid3 acumula la latencia de todos los motores que invoca, lo que la convierte en la opción más lenta. El paradigma de sobregeneración y ranking solo aporta valor cuando las candidatas son diversas y la función de ranking tiene granularidad suficiente para discriminar entre ellas; en un dominio con frases cortas y vocabulario restringido, las candidatas tienden a converger y el ranking pierde capacidad discriminativa. El umbral de fidelidad de cobertura completa puede descartar frases naturales que omiten un pictograma con representación implícita: ``Quiero agua'' para la entrada ``yo, quiero, agua'' podría fallar si el sistema no reconoce el sujeto implícito.
