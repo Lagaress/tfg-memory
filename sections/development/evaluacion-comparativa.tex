@@ -297,7 +297,7 @@ Frases únicas & Casos & \% del total \\
 
 La Tabla~\ref{tab:eval-diversidad} muestra que la diversidad entre motores es limitada. En el 32.9\% de los casos los seis motores producen exactamente la misma oración; en otro 52.8\% generan solo dos formulaciones distintas. La media de frases únicas por caso es 1.83 (por debajo de 2 sobre un máximo teórico de 6), lo que confirma una convergencia alta. En métricas de coincidencia n-gramática (BLEU-4, METEOR, chrF++, ROUGE-L, Exact Match), 344 de los 428 casos (80.4\%) presentan score idéntico en los seis motores, reduciendo la muestra efectiva para las comparaciones estadísticas a 84 casos.
 
-La estructura interna de esta convergencia revela bloques de equivalencia. La gramática formal y los embeddings producen salidas idénticas en 426 de 428 casos (99.5\%), consecuencia de que el componente de embeddings rara vez altera las decisiones del motor basado en reglas para el vocabulario acotado de este proyecto. La gramática y Hybrid3 coinciden en 379 de 428 casos (88.6\%), reflejo del patrón de selección de Hybrid3 que se analiza en la Sección~\ref{sec:eval-seleccion-h3}.
+La estructura interna de esta convergencia revela bloques de equivalencia. La gramática formal y los embeddings producen salidas idénticas en 426 de 428 casos (99.5\%), consecuencia de que el componente de embeddings rara vez altera las decisiones del motor basado en reglas para el vocabulario acotado de este proyecto. La gramática y Hybrid3 coinciden en 379 de 428 casos (88.6\%), reflejo del patrón de selección de Hybrid3 que se analiza en la Sección~\ref{sec:eval-hibridos}.
 
 Estos tres motores (gramática, embeddings e Hybrid3) forman un bloque mayoritario que produce la misma salida en 377 de 428 casos (88.1\%). El LLM y los híbridos 1 y 2, al incorporar un componente de post-edición neural, son los que más frecuentemente divergen del bloque mayoritario.
 
@@ -360,6 +360,8 @@ Para afrontar esta limitación se llevaron a cabo dos encuestas complementarias 
 
 La encuesta de naturalidad es complementaria: presenta las frases de las tres técnicas base a los evaluadores y mide cuál les suena más natural, aportando una dimensión de preferencia subjetiva que las métricas automáticas no capturan.
 
+Ambas encuestas se desplegaron como aplicaciones web con React y TypeScript~\cite{dixigoldensurvey2026,dixinaturalsurvey2026}. La interfaz muestra los pictogramas ARASAAC reales (imágenes con bordes coloreados por categoría según el sistema Fitzgerald), ofrece sesiones resumibles con el progreso guardado en \textit{localStorage} del navegador y envía las respuestas en tiempo real a una base de datos Supabase alojada en la Unión Europea. El consentimiento informado cumple el Reglamento General de Protección de Datos (RGPD): se recogen datos mínimos (solo email para detectar envíos duplicados), el consentimiento es explícito, el almacenamiento se realiza en la UE y la retención está limitada a la defensa del TFG más seis meses.
+
 \subsubsection{Encuesta de golden standard}
 \label{sec:eval-golden}
 
@@ -380,7 +382,7 @@ La evaluación multi-referencia consiste en calcular las métricas automáticas 
 
 El corpus permite cuantificar la variabilidad inherente de la tarea: cuántas formulaciones válidas produce una misma secuencia de pictogramas y en qué medida esta variabilidad depende de la complejidad de la entrada o de la función comunicativa. El análisis por función comunicativa revelará si determinados tipos de enunciado (preguntas, negaciones, descripciones) presentan mayor o menor convergencia entre hablantes.
 
-La encuesta se desplegó como una aplicación web desarrollada con React y respaldada por Supabase~\cite{dixigoldensurvey2026}, difundida por canales personales del autor durante aproximadamente tres semanas. Cada participante quedaba asignado a un bloque del diseño balanceado y escribía libremente la frase que diría al ver cada una de las 20 secuencias de pictogramas de ese bloque. Se inscribieron 57 personas: 45 completaron los 20 ítems (78.9\%), 8 aportaron respuestas parciales de entre 2 y 10 ítems, y 4 no llegaron a responder. La Tabla~\ref{tab:eval-golden-cobertura} detalla la cobertura por bloque: siete alcanzaron el objetivo de seis inscritos, dos quedaron en cinco por el algoritmo de balance del servidor al detenerse la captación y el bloque 9 fue el peor cubierto, con dos completos sobre cinco inscritos.
+La encuesta se difundió por canales personales del autor durante aproximadamente tres semanas. Cada participante quedaba asignado a un bloque del diseño balanceado y escribía libremente la frase que diría al ver cada una de las 20 secuencias de pictogramas de ese bloque. Se inscribieron 57 personas: 45 completaron los 20 ítems (78.9\%), 8 aportaron respuestas parciales de entre 2 y 10 ítems, y 4 no llegaron a responder. La Tabla~\ref{tab:eval-golden-cobertura} detalla la cobertura por bloque: siete alcanzaron el objetivo de seis inscritos, dos quedaron en cinco por el algoritmo de balance del servidor al detenerse la captación y el bloque 9 fue el peor cubierto, con dos completos sobre cinco inscritos.
 
 \begin{table}[ht]
 \centering
@@ -434,13 +436,11 @@ La selección de casos aplica un muestreo estratificado por dos ejes: longitud d
 
 Cuando dos técnicas generan exactamente la misma frase, la opción duplicada se elimina de la interfaz. El evaluador solo ve frases distintas. Si elige una frase compartida por varias técnicas, el voto se atribuye a todas las que la generaron, evitando tanto la duplicación visual como la pérdida de información.
 
-La plataforma de la encuesta es una aplicación web desarrollada con React y TypeScript~\cite{dixinaturalsurvey2026}. La interfaz muestra los pictogramas ARASAAC reales (imágenes con bordes coloreados por categoría según el sistema Fitzgerald), no únicamente texto. Cada evaluador dispone de sesiones resumibles: el progreso se guarda en \textit{localStorage} del navegador, con barra de progreso y transiciones animadas entre preguntas. Las respuestas se envían en tiempo real a una base de datos Supabase alojada en servidores de la Unión Europea. El consentimiento informado cumple el Reglamento General de Protección de Datos (RGPD): se recogen datos mínimos (solo email para detectar envíos duplicados), el consentimiento es explícito, el almacenamiento se realiza en la UE y la retención está limitada a la defensa del TFG más seis meses.
-
 El análisis previsto incluye la decodificación de respuestas, la agregación de votos por técnica y subgrupo, un test chi-cuadrado de bondad de ajuste para evaluar si la distribución de preferencias difiere de la equiprobabilidad, tests binomiales por pares con corrección por comparaciones múltiples, análisis de preferencia por longitud de secuencia y tipo comunicativo, y el coeficiente kappa de Fleiss para medir la concordancia entre evaluadores.
 
-La encuesta se difundió por canales personales del autor. Se inscribieron 18 personas: 16 completaron los 26 ítems de su set (88.9\%), 1 aportó una respuesta parcial de 9 ítems y 1 no llegó a responder. El conjunto recogido suma 425 respuestas. La cobertura por set es asimétrica: en el set A los 9 inscritos completaron el cuestionario (100\%), mientras que en el set B lo hicieron 7 de 9 (78\%). Los 44 ítems presentados recibieron al menos una respuesta, con una cobertura del 100\% sobre el diseño. Los 8 \textit{anchors} permiten validar la ausencia de sesgos cruzados entre sets: en los ocho ítems compartidos la técnica ganadora coincide entre el set A y el set B, lo que indica que la asignación de participantes no introdujo desviaciones sistemáticas en los resultados.
+La encuesta se difundió por canales personales del autor. Se inscribieron 54 personas: 48 completaron los 26 ítems de su set (88.9\%), 3 aportaron respuestas parciales de entre 8 y 10 ítems y 3 no llegaron a responder. El conjunto recogido suma 1275 respuestas. La cobertura por set es asimétrica: en el set A los 27 inscritos completaron el cuestionario (100\%) y en el set B lo hicieron 21 de 27 (78\%). Los 44 ítems presentados recibieron al menos una respuesta, con una cobertura del 100\% sobre el diseño. Los 8 \textit{anchors} permiten validar la ausencia de sesgos cruzados entre sets: en los ocho ítems compartidos la técnica ganadora coincide entre el set A y el set B, lo que indica que la asignación de participantes no introdujo desviaciones sistemáticas en los resultados.
 
-La distribución global de preferencias sobre las 425 respuestas sitúa al LLM (GPT-4o) como opción más elegida, con 187 votos (44.0\%), seguido por la gramática formal con 101 votos (23.8\%) y los embeddings con 100 votos (23.5\%). La opción ``Ninguna de las anteriores'' recibió 37 votos (8.7\%). El LLM dobla aproximadamente la preferencia de cada motor base, pero no domina: cerca de una de cada cuatro respuestas prefiere la gramática y otra tantas los embeddings, en casos concretos donde las formulaciones breves y directas de los motores deterministas resultan más naturales a los evaluadores que la reformulación neural.
+La distribución global de preferencias sobre las 1275 respuestas sitúa al LLM (GPT-4o) como opción más elegida, con 561 votos (44.0\%), seguido por la gramática formal con 303 votos (23.8\%) y los embeddings con 300 votos (23.5\%). La opción ``Ninguna de las anteriores'' recibió 111 votos (8.7\%). El LLM dobla aproximadamente la preferencia de cada motor base, pero no domina: cerca de una de cada cuatro respuestas prefiere la gramática y otra tantas los embeddings, en casos concretos donde las formulaciones breves y directas de los motores deterministas resultan más naturales a los evaluadores que la reformulación neural.
 
 El análisis por longitud de secuencia y por tipo comunicativo matiza esta preferencia global. La Tabla~\ref{tab:eval-naturalidad-longitud} muestra que el liderazgo del LLM crece con la longitud de la entrada. En frases \textit{short} los motores base superan conjuntamente al LLM (embeddings 37\%, gramática 33\% frente a 18\% del LLM) y la tasa de ``Ninguna'' es la más alta del corpus (12\%). En frases \textit{medium} y \textit{long} el LLM se impone con un 46\% y un 45\% respectivamente, mientras que los motores base se reparten el resto. En frases \textit{extra\_long} el LLM triplica a cualquier motor base con un 67\%, reflejo de su capacidad para articular secuencias largas con una sintaxis más fluida.
 
@@ -451,10 +451,10 @@ El análisis por longitud de secuencia y por tipo comunicativo matiza esta prefe
 \hline
 Longitud & $n$ & LLM & Gramática & Embeddings & Ninguna \\
 \hline
-\textit{short} & 83 & 18\% & 33\% & 37\% & 12\% \\
-\textit{medium} & 148 & 46\% & 16\% & 26\% & 11\% \\
-\textit{long} & 121 & 45\% & 31\% & 18\% & 6\% \\
-\textit{extra\_long} & 73 & 67\% & 18\% & 11\% & 4\% \\
+\textit{short} & 249 & 18\% & 33\% & 37\% & 12\% \\
+\textit{medium} & 444 & 46\% & 16\% & 26\% & 11\% \\
+\textit{long} & 363 & 45\% & 31\% & 18\% & 6\% \\
+\textit{extra\_long} & 219 & 67\% & 18\% & 11\% & 4\% \\
 \hline
 \end{tabular}
 \caption{Distribución de elecciones por longitud de la secuencia de pictogramas. $n$ indica el número de respuestas en cada segmento.}
@@ -470,13 +470,13 @@ El desglose por tipo comunicativo (Tabla~\ref{tab:eval-naturalidad-tipo}) revela
 \hline
 Tipo comunicativo & $n$ & LLM & Gramática & Embeddings & Ninguna \\
 \hline
-Descripciones & 9 & 89\% & 0\% & 11\% & 0\% \\
-Emociones y estados & 16 & 81\% & 0\% & 0\% & 0\% \\
-Negaciones & 74 & 62\% & 22\% & 11\% & 0\% \\
-Peticiones y deseos & 97 & 55\% & 18\% & 25\% & 0\% \\
-Preguntas & 73 & 38\% & 19\% & 33\% & 0\% \\
-Acciones cotidianas & 123 & 32\% & 33\% & 23\% & 13\% \\
-Necesidades básicas & 33 & 0\% & 39\% & 42\% & 18\% \\
+Descripciones & 27 & 89\% & 0\% & 11\% & 0\% \\
+Emociones y estados & 48 & 81\% & 0\% & 0\% & 0\% \\
+Negaciones & 222 & 62\% & 22\% & 11\% & 0\% \\
+Peticiones y deseos & 291 & 55\% & 18\% & 25\% & 0\% \\
+Preguntas & 219 & 38\% & 19\% & 33\% & 0\% \\
+Acciones cotidianas & 369 & 32\% & 33\% & 23\% & 13\% \\
+Necesidades básicas & 99 & 0\% & 39\% & 42\% & 18\% \\
 \hline
 \end{tabular}
 \caption{Distribución de elecciones por tipo comunicativo. Los porcentajes pueden no sumar 100\% por redondeo; las filas con suma distinta de 100\% aparecen tal como las reporta el análisis.}
@@ -485,7 +485,7 @@ Necesidades básicas & 33 & 0\% & 39\% & 42\% & 18\% \\
 
 La tasa global de ``Ninguna de las anteriores'' se sitúa en el 8.7\%, pero concentra su peso en dos tipos concretos: \textit{necesidades básicas} (18.2\%) y \textit{acciones cotidianas} (13.0\%). En \textit{descripciones} ningún evaluador marcó esta opción. El patrón sugiere que los tipos con mayor ``Ninguna'' señalan dominios donde el sistema completo, entendido como el conjunto de los tres motores, falla con más frecuencia ante los evaluadores, no solo donde un motor aislado produce una salida pobre.
 
-Los resultados admiten varias matizaciones. La muestra es modesta (16 participantes completos) y se reclutó por canales personales del autor, de modo que la composición demográfica no pretende representatividad poblacional y el diseño no permite generalizar a usuarios finales de CAA. La ventaja del LLM, aunque clara en el conjunto, no es unánime: alrededor de una cuarta parte de las elecciones prefieren cada motor base, y en \textit{necesidades básicas} el LLM no es la opción preferida en ningún caso. El 18\% de ``Ninguna'' en ese mismo tipo apunta a un vacío del sistema en enunciados donde la formulación esperada por los evaluadores no coincide con la salida de ninguno de los tres motores, un indicio que convendría contrastar con las referencias humanas del \textit{golden standard} recogidas en el subapartado anterior.
+Los resultados admiten varias matizaciones. La muestra es modesta (48 participantes completos) y se reclutó por canales personales del autor, de modo que la composición demográfica no pretende representatividad poblacional y el diseño no permite generalizar a usuarios finales de CAA. La ventaja del LLM, aunque clara en el conjunto, no es unánime: alrededor de una cuarta parte de las elecciones prefieren cada motor base, y en \textit{necesidades básicas} el LLM no es la opción preferida en ningún caso. El 18\% de ``Ninguna'' en ese mismo tipo apunta a un vacío del sistema en enunciados donde la formulación esperada por los evaluadores no coincide con la salida de ninguno de los tres motores, un indicio que convendría contrastar con las referencias humanas del \textit{golden standard} recogidas en el subapartado anterior.
 
 \subsection{Resumen de resultados}
 
@@ -528,7 +528,7 @@ Las implicaciones para un sistema de producción apuntan a Hybrid1 como la opci�
 
 La gramática formal sigue siendo la opción para dispositivos offline o escenarios donde el determinismo y la latencia imperceptible son prioritarios, y constituye el \textit{fallback} natural de Hybrid1 cuando no hay conectividad.
 
-Hybrid3 constituye un resultado negativo (sección~\ref{sec:eval-seleccion-h3}): su perplejidad (mediana 150) no mejora la de la gramática, su latencia (4.2 s) es cinco veces mayor que la de Hybrid1, y su coste por consulta triplica al de los demás híbridos. Hybrid2 obtiene resultados prácticamente idénticos a Hybrid1 (perplejidad 102, fidelidad ajustada 0.979) pero añade la dependencia de FastText sin beneficio medible.
+Hybrid3 constituye un resultado negativo (sección~\ref{sec:eval-hibridos}): su perplejidad (mediana 150) no mejora la de la gramática, su latencia (4.2 s) es cinco veces mayor que la de Hybrid1, y su coste por consulta triplica al de los demás híbridos. Hybrid2 obtiene resultados prácticamente idénticos a Hybrid1 (perplejidad 102, fidelidad ajustada 0.979) pero añade la dependencia de FastText sin beneficio medible.
 
 La post-edición por LLM introduce un compromiso no previsto en el diseño original: en aproximadamente 16 casos (3.7\%), el post-editor produce una frase más natural pero que pierde algún pictograma respecto a la salida del motor base. Por ejemplo, ante la entrada \texttt{[luego, dormir]}, la gramática genera \textit{Luego quiero dormir} (infiriendo el verbo modal) y el post-editor la reformula como \textit{Luego dormiré}, una frase gramaticalmente superior pero que omite el concepto ``querer''. Este fenómeno afecta tanto a Hybrid1 como a Hybrid2 y revela una tensión inherente al patrón \textit{plan-then-realize}: el realizador puede mejorar la forma a costa del contenido.
 
