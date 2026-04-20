@@ -365,7 +365,7 @@ Por estas razones se diseñaron dos encuestas complementarias. La encuesta de na
 
 La encuesta de naturalidad sigue un paradigma de elección forzada (\textit{forced-choice}). El evaluador ve una secuencia de pictogramas ARASAAC y las frases generadas por las tres técnicas base (gramática formal, embeddings semánticos y LLM), sin saber qué técnica produjo cada frase. Debe seleccionar la que suene más natural en español, o elegir ``Ninguna de las anteriores'' si ninguna le convence.
 
-La elección forzada se prefirió sobre una escala Likert por tres razones. Con una escala Likert cada evaluador tendría que puntuar 156 frases individuales (52 casos $\times$ 3 técnicas), mientras que con elección forzada son 52 decisiones. La reducción de carga cognitiva es relevante porque los evaluadores son voluntarios no remunerados, y la brevedad del instrumento condiciona la tasa de finalización. La elección forzada minimiza el sesgo de aquiescencia (la tendencia a dar puntuaciones moderadas a todo) y produce datos directamente comparables entre técnicas sin necesidad de normalizar escalas individuales.
+La elección forzada se prefirió sobre una escala Likert por tres razones. Con una escala Likert cada evaluador tendría que puntuar cada frase por separado (tres puntuaciones por caso), mientras que con elección forzada cada caso se resuelve con una sola decisión. La reducción de carga cognitiva es relevante porque los evaluadores son voluntarios no remunerados, y la brevedad del instrumento condiciona la tasa de finalización. La elección forzada minimiza el sesgo de aquiescencia (la tendencia a dar puntuaciones moderadas a todo) y produce datos directamente comparables entre técnicas sin necesidad de normalizar escalas individuales.
 
 Se evalúan únicamente las tres técnicas base, no los híbridos. Los motores híbridos combinan las técnicas base mediante post-edición o selección, de modo que su evaluación humana no aportaría información independiente sobre la percepción de naturalidad de cada enfoque individual. La evaluación de los híbridos queda cubierta por las métricas automáticas.
 
@@ -373,7 +373,7 @@ La evaluación es ciega: el evaluador no conoce qué técnica generó cada frase
 
 La opción ``Ninguna de las anteriores'' evita forzar una elección cuando todas las frases son deficientes. Sin esta opción, un evaluador que encuentre las tres alternativas poco naturales se vería obligado a seleccionar la ``menos mala'', contaminando los datos con preferencias que no son tales. La opción permite detectar casos donde el sistema completo falla, lo cual es informativo para el análisis por subgrupos.
 
-La selección de casos parte del corpus de 428 y retiene 52 mediante muestreo estratificado por dos ejes: longitud de la secuencia de pictogramas (10 casos de 2 pictogramas, 16 de 3, 16 de 4, 10 de 5 o más) y tipo comunicativo (7 categorías: necesidades básicas, peticiones y deseos, emociones y estados, acciones cotidianas, descripciones, preguntas y negaciones). Se priorizan los casos donde las tres técnicas generan frases distintas (\texttt{distinct\_sentences=3}), porque son los más informativos para discriminar entre motores: cuando dos técnicas producen la misma frase, la elección no aporta información diferencial. Los casos de 1 pictograma se excluyen porque la inferencia es tan directa que las tres técnicas tienden a generar la misma salida. Los 52 casos se distribuyen en 4 bloques de 13 mediante \textit{round-robin} por (longitud, tipo), de modo que cada bloque mantiene una distribución similar y los evaluadores que solo completen un bloque aporten datos representativos.
+La selección de casos parte del corpus de 428 y aplica un muestreo estratificado por dos ejes: longitud de la secuencia de pictogramas (10 casos de 2 pictogramas, 16 de 3, 16 de 4, 10 de 5 o más) y tipo comunicativo, en siete categorías (necesidades básicas, peticiones y deseos, emociones y estados, acciones cotidianas, descripciones, preguntas y negaciones). Se priorizan los casos donde las tres técnicas generan frases distintas, porque son los más informativos para discriminar entre motores: cuando dos técnicas producen la misma frase, la elección no aporta información diferencial. Los casos de 1 pictograma se excluyen porque la inferencia es tan directa que las tres técnicas tienden a generar la misma salida. De los 52 casos candidatos resultantes, 8 se descartaron al comprobar que las tres técnicas producían frases idénticas o cuasi-idénticas: sin divergencia entre motores, la decisión del evaluador no aportaría información. Los 44 casos finalmente presentados se organizan en dos sets, A y B, de 26 ítems cada uno: 18 ítems exclusivos del set más 8 \textit{anchors} compartidos entre ambos. Cada participante ve un único set de 26 ítems, y los 8 \textit{anchors} sirven como núcleo común para detectar sesgos cruzados entre sets comparando la técnica ganadora en los mismos ítems.
 
 Cuando dos técnicas generan exactamente la misma frase (un fenómeno frecuente: gramática y embeddings coinciden en el 99,5\% de los casos), la opción duplicada se elimina de la interfaz. El evaluador solo ve frases distintas. Si elige una frase compartida por varias técnicas, el voto se atribuye a todas las que la generaron, evitando tanto la duplicación visual como la pérdida de información.
 
@@ -381,7 +381,54 @@ La plataforma de la encuesta es una aplicación web desarrollada con React y Typ
 
 El análisis previsto incluye la decodificación de respuestas, la agregación de votos por técnica y subgrupo, un test chi-cuadrado de bondad de ajuste para evaluar si la distribución de preferencias difiere de la equiprobabilidad, tests binomiales por pares con corrección por comparaciones múltiples, análisis de preferencia por longitud de secuencia y tipo comunicativo, y el coeficiente kappa de Fleiss para medir la concordancia entre evaluadores.
 
-\textit{(TODO: resultados de la encuesta de naturalidad.)}
+La encuesta se difundió por canales personales del autor. Se inscribieron 18 personas: 16 completaron los 26 ítems de su set (88.9\%), 1 aportó una respuesta parcial de 9 ítems y 1 no llegó a responder. El conjunto recogido suma 425 respuestas. La cobertura por set es asimétrica: en el set A los 9 inscritos completaron el cuestionario (100\%), mientras que en el set B lo hicieron 7 de 9 (78\%). Los 44 ítems presentados recibieron al menos una respuesta, con una cobertura del 100\% sobre el diseño. Los 8 \textit{anchors} permiten validar la ausencia de sesgos cruzados entre sets: en los ocho ítems compartidos la técnica ganadora coincide entre el set A y el set B, lo que indica que la asignación de participantes no introdujo desviaciones sistemáticas en los resultados.
+
+La distribución global de preferencias sobre las 425 respuestas sitúa al LLM (GPT-4o) como opción más elegida, con 187 votos (44.0\%), seguido por la gramática formal con 101 votos (23.8\%) y los embeddings con 100 votos (23.5\%). La opción ``Ninguna de las anteriores'' recibió 37 votos (8.7\%). El LLM dobla aproximadamente la preferencia de cada motor base, pero no domina: cerca de una de cada cuatro respuestas prefiere la gramática y otra tantas los embeddings, en casos concretos donde las formulaciones breves y directas de los motores deterministas resultan más naturales a los evaluadores que la reformulación neural.
+
+El análisis por longitud de secuencia y por tipo comunicativo matiza esta preferencia global. La Tabla~\ref{tab:eval-naturalidad-longitud} muestra que el liderazgo del LLM crece con la longitud de la entrada. En frases \textit{short} los motores base superan conjuntamente al LLM (embeddings 37\%, gramática 33\% frente a 18\% del LLM) y la tasa de ``Ninguna'' es la más alta del corpus (12\%). En frases \textit{medium} y \textit{long} el LLM se impone con un 46\% y un 45\% respectivamente, mientras que los motores base se reparten el resto. En frases \textit{extra\_long} el LLM triplica a cualquier motor base con un 67\%, reflejo de su capacidad para articular secuencias largas con una sintaxis más fluida.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{l r r r r r}
+\hline
+Longitud & $n$ & LLM & Gramática & Embeddings & Ninguna \\
+\hline
+\textit{short} & 83 & 18\% & 33\% & 37\% & 12\% \\
+\textit{medium} & 148 & 46\% & 16\% & 26\% & 11\% \\
+\textit{long} & 121 & 45\% & 31\% & 18\% & 6\% \\
+\textit{extra\_long} & 73 & 67\% & 18\% & 11\% & 4\% \\
+\hline
+\end{tabular}
+\caption{Distribución de elecciones por longitud de la secuencia de pictogramas. $n$ indica el número de respuestas en cada segmento.}
+\label{tab:eval-naturalidad-longitud}
+\end{table}
+
+El desglose por tipo comunicativo (Tabla~\ref{tab:eval-naturalidad-tipo}) revela diferencias todavía más acusadas. El LLM domina con amplitud en \textit{descripciones} (89\%) y \textit{emociones y estados} (81\%), y mantiene ventaja clara en \textit{negaciones} (62\%) y \textit{peticiones y deseos} (55\%). En \textit{preguntas} la preferencia se reparte entre los tres motores, con el LLM al 38\% y los embeddings al 33\%. En \textit{acciones cotidianas} la gramática se impone por estrecho margen (33\%) al LLM (32\%) y a los embeddings (23\%), con un 13\% de ``Ninguna''. El hallazgo más llamativo aparece en \textit{necesidades básicas}: el LLM no recibe ni una sola elección preferente (0\%) frente al 42\% de los embeddings y el 39\% de la gramática, y un 18\% de los evaluadores marca ``Ninguna''. Los motores base, que generan formulaciones breves y directas, resultan preferidos a la reformulación del LLM en un dominio donde la economía expresiva importa más que la elaboración sintáctica.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{l r r r r r}
+\hline
+Tipo comunicativo & $n$ & LLM & Gramática & Embeddings & Ninguna \\
+\hline
+Descripciones & 9 & 89\% & 0\% & 11\% & 0\% \\
+Emociones y estados & 16 & 81\% & 0\% & 0\% & 0\% \\
+Negaciones & 74 & 62\% & 22\% & 11\% & 0\% \\
+Peticiones y deseos & 97 & 55\% & 18\% & 25\% & 0\% \\
+Preguntas & 73 & 38\% & 19\% & 33\% & 0\% \\
+Acciones cotidianas & 123 & 32\% & 33\% & 23\% & 13\% \\
+Necesidades básicas & 33 & 0\% & 39\% & 42\% & 18\% \\
+\hline
+\end{tabular}
+\caption{Distribución de elecciones por tipo comunicativo. Los porcentajes pueden no sumar 100\% por redondeo; las filas con suma distinta de 100\% aparecen tal como las reporta el análisis.}
+\label{tab:eval-naturalidad-tipo}
+\end{table}
+
+La tasa global de ``Ninguna de las anteriores'' se sitúa en el 8.7\%, pero concentra su peso en dos tipos concretos: \textit{necesidades básicas} (18.2\%) y \textit{acciones cotidianas} (13.0\%). En \textit{descripciones} ningún evaluador marcó esta opción. El patrón sugiere que los tipos con mayor ``Ninguna'' señalan dominios donde el sistema completo, entendido como el conjunto de los tres motores, falla con más frecuencia ante los evaluadores, no solo donde un motor aislado produce una salida pobre.
+
+Los resultados admiten varias matizaciones. La muestra es modesta (16 participantes completos) y se reclutó por canales personales del autor, de modo que la composición demográfica no pretende representatividad poblacional y el diseño no permite generalizar a usuarios finales de CAA. La ventaja del LLM, aunque clara en el conjunto, no es unánime: alrededor de una cuarta parte de las elecciones prefieren cada motor base, y en \textit{necesidades básicas} el LLM no es la opción preferida en ningún caso. El 18\% de ``Ninguna'' en ese mismo tipo apunta a un vacío del sistema en enunciados donde la formulación esperada por los evaluadores no coincide con la salida de ninguno de los tres motores, un indicio que convendrá contrastar cuando se incorporen las referencias humanas del \textit{golden standard}.
 
 \subsubsection{Encuesta de golden standard}
 \label{sec:eval-golden}
