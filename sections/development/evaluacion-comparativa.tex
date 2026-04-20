@@ -360,6 +360,56 @@ A este problema se suma el sesgo de referencia. Las oraciones de referencia del 
 
 Para afrontar estas limitaciones se llevaron a cabo dos encuestas complementarias con hablantes nativos de español. La encuesta de naturalidad pide a los evaluadores elegir, entre las frases generadas por los motores, la que les suena más natural, y mide la preferencia subjetiva entre formulaciones. La encuesta de \textit{golden standard} aborda directamente el sesgo del corpus original: pide a hablantes nativos escribir la frase que ellos dirían al ver cada secuencia de pictogramas, sin exposición a las salidas de los motores. El resultado es un corpus de 164 casos con múltiples referencias humanas por caso que pasa a ser la referencia principal contra la que se recalculan las métricas, sustituyendo al conjunto original de un solo anotador.
 
+\subsubsection{Encuesta de golden standard}
+\label{sec:eval-golden}
+
+Para neutralizar el sesgo de referencia se diseñó la encuesta de \textit{golden standard}: un corpus de referencias humanas independientes, producidas por hablantes nativos de español sin exposición alguna a las salidas de los motores.
+
+La encuesta se diseña con 164 ítems, una cifra que responde a requisitos estadísticos y al propio esquema de bloques. Cada subgrupo (8 funciones comunicativas $\times$ 3 niveles de complejidad) necesita al menos 15-20 observaciones para que las métricas de NLG sean interpretables~\cite{reiter2009investigation}, y con 164 casos se alcanzan aproximadamente 20 observaciones por función comunicativa (164 / 8 $\approx$ 20.5), por encima de ese umbral. Con un mínimo de 3 referencias por caso, se obtienen 492 juicios de referencia (164 $\times$ 3), suficientes para \textit{bootstrap resampling} con corrección de Bonferroni para las 15 comparaciones pareadas entre los 6 motores~\cite{koehn2004statistical}.
+
+La encuesta se organiza en 10 bloques de 16 ítems únicos más 4 anchors compartidos, de modo que cada participante ve 20 ítems (16 + 4) dentro del umbral de fatiga de 20 minutos que Van der Lee et al.~\cite{vanderlee2021human} recomiendan no exceder en tareas de evaluación de texto generado. Este diseño produce un total de 164 ítems distintos (10 $\times$ 16 + 4). Cada respondente ve una secuencia de pictogramas ARASAAC y escribe libremente la frase que diría, sin restricciones de vocabulario ni de estructura, y no ve ninguna salida de los motores ni la referencia original (véase la Figura~\ref{fig:eval-golden-encuesta}).
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.7\textwidth]{figures/eval-golden-encuesta.png}
+    \caption{Interfaz de la encuesta de \textit{golden standard}. El respondente ve la secuencia de pictogramas con sus etiquetas y dispone de un campo libre para escribir la frase que diría.}
+    \label{fig:eval-golden-encuesta}
+\end{figure}
+
+La evaluación multi-referencia consiste en calcular las métricas automáticas (BLEU, chrF, BERTScore) comparando cada predicción del motor contra varias referencias humanas válidas del mismo caso, en lugar de contra una sola. Un $n$-grama de la predicción cuenta como acierto si aparece en cualquiera de las referencias, de modo que las reformulaciones legítimas (decir ``Yo quiero agua'' en lugar de ``Quiero agua'') dejan de penalizarse. La ganancia es empírica: Zouhar y Bojar~\cite{zouhar2024quality} muestran que añadir hasta 7 referencias por segmento incrementa la correlación entre métricas automáticas y juicio humano, porque cada referencia adicional captura una formulación alternativa válida. Con este margen de tolerancia, el \textit{golden standard} permite detectar diferencias entre motores que las métricas con referencia única confunden con ruido.
+
+El corpus permite cuantificar la variabilidad inherente de la tarea: cuántas formulaciones válidas produce una misma secuencia de pictogramas y en qué medida esta variabilidad depende de la complejidad de la entrada o de la función comunicativa. El análisis por función comunicativa revelará si determinados tipos de enunciado (preguntas, negaciones, descripciones) presentan mayor o menor convergencia entre hablantes.
+
+La encuesta se desplegó como una aplicación web desarrollada con React y respaldada por Supabase~\cite{dixigoldensurvey2026}, difundida por canales personales del autor durante aproximadamente tres semanas. Cada participante quedaba asignado a un bloque del diseño balanceado y escribía libremente la frase que diría al ver cada una de las 20 secuencias de pictogramas de ese bloque. Se inscribieron 57 personas: 45 completaron los 20 ítems (78.9\%), 8 aportaron respuestas parciales de entre 2 y 10 ítems, y 4 no llegaron a responder. La Tabla~\ref{tab:eval-golden-cobertura} detalla la cobertura por bloque: siete alcanzaron el objetivo de seis inscritos, dos quedaron en cinco por el algoritmo de balance del servidor al detenerse la captación y el bloque 9 fue el peor cubierto, con dos completos sobre cinco inscritos.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{l c c c c c c c c c c}
+\hline
+Bloque & B1 & B2 & B3 & B4 & B5 & B6 & B7 & B8 & B9 & B10 \\
+\hline
+Completos/inscritos & 3/6 & 6/6 & 3/6 & 6/6 & 5/5 & 5/5 & 6/6 & 3/6 & 2/5 & 6/6 \\
+\hline
+\end{tabular}
+\caption{Cobertura por bloque de la encuesta de \textit{golden standard}: participantes que completaron los 20 ítems sobre el total de inscritos.}
+\label{tab:eval-golden-cobertura}
+\end{table}
+
+El corpus recogido suma 948 respuestas humanas, que tras deduplicación exacta por ítem quedan en 615 referencias únicas. De los 160 ítems no-anchor, 22 recibieron una única referencia, 33 reunieron dos, 30 reunieron tres, 30 reunieron cuatro, 25 reunieron cinco y 20 reunieron seis, con una media de 3.39 referencias únicas por ítem (4.74 respuestas brutas por ítem sin deduplicar). Los cuatro anchors, que por diseño aparecen en todos los bloques, acumularon entre 46 y 48 respuestas cada uno.
+
+La convergencia entre participantes es la señal más clara de que el corpus captura variabilidad genuina y no ruido. En GS001 (``agua + y + pan''), 27 de 48 respondentes escribieron literalmente ``Agua y pan'' y otros 6 ``Quiero agua y pan'', dejando solo 15 referencias únicas. En GS067 (``cansado''), 36 coincidieron en ``estoy muy cansado''. En GS143 (``yo + querer + agua''), 27 escribieron ``yo quiero agua'' y 11 ``quiero agua''. En total se registraron 168 pares (ítem, texto) repetidos por distintos participantes, y ningún respondente usó el mismo texto en cinco o más ítems distintos, lo que descarta patrones de spam o relleno.
+
+El \textit{golden standard} final contiene los 164 ítems del diseño: los 160 no-anchor más los 4 anchors, todos con referencias humanas recogidas. Cada ítem lleva asociada su lista de referencias únicas, lista para alimentar BLEU y chrF multi-referencia, junto con la frecuencia con la que cada formulación fue producida por los participantes.
+
+El corpus recogido presenta tres limitaciones:
+
+\begin{enumerate}
+    \item La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica.
+    \item De los 160 ítems no-anchor, 55 cuentan con dos referencias únicas o menos, lo que aumentará la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore en el recálculo y reportar intervalos de confianza por \textit{bootstrap} pareado.
+    \item El esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
+\end{enumerate}
+
 \subsubsection{Encuesta de naturalidad}
 \label{sec:eval-naturalidad}
 
@@ -428,57 +478,7 @@ Necesidades básicas & 33 & 0\% & 39\% & 42\% & 18\% \\
 
 La tasa global de ``Ninguna de las anteriores'' se sitúa en el 8.7\%, pero concentra su peso en dos tipos concretos: \textit{necesidades básicas} (18.2\%) y \textit{acciones cotidianas} (13.0\%). En \textit{descripciones} ningún evaluador marcó esta opción. El patrón sugiere que los tipos con mayor ``Ninguna'' señalan dominios donde el sistema completo, entendido como el conjunto de los tres motores, falla con más frecuencia ante los evaluadores, no solo donde un motor aislado produce una salida pobre.
 
-Los resultados admiten varias matizaciones. La muestra es modesta (16 participantes completos) y se reclutó por canales personales del autor, de modo que la composición demográfica no pretende representatividad poblacional y el diseño no permite generalizar a usuarios finales de CAA. La ventaja del LLM, aunque clara en el conjunto, no es unánime: alrededor de una cuarta parte de las elecciones prefieren cada motor base, y en \textit{necesidades básicas} el LLM no es la opción preferida en ningún caso. El 18\% de ``Ninguna'' en ese mismo tipo apunta a un vacío del sistema en enunciados donde la formulación esperada por los evaluadores no coincide con la salida de ninguno de los tres motores, un indicio que convendrá contrastar cuando se incorporen las referencias humanas del \textit{golden standard}.
-
-\subsubsection{Encuesta de golden standard}
-\label{sec:eval-golden}
-
-Para neutralizar el sesgo de referencia se diseñó la encuesta de \textit{golden standard}: un corpus de referencias humanas independientes, producidas por hablantes nativos de español sin exposición alguna a las salidas de los motores.
-
-La encuesta se diseña con 164 ítems, una cifra que responde a requisitos estadísticos y al propio esquema de bloques. Cada subgrupo (8 funciones comunicativas $\times$ 3 niveles de complejidad) necesita al menos 15-20 observaciones para que las métricas de NLG sean interpretables~\cite{reiter2009investigation}, y con 164 casos se alcanzan aproximadamente 20 observaciones por función comunicativa (164 / 8 $\approx$ 20.5), por encima de ese umbral. Con un mínimo de 3 referencias por caso, se obtienen 492 juicios de referencia (164 $\times$ 3), suficientes para \textit{bootstrap resampling} con corrección de Bonferroni para las 15 comparaciones pareadas entre los 6 motores~\cite{koehn2004statistical}.
-
-La encuesta se organiza en 10 bloques de 16 ítems únicos más 4 anchors compartidos, de modo que cada participante ve 20 ítems (16 + 4) dentro del umbral de fatiga de 20 minutos que Van der Lee et al.~\cite{vanderlee2021human} recomiendan no exceder en tareas de evaluación de texto generado. Este diseño produce un total de 164 ítems distintos (10 $\times$ 16 + 4). Cada respondente ve una secuencia de pictogramas ARASAAC y escribe libremente la frase que diría, sin restricciones de vocabulario ni de estructura, y no ve ninguna salida de los motores ni la referencia original (véase la Figura~\ref{fig:eval-golden-encuesta}).
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.7\textwidth]{figures/eval-golden-encuesta.png}
-    \caption{Interfaz de la encuesta de \textit{golden standard}. El respondente ve la secuencia de pictogramas con sus etiquetas y dispone de un campo libre para escribir la frase que diría.}
-    \label{fig:eval-golden-encuesta}
-\end{figure}
-
-La evaluación multi-referencia consiste en calcular las métricas automáticas (BLEU, chrF, BERTScore) comparando cada predicción del motor contra varias referencias humanas válidas del mismo caso, en lugar de contra una sola. Un $n$-grama de la predicción cuenta como acierto si aparece en cualquiera de las referencias, de modo que las reformulaciones legítimas (decir ``Yo quiero agua'' en lugar de ``Quiero agua'') dejan de penalizarse. La ganancia es empírica: Zouhar y Bojar~\cite{zouhar2024quality} muestran que añadir hasta 7 referencias por segmento incrementa la correlación entre métricas automáticas y juicio humano, porque cada referencia adicional captura una formulación alternativa válida. Con este margen de tolerancia, el \textit{golden standard} permite detectar diferencias entre motores que las métricas con referencia única confunden con ruido.
-
-El corpus permite cuantificar la variabilidad inherente de la tarea: cuántas formulaciones válidas produce una misma secuencia de pictogramas y en qué medida esta variabilidad depende de la complejidad de la entrada o de la función comunicativa. El análisis por función comunicativa revelará si determinados tipos de enunciado (preguntas, negaciones, descripciones) presentan mayor o menor convergencia entre hablantes.
-
-La encuesta se desplegó como una aplicación web desarrollada con React y respaldada por Supabase~\cite{dixigoldensurvey2026}, difundida por canales personales del autor durante aproximadamente tres semanas. Cada participante quedaba asignado a un bloque del diseño balanceado y escribía libremente la frase que diría al ver cada una de las 20 secuencias de pictogramas de ese bloque. Se inscribieron 57 personas: 45 completaron los 20 ítems (78.9\%), 8 aportaron respuestas parciales de entre 2 y 10 ítems, y 4 no llegaron a responder. La Tabla~\ref{tab:eval-golden-cobertura} detalla la cobertura por bloque: siete alcanzaron el objetivo de seis inscritos, dos quedaron en cinco por el algoritmo de balance del servidor al detenerse la captación y el bloque 9 fue el peor cubierto, con dos completos sobre cinco inscritos.
-
-\begin{table}[ht]
-\centering
-\small
-\begin{tabular}{l c c c c c c c c c c}
-\hline
-Bloque & B1 & B2 & B3 & B4 & B5 & B6 & B7 & B8 & B9 & B10 \\
-\hline
-Completos/inscritos & 3/6 & 6/6 & 3/6 & 6/6 & 5/5 & 5/5 & 6/6 & 3/6 & 2/5 & 6/6 \\
-\hline
-\end{tabular}
-\caption{Cobertura por bloque de la encuesta de \textit{golden standard}: participantes que completaron los 20 ítems sobre el total de inscritos.}
-\label{tab:eval-golden-cobertura}
-\end{table}
-
-El corpus recogido suma 948 respuestas humanas, que tras deduplicación exacta por ítem quedan en 615 referencias únicas. De los 160 ítems no-anchor, 22 recibieron una única referencia, 33 reunieron dos, 30 reunieron tres, 30 reunieron cuatro, 25 reunieron cinco y 20 reunieron seis, con una media de 3.39 referencias únicas por ítem (4.74 respuestas brutas por ítem sin deduplicar). Los cuatro anchors, que por diseño aparecen en todos los bloques, acumularon entre 46 y 48 respuestas cada uno.
-
-La convergencia entre participantes es la señal más clara de que el corpus captura variabilidad genuina y no ruido. En GS001 (``agua + y + pan''), 27 de 48 respondentes escribieron literalmente ``Agua y pan'' y otros 6 ``Quiero agua y pan'', dejando solo 15 referencias únicas. En GS067 (``cansado''), 36 coincidieron en ``estoy muy cansado''. En GS143 (``yo + querer + agua''), 27 escribieron ``yo quiero agua'' y 11 ``quiero agua''. En total se registraron 168 pares (ítem, texto) repetidos por distintos participantes, y ningún respondente usó el mismo texto en cinco o más ítems distintos, lo que descarta patrones de spam o relleno.
-
-El \textit{golden standard} final contiene los 164 ítems del diseño: los 160 no-anchor más los 4 anchors, todos con referencias humanas recogidas. Cada ítem lleva asociada su lista de referencias únicas, lista para alimentar BLEU y chrF multi-referencia, junto con la frecuencia con la que cada formulación fue producida por los participantes.
-
-El corpus recogido presenta tres limitaciones:
-
-\begin{enumerate}
-    \item La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica.
-    \item De los 160 ítems no-anchor, 55 cuentan con dos referencias únicas o menos, lo que aumentará la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore en el recálculo y reportar intervalos de confianza por \textit{bootstrap} pareado.
-    \item El esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
-\end{enumerate}
+Los resultados admiten varias matizaciones. La muestra es modesta (16 participantes completos) y se reclutó por canales personales del autor, de modo que la composición demográfica no pretende representatividad poblacional y el diseño no permite generalizar a usuarios finales de CAA. La ventaja del LLM, aunque clara en el conjunto, no es unánime: alrededor de una cuarta parte de las elecciones prefieren cada motor base, y en \textit{necesidades básicas} el LLM no es la opción preferida en ningún caso. El 18\% de ``Ninguna'' en ese mismo tipo apunta a un vacío del sistema en enunciados donde la formulación esperada por los evaluadores no coincide con la salida de ninguno de los tres motores, un indicio que convendría contrastar con las referencias humanas del \textit{golden standard} recogidas en el subapartado anterior.
 
 \subsection{Resumen de resultados}
 
