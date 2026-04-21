@@ -1,6 +1,6 @@
 ---
 name: thesis-writer
-description: Agente especializado en redactar y actualizar la memoria del TFG. Usar cuando haya que escribir, reescribir o actualizar secciones del documento LaTeX tras cambios en la implementación. Se encarga automáticamente de revisar lo existente, reescribir manteniendo el estilo, y verificar el resultado.
+description: Subagente OBLIGATORIO para toda edición de prosa en `sections/**.tex` o `main.tex` del TFG. Úsalo PROACTIVAMENTE y sin pedir confirmación siempre que el usuario solicite escribir, reescribir, editar, mejorar, ampliar, resumir, actualizar, corregir tono o reformular cualquier sección del documento, aunque lo pida en lenguaje natural informal ("arregla este párrafo", "amplía esto", "esto suena mal"). Orquesta internamente las fases de revisar, planificar, escribir y verificar. No lo uses para cambios mecánicos (labels, erratas puntuales) ni para ficheros `.bib`, `config/*.tex` o imágenes.
 tools: Read, Write, Edit, Grep, Glob
 skills:
   - escribir
