@@ -1,0 +1,56 @@
+\chapter{Repositorios de código}
+\label{cap:repositorios}
+
+Todo el código fuente del proyecto se ha publicado como un conjunto de repositorios públicos en GitHub, bajo la cuenta del autor. Esta forma de entrega responde a una doble necesidad. Por un lado, el volumen total de los repositorios ---incluidos modelos de embeddings, conjuntos de datos y dependencias--- supera con holgura el límite de veinte megabytes impuesto al archivo comprimido que se entrega en la plataforma de defensa. Por otro, publicar el trabajo en repositorios activos facilita el acceso reproducible al código y mantiene disponibles tanto el historial de \textit{commits} como las \textit{issues} y la documentación asociada a cada componente.
+
+El proyecto se estructura en diez repositorios independientes, cada uno con su propio historial, su propia configuración de entorno y sus propias dependencias. Esta separación permite clonar, instalar y ejecutar cada pieza de forma autónoma sin arrastrar el resto. Las secciones siguientes describen el contenido de cada repositorio y enlazan a su URL en GitHub.
+
+\section{Memoria}
+\label{sec:repo-memoria}
+
+El texto LaTeX de la memoria del TFG que se está leyendo, junto con las figuras, la bibliografía y la configuración de estilo de la Universidad de Cádiz. El repositorio contiene el proyecto completo listo para compilarse con \textit{latexmk}.
+
+\begin{itemize}
+    \item \textit{tfg-memory} --- Memoria del TFG en LaTeX. \url{https://github.com/Lagaress/tfg-memory}
+\end{itemize}
+
+\section{Aplicación móvil y servidor}
+\label{sec:repo-aplicacion}
+
+La aplicación Dixi se reparte en dos repositorios que se despliegan por separado. El cliente contiene la interfaz de usuario que manejan las personas con dificultades del habla y sus acompañantes. El servidor expone una API REST que atiende las peticiones de generación y delega en el motor configurado, actuando además como intermediario frente a los servicios externos que requieren credenciales.
+
+\begin{itemize}
+    \item \textit{tfg-mobile-app} --- Aplicación móvil Dixi desarrollada con React Native y Expo; incluye el tablero de pictogramas, las frases frecuentes y los ajustes descritos en el manual de usuario (Anexo~\ref{cap:manual-usuario}). \url{https://github.com/Lagaress/tfg-mobile-app}
+    \item \textit{tfg-api} --- Servidor REST escrito en Python con FastAPI; orquesta los seis motores de generación mediante los patrones \textit{Strategy} y \textit{Registry} descritos en el capítulo de la aplicación móvil. \url{https://github.com/Lagaress/tfg-api}
+\end{itemize}
+
+\section{Motores de generación}
+\label{sec:repo-motores}
+
+Los cuatro motores de generación se mantienen en repositorios separados, un enfoque que facilita el desarrollo iterativo de cada técnica sin afectar a las demás. Cada repositorio incluye el código del motor, los tests unitarios, las dependencias específicas y una documentación con las decisiones de diseño que se discuten en los capítulos correspondientes.
+
+\begin{itemize}
+    \item \textit{tfg-formal-grammar} --- Motor de generación basado en gramática libre de contexto implementado con Lark en Python. \url{https://github.com/Lagaress/tfg-formal-grammar}
+    \item \textit{tfg-embeddings} --- Motor híbrido que combina la gramática formal con embeddings FastText para el ranking semántico de candidatos. \url{https://github.com/Lagaress/tfg-embeddings}
+    \item \textit{tfg-llms} --- Motor basado en modelos de lenguaje (GPT-4o) mediante la API de OpenAI. \url{https://github.com/Lagaress/tfg-llms}
+    \item \textit{tfg-hybridization} --- Implementación de las tres estrategias de hibridación (Hybrid1, Hybrid2, Hybrid3) descritas en el capítulo de enfoques híbridos. \url{https://github.com/Lagaress/tfg-hybridization}
+\end{itemize}
+
+\section{Evaluación}
+\label{sec:repo-evaluacion}
+
+La evaluación comparativa se divide en dos repositorios complementarios: uno con el \textit{pipeline} automático de métricas y otro con las dos aplicaciones web utilizadas para la recogida de juicios humanos. Ambos comparten el \textit{golden standard} producido por la encuesta como entrada común.
+
+\begin{itemize}
+    \item \textit{tfg-comparison} --- \textit{Pipeline} de evaluación automática: cálculo de métricas con y sin referencia, tests de significancia estadística y generación de tablas y gráficas. \url{https://github.com/Lagaress/tfg-comparison}
+    \item \textit{tfg-survey-web} --- Monorepo con las dos encuestas web: la de \textit{golden standard} y la de naturalidad. Ambas se despliegan como aplicaciones React independientes y comparten una base de datos Supabase alojada en la Unión Europea. \url{https://github.com/Lagaress/tfg-survey-web}
+\end{itemize}
+
+\section{Adquisición de datos}
+\label{sec:repo-datos}
+
+La adquisición del catálogo de pictogramas ARASAAC se realizó mediante un conjunto de pruebas de concepto que validaron la API pública del portal y la descarga masiva de recursos gráficos. El repositorio queda como traza del trabajo exploratorio y como base reutilizable para ampliar el catálogo en el futuro.
+
+\begin{itemize}
+    \item \textit{tfg-poc-download-data} --- Pruebas de concepto para conectar con la API de ARASAAC y descargar los pictogramas del vocabulario del sistema. \url{https://github.com/Lagaress/tfg-poc-download-data}
+\end{itemize}
