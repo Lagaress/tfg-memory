@@ -1,0 +1,131 @@
+\chapter{Manual de usuario de Dixi}
+\label{cap:manual-usuario}
+
+Este manual acompaña a quien va a usar Dixi en su día a día. No explica cómo está construida la aplicación, sino cómo se maneja: qué se ve en cada pantalla, cómo se forman los mensajes, cómo se reproducen con voz y cómo se ajusta la apariencia a las preferencias de cada persona. Las figuras que aparecen a lo largo del capítulo muestran la interfaz tal como aparece en un dispositivo real.
+
+\section{Para quién es este manual}
+\label{sec:manual-destinatarios}
+
+Dixi está pensada para personas con dificultades del habla ---por autismo, parálisis cerebral, afasia u otras condiciones--- que se comunican mediante pictogramas. Por eso este manual se dirige a dos lectores a la vez: la persona que usa la app para hablar y la persona que la acompaña, ya sea un familiar, un cuidador o un profesional del ámbito educativo o sanitario. Las explicaciones son las mismas para ambos; si hay alguna recomendación específica para quienes acompañan, se recoge en el último apartado.
+
+La aplicación no requiere conocimientos técnicos previos. Quien sepa usar un teléfono o una tableta podrá manejarla. Las pantallas están pensadas para que la ruta desde abrir la app hasta escuchar una frase sea corta: todo lo importante está a un toque de distancia.
+
+\section{Primer contacto}
+\label{sec:manual-primer-contacto}
+
+Al abrir Dixi por primera vez aparece el tablero de comunicación vacío, listo para usarse. No hay pasos de configuración previa ni pantallas de bienvenida: la app asume que quien la abre quiere comunicarse y prioriza llegar cuanto antes a esa función. La Figura~\ref{fig:manual-primer-contacto} muestra ese primer vistazo.
+
+En la parte inferior de la pantalla hay una barra con tres pestañas, que son las tres zonas de la aplicación. La primera es el \textit{Tablero}, donde se construyen mensajes nuevos seleccionando pictogramas. La segunda es \textit{Frases frecuentes}, una colección de expresiones preparadas para reproducir directamente. La tercera es \textit{Ajustes}, donde se configura la voz, el aspecto y las opciones de accesibilidad. Se pasa de una a otra tocando su icono; la aplicación recuerda el estado de cada pestaña, de modo que volver al tablero devuelve los pictogramas tal como estaban.
+
+\begin{figure}[ht]
+    \centering
+    % TODO: captura de la pantalla inicial al abrir Dixi por primera vez: tablero vacío,
+    % barra de construcción sin pictogramas, cuadrícula con pictogramas de la categoría activa
+    % y la barra inferior de pestañas visible (Tablero, Frases frecuentes, Ajustes).
+    % \includegraphics[width=0.55\textwidth]{figures/manual/primer-contacto.png}
+    \caption{Primer vistazo de Dixi al abrir la aplicación. El tablero aparece vacío y la barra inferior muestra las tres pestañas que organizan toda la app.}
+    \label{fig:manual-primer-contacto}
+\end{figure}
+
+\section{Construir un mensaje con pictogramas}
+\label{sec:manual-tablero}
+
+El tablero es la pantalla donde más tiempo se pasa. Ocupa la mayor parte del espacio con una cuadrícula de pictogramas, cada uno con su dibujo y su etiqueta escrita debajo. Encima de la cuadrícula hay una barra de categorías de colores ---personas, acciones, necesidades, objetos, lugares, cualidades, emociones, tiempo y preguntas, más una categoría ``Todas''--- que filtra los pictogramas según su grupo. Cada categoría tiene un color distintivo, así que con el tiempo se aprende a reconocerla por el color sin necesidad de leer la etiqueta.
+
+Por encima de la cuadrícula hay un campo de búsqueda. Basta escribir unas pocas letras para que los pictogramas se filtren en tiempo real; es la forma más rápida de encontrar uno concreto cuando se sabe su nombre pero no la categoría en la que está.
+
+En la parte superior, la \textit{barra de construcción} muestra los pictogramas que se van seleccionando, uno a uno, y debajo aparece la frase natural que la aplicación genera a partir de esa secuencia. A medida que se añaden o se quitan pictogramas, la frase se actualiza. La Figura~\ref{fig:manual-tablero-activo} recoge el tablero con un mensaje a medio construir.
+
+\begin{figure}[ht]
+    \centering
+    % TODO: captura del tablero con tres o cuatro pictogramas ya seleccionados en la barra
+    % de construcción y la frase natural generada visible debajo (por ejemplo, pictogramas
+    % "yo", "querer", "agua" con la frase "Quiero agua"). Mostrar también la barra de
+    % categorías con una categoría activa y el botón de reproducción destacado.
+    % \includegraphics[width=0.55\textwidth]{figures/manual/tablero-activo.png}
+    \caption{Tablero de comunicación con un mensaje en construcción. La barra superior muestra los pictogramas elegidos y la frase natural generada; la cuadrícula permite seguir añadiendo pictogramas.}
+    \label{fig:manual-tablero-activo}
+\end{figure}
+
+El flujo para decir algo es el siguiente:
+
+\begin{enumerate}
+    \item Elegir la categoría deseada en la barra de colores, o escribir en la búsqueda si se conoce el nombre del pictograma.
+    \item Tocar los pictogramas en el orden en que se quieren expresar. Cada uno se añade a la barra de construcción y la frase se genera de forma automática.
+    \item Si algún pictograma sobra, tocarlo en la barra de construcción lo elimina y la frase se regenera sin él.
+    \item Cuando el mensaje esté listo, pulsar el botón del altavoz, situado en la esquina inferior derecha, para reproducir la frase en voz alta.
+\end{enumerate}
+
+El botón del altavoz solo se activa cuando hay al menos un pictograma seleccionado. Mientras la aplicación está sintetizando la voz, el botón aparece atenuado para evitar que se pulse varias veces seguidas. Si el dispositivo tiene activada la vibración háptica, cada toque devuelve una pequeña respuesta táctil que confirma la acción.
+
+Junto al altavoz hay un segundo botón flotante con un signo ``+'' que abre una ventana para añadir un pictograma propio. Esta opción está pensada para cuando el vocabulario incorporado no cubre algo que el usuario necesita expresar con frecuencia: un nombre de una mascota, un lugar concreto, un alimento poco habitual. El diálogo pide una imagen y una etiqueta textual, y el pictograma resultante queda disponible en la categoría elegida como uno más. La Figura~\ref{fig:manual-pictograma-personalizado} muestra este diálogo.
+
+\begin{figure}[ht]
+    \centering
+    % TODO: captura del modal de añadir pictograma personalizado, con los campos para
+    % elegir imagen (desde galería o cámara) y escribir la etiqueta, más los botones
+    % de cancelar y guardar. Si es posible, que la imagen elegida se previsualice.
+    % \includegraphics[width=0.55\textwidth]{figures/manual/pictograma-personalizado.png}
+    \caption{Ventana para añadir un pictograma personalizado al tablero. Se puede elegir una imagen desde la galería o la cámara y escribir la etiqueta que aparecerá bajo el dibujo.}
+    \label{fig:manual-pictograma-personalizado}
+\end{figure}
+
+\section{Usar frases frecuentes}
+\label{sec:manual-frases}
+
+Algunas cosas se dicen todos los días: ``tengo hambre'', ``quiero ir al baño'', ``me duele la cabeza''. Construirlas pictograma a pictograma cada vez es lento, y en muchas situaciones (una urgencia, una clase, una conversación rápida) no hay tiempo para eso. La pestaña de \textit{Frases frecuentes} resuelve ese caso: guarda expresiones ya formadas y las reproduce con un solo toque.
+
+La pantalla, recogida en la Figura~\ref{fig:manual-frases-lista}, organiza las frases en secciones colapsables por contexto ---casa, colegio, médico, social, emociones y ``Mis frases''---, de forma que es fácil localizar la que se busca sin desplazarse por una lista larga. Cada frase aparece con un botón de reproducción a un lado y un indicador de favorito al otro. Tocar la frase o su botón la reproduce; tocar el indicador de favorito la marca para encontrarla antes en futuras sesiones. Si se sabe parte del contenido pero no la sección, el campo de búsqueda de la parte superior filtra todas las secciones en tiempo real.
+
+\begin{figure}[ht]
+    \centering
+    % TODO: captura de la pestaña de Frases frecuentes con al menos dos secciones
+    % visibles (por ejemplo "Casa" desplegada con tres o cuatro frases y "Colegio"
+    % plegada), mostrando el campo de búsqueda arriba, el botón flotante "+" en la
+    % esquina inferior derecha y el indicador de favorito marcado en alguna frase.
+    % \includegraphics[width=0.55\textwidth]{figures/manual/frases-lista.png}
+    \caption{Pestaña de frases frecuentes con las secciones contextuales colapsables. Cada frase se reproduce con un toque y puede marcarse como favorita.}
+    \label{fig:manual-frases-lista}
+\end{figure}
+
+Para añadir una frase nueva se usa el botón ``+'' de la esquina inferior derecha. En iOS aparece un diálogo breve donde escribir el texto; en Android, una pequeña ventana con el mismo fin. La Figura~\ref{fig:manual-frases-nueva} recoge ambos casos. La frase guardada se añade a ``Mis frases'', la sección personal del usuario, y queda disponible para reproducirla como cualquier otra. Si después deja de ser útil, se elimina desde esa misma sección.
+
+\begin{figure}[ht]
+    \centering
+    % TODO: captura (o composición de dos capturas lado a lado) del diálogo de nueva
+    % frase: en iOS es un Alert.prompt nativo; en Android, un modal con un campo de
+    % texto centrado y los botones "Cancelar" y "Añadir". Mostrar el campo con un
+    % ejemplo de frase escrita para que se entienda el flujo.
+    % \includegraphics[width=0.55\textwidth]{figures/manual/frases-nueva.png}
+    \caption{Diálogo para añadir una frase nueva a ``Mis frases''. La frase introducida queda guardada en la sección personal y puede reproducirse como cualquier otra.}
+    \label{fig:manual-frases-nueva}
+\end{figure}
+
+\section{Personalizar la experiencia}
+\label{sec:manual-ajustes}
+
+La pestaña de \textit{Ajustes} agrupa las opciones que permiten adaptar Dixi a cada persona. Las preferencias se conservan entre sesiones, de modo que basta con dejarlas configuradas una vez. La Figura~\ref{fig:manual-ajustes} muestra la apariencia general de la pantalla.
+
+\begin{figure}[ht]
+    \centering
+    % TODO: captura de la pantalla de Ajustes con la sección "Voz" expandida, de forma
+    % que se vean el selector de motor TTS (Sistema / ElevenLabs), los sliders de
+    % velocidad y tono, y el botón "Probar". Si cabe, incluir también parte de la
+    % sección "Apariencia" para que se vea la transición entre secciones.
+    % \includegraphics[width=0.55\textwidth]{figures/manual/ajustes.png}
+    \caption{Pestaña de ajustes. La sección de voz permite elegir motor, velocidad y tono, y probar la configuración antes de aplicarla.}
+    \label{fig:manual-ajustes}
+\end{figure}
+
+La primera sección, \textit{Voz}, controla cómo suena Dixi. Se puede elegir entre la voz del sistema del dispositivo, disponible siempre y sin conexión, y una voz neuronal externa de mayor calidad cuando hay Internet. La velocidad se ajusta entre 0,5x y 2,0x, y el tono entre 0,5 y 2,0, moviendo los respectivos deslizadores. Un botón ``Probar'' reproduce una frase corta con los parámetros actuales, de forma que la configuración se oye antes de aceptarla.
+
+La sección de \textit{Apariencia} cambia el aspecto visual. El interruptor de modo oscuro alterna entre tema claro y tema oscuro, útil según la luz del entorno y las preferencias visuales del usuario. El tamaño de los pictogramas se elige entre pequeño, mediano y grande, y el número de columnas de la cuadrícula entre tres, cuatro y cinco. Más columnas muestran más pictogramas a la vez pero los hacen más pequeños; menos columnas los agrandan y reducen la precisión motora necesaria para tocarlos.
+
+La sección de \textit{Accesibilidad} recoge tres opciones. La vibración, cuando está activada, devuelve una respuesta háptica al tocar cualquier elemento interactivo. El sonido reproduce un breve efecto al seleccionar pictogramas, como confirmación auditiva adicional. El tamaño de fuente, ajustable entre 14 y 22 píxeles, afecta a las etiquetas de los pictogramas y al resto de textos de la interfaz.
+
+La última sección, \textit{Acerca de}, no modifica nada: muestra la versión de la aplicación y los créditos, con un enlace al portal de ARASAAC~\cite{arasaac}, que es el origen de los pictogramas que Dixi utiliza.
+
+\section{Consejos para quien acompaña}
+\label{sec:manual-acompanantes}
+
+Dixi la usa, sobre todo, la persona que quiere hablar. Familiares y profesionales acompañan ese uso sin imponerlo: ayudan a explorar el tablero las primeras veces, ajustan las opciones de voz y apariencia a los gustos del usuario y guardan en \textit{Frases frecuentes} aquellas expresiones que se repiten en las rutinas diarias. Cuando una categoría se vuelve familiar, conviene explorar otra para ampliar poco a poco el vocabulario disponible, sin saturar al usuario con demasiados pictogramas a la vez. Si una frase concreta aparece de forma habitual, guardarla como frase frecuente ahorra tiempo en adelante y reduce la fricción en los momentos en los que comunicarse deprisa importa.
