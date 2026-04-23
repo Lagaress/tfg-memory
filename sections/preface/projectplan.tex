@@ -40,7 +40,7 @@ El proyecto se desarrolla entre diciembre de 2025 y julio de 2026, con dos posib
 
 Al tratarse de un Trabajo de Fin de Grado, la estimación de costes se limita a los servicios externos que el sistema consume en ejecución. El trabajo del alumno, la supervisión de las tutoras y el equipo de desarrollo no se computan como gasto al formar parte de la dedicación académica propia del TFG, y el resto de herramientas empleadas son gratuitas o de código abierto.
 
-La API de OpenAI~\cite{openai2024pricing} se utiliza en el motor de modelos de lenguaje y en las hibridaciones que lo incorporan. A precios de abril de 2026, GPT-4o factura \$2.50 por millón de tokens de entrada y \$10.00 por millón de salida, mientras que GPT-4o-mini se queda en \$0.15 y \$0.60 respectivamente; el desglose del coste por consulta aparece en la sección~\ref{ch:modelos-lenguaje}.
+La API de OpenAI~\cite{openai2024pricing} se utiliza en el motor de modelos de lenguaje y en las hibridaciones que lo incorporan. A precios de abril de 2026, GPT-4o factura \$2.50 por millón de \textit{tokens} de entrada y \$10.00 por millón de salida, mientras que GPT-4o-mini se queda en \$0.15 y \$0.60 respectivamente; el desglose del coste por consulta aparece en la sección~\ref{ch:modelos-lenguaje}.
 
 La API de ElevenLabs~\cite{elevenlabs2026pricing}, prevista para la síntesis de voz neuronal en la aplicación móvil, factura por caracteres: \$0.06 por cada 1.000 caracteres con los modelos \textit{Flash} y \textit{Turbo}, y \$0.12 con los modelos \textit{Multilingual v2} y \textit{v3}.
 
@@ -49,9 +49,9 @@ La API de ElevenLabs~\cite{elevenlabs2026pricing}, prevista para la síntesis de
 
 El desarrollo del proyecto está condicionado por cinco riesgos relevantes.
 
-El tamaño del modelo de FastText utilizado por el enfoque de embeddings condiciona el despliegue. El modelo preentrenado sobre \textit{Common Crawl} en español (\texttt{cc.es.300.bin}) ocupa alrededor de 7 GB en disco, lo que descarta funciones \textit{serverless} y servicios con restricciones de memoria. La mitigación consiste en desplegar el servidor mediante contenedores Docker con disco suficiente, lo que restringe la infraestructura pero no impide el funcionamiento.
+El tamaño del modelo de FastText utilizado por el enfoque de \textit{embeddings} condiciona el despliegue. El modelo preentrenado sobre \textit{Common Crawl} en español (\texttt{cc.es.300.bin}) ocupa alrededor de 7 GB en disco, lo que descarta funciones \textit{serverless} y servicios con restricciones de memoria. La mitigación consiste en desplegar el servidor mediante contenedores Docker con disco suficiente, lo que restringe la infraestructura pero no impide el funcionamiento.
 
-La dependencia de la API de OpenAI afecta al motor de modelos de lenguaje y a las dos hibridaciones que lo incorporan: sin acceso a Internet, la mitad de las técnicas deja de operar. El servidor implementa \textit{fallback} automático a la gramática formal y a la gramática enriquecida con embeddings, que funcionan en local y permiten seguir dando servicio.
+La dependencia de la API de OpenAI afecta al motor de modelos de lenguaje y a las dos hibridaciones que lo incorporan: sin acceso a Internet, la mitad de las técnicas deja de operar. El servidor implementa \textit{fallback} automático a la gramática formal y a la gramática enriquecida con \textit{embeddings}, que funcionan en local y permiten seguir dando servicio.
 
 El vocabulario cerrado del sistema, limitado a 232 pictogramas de ARASAAC, deja fuera cualquier concepto no representado. La mitigación se abordó en la fase de selección, priorizando los conceptos más frecuentes en la comunicación cotidiana de usuarios de CAA y cubriendo nueve categorías semánticas.
 

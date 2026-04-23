@@ -9,20 +9,20 @@ A continuación, se describe la motivación de este proyecto y su alcance. Tambi
 La comunicación es fundamental en todo lo que hacemos. Es el medio a través del cual podemos construir relaciones, expresar necesidades, compartir ideas y participar plenamente en la vida social. Poder comunicarse, y hacerlo de forma efectiva, no constituye un lujo, sino un elemento central del bienestar y la realización personal.
 
 % 2. Grupo con dificultades
-Sin embargo, para un porcentaje de la población, esta capacidad representa un desafío diario. Las personas con Trastorno del Espectro Autista (TEA), entre otras condiciones, encuentran a menudo dificultades importantes para comunicarse verbalmente. Según la Organización Mundial de la Salud, aproximadamente 1 de cada 127 personas presenta autismo a nivel mundial~\cite{who2025autism}, y en España se estima que existen más de 450.000 personas con esta condición~\cite{autismoespana2024}. Según datos del CDC de 2023, aproximadamente el 26.7\% de las personas con autismo presentan lo que se denomina «autismo profundo», caracterizado por ser no verbales, mínimamente verbales o tener un coeficiente intelectual inferior a 50~\cite{cdc2023profound}. Esto implica que más de 120.000 personas en España podrían necesitar sistemas alternativos para comunicarse. Para estas personas, las barreras comunicativas condicionan profundamente su día a día y su participación en sociedad.
+Sin embargo, para un porcentaje de la población, esta capacidad representa un desafío diario. Las personas con Trastorno del Espectro Autista (TEA), entre otras condiciones, encuentran a menudo dificultades importantes para comunicarse verbalmente. Según la Organización Mundial de la Salud, aproximadamente 1 de cada 127 personas presenta autismo a nivel mundial~\cite{who2025autism}, y en España se estima que existen más de 450.000 personas con esta condición~\cite{autismoespana2024}. Según datos del CDC de 2023, aproximadamente el 26,7\% de las personas con autismo presentan lo que se denomina «autismo profundo», caracterizado por ser no verbales, mínimamente verbales o tener un coeficiente intelectual inferior a 50~\cite{cdc2023profound}. Esto implica que más de 120.000 personas en España podrían necesitar sistemas alternativos para comunicarse. Para estas personas, las barreras comunicativas condicionan profundamente su día a día y su participación en sociedad.
 
 % 3. Soluciones manuales
 Históricamente, se han desarrollado diversas estrategias para facilitar la comunicación a estas personas. Entre las soluciones más tradicionales se encuentran los tableros de comunicación impresos, cuadernos con pictogramas organizados por categorías, o tarjetas intercambiables que el usuario señala para expresar sus necesidades. Estos métodos, aunque útiles, presentan limitaciones evidentes: requieren llevar material físico, ofrecen un vocabulario fijo y limitado, y dependen de que el interlocutor esté cerca y preste atención visual.
 
 % 4. Soluciones tecnológicas (SAAC)
-La tecnología ha permitido superar algunas de estas barreras mediante los denominados Sistemas Aumentativos y Alternativos de Comunicación (SAAC) digitales. Estos sistemas llevan décadas ofreciendo alternativas al habla, especialmente en entornos educativos y terapéuticos. Los más utilizados están basados en pictogramas: símbolos gráficos que representan conceptos, acciones u objetos de forma visual. El recurso de referencia en español es ARASAAC~\cite{arasaac}, el Centro Aragonés para la Comunicación Aumentativa y Alternativa, que pone a disposición más de 12.000 pictogramas de uso libre (más de 30.000 incluyendo variantes de color, género y estilo), cubriendo desde objetos cotidianos hasta emociones o acciones complejas. Es la base sobre la que se construyen la mayoría de aplicaciones y materiales en nuestro idioma.
+La tecnología ha permitido superar algunas de estas barreras mediante los denominados Sistemas Aumentativos y Alternativos de Comunicación (SAAC) digitales. Estos sistemas llevan décadas ofreciendo alternativas al habla, especialmente en entornos educativos y terapéuticos. Los más utilizados están basados en pictogramas: símbolos gráficos que representan conceptos, acciones u objetos de forma visual. El recurso de referencia en español es ARASAAC~\cite{arasaac}, el Centro Aragonés para la Comunicación Aumentativa y Alternativa, que pone a disposición más de 11.500 pictogramas de uso libre, acompañados de variantes cromáticas, de género y de estilo que amplían su alcance, cubriendo desde objetos cotidianos hasta emociones o acciones complejas. Es la base sobre la que se construyen la mayoría de aplicaciones y materiales en nuestro idioma.
 
 % 5. Problemas de las soluciones tecnológicas actuales
 No obstante, las aplicaciones disponibles actualmente presentan limitaciones significativas. En primer lugar, sus interfaces pueden resultar confusas y poco intuitivas para los usuarios objetivo. Pero el problema va más allá de lo visual: estas herramientas en muchos casos se limitan a concatenar palabras. Si un usuario selecciona los pictogramas ``yo'', ``querer'' y ``agua'', el sistema reproduce exactamente eso: ``yo querer agua''. Una construcción artificial que obliga al interlocutor a interpretar el mensaje y puede generar frustración en el emisor por no poder comunicarse como desearía.
 
-Otro problema relevante es la velocidad de comunicación. Mientras el habla natural alcanza entre 125 y 185 palabras por minuto, los sistemas AAC actuales raramente superan las 8-15~\cite{elsahar2019aac}. Esta diferencia de un orden de magnitud no es solo una cuestión de eficiencia; condiciona el tipo de comunicación posible, relegando a los usuarios a intercambios transaccionales cuando lo que necesitan es poder mantener conversaciones reales.
+Otro problema relevante es la velocidad de comunicación. Mientras el habla natural alcanza entre 125 y 185 palabras por minuto, los sistemas de CAA actuales raramente superan las 8-15~\cite{elsahar2019aac}. Esta diferencia de un orden de magnitud no es solo una cuestión de eficiencia; condiciona el tipo de comunicación posible, relegando a los usuarios a intercambios transaccionales cuando lo que necesitan es poder mantener conversaciones reales.
 
-A estas limitaciones se suma otra carencia significativa: las soluciones actuales no aprovechan los avances recientes en inteligencia artificial. Ni los modelos de lenguaje que podrían generar frases naturales a partir de pictogramas, ni los motores de síntesis de voz que hoy pueden producir locuciones prácticamente indistinguibles de una voz humana. Ninguna de las soluciones existentes aborda de manera integral los requisitos de un sistema AAC moderno: generación de texto natural, velocidad de respuesta adecuada para comunicación en tiempo real, e integración con síntesis de voz de calidad.
+A estas limitaciones se suma otra carencia significativa: las soluciones actuales no aprovechan los avances recientes en inteligencia artificial. Ni los modelos de lenguaje que podrían generar frases naturales a partir de pictogramas, ni los motores de síntesis de voz que hoy pueden producir locuciones prácticamente indistinguibles de una voz humana. Ninguna de las soluciones existentes aborda de manera integral los requisitos de un sistema de CAA moderno: generación de texto natural, velocidad de respuesta adecuada para comunicación en tiempo real, e integración con síntesis de voz de calidad.
 
 % 6. Momento propicio y qué resuelve el proyecto
 Sin embargo, el momento actual resulta especialmente propicio para abordar estas carencias. Los modelos de lenguaje han alcanzado un nivel de madurez que permite generar texto natural de alta calidad, y la síntesis de voz neuronal ha experimentado avances comparables. Estas tecnologías, combinadas adecuadamente, ofrecen una oportunidad real de transformar la comunicación aumentativa.
@@ -31,7 +31,7 @@ En este contexto surge Dixi\footnote{Del latín \textit{dixi}, ``he dicho'', la 
 
 \section{Alcance y objetivos}
 
-El objetivo principal de este proyecto es desarrollar una aplicación multiplataforma que permita a personas con dificultades del habla construir frases seleccionando pictogramas y convertirlas en voz de forma natural. Para ello, el tiene los siguientes objetivos específicos:
+El objetivo principal de este proyecto es desarrollar una aplicación multiplataforma que permita a personas con dificultades del habla construir frases seleccionando pictogramas y convertirlas en voz de forma natural. Para ello, el proyecto tiene los siguientes objetivos específicos:
 
 \begin{enumerate}
     \item Análisis del estado del arte en sistemas SAAC y técnicas de generación de lenguaje natural aplicadas a comunicación aumentativa.
@@ -53,7 +53,7 @@ El sistema está pensado principalmente para personas con TEA que presentan difi
 
     \item[ARASAAC] Centro Aragonés para la Comunicación Aumentativa y Alternativa. Ofrece pictogramas y recursos de forma gratuita bajo licencia Creative Commons. Es la referencia más utilizada en el mundo hispanohablante.
 
-    \item[BERTScore] Métrica de evaluación de texto que mide la similitud semántica entre dos oraciones utilizando embeddings contextuales de un modelo BERT. A diferencia de BLEU o ROUGE, reconoce sinónimos y paráfrasis.
+    \item[BERTScore] Métrica de evaluación de texto que mide la similitud semántica entre dos oraciones utilizando \textit{embeddings} contextuales de un modelo BERT. A diferencia de BLEU o ROUGE, reconoce sinónimos y paráfrasis.
 
     \item[BLEU] \textit{Bilingual Evaluation Understudy}. Métrica que mide la coincidencia de $n$-gramas entre una oración generada y una de referencia. BLEU-4 considera secuencias de hasta cuatro palabras.
 
@@ -67,9 +67,9 @@ El sistema está pensado principalmente para personas con TEA que presentan difi
 
     \item[\textit{Embedding}] Representación de palabras o conceptos como vectores numéricos en un espacio donde elementos similares quedan cerca entre sí. Permite a los algoritmos trabajar con el significado de las palabras.
 
-    \item[FastText] Modelo de embeddings de palabras desarrollado por Meta que representa cada palabra a partir de sus fragmentos de caracteres ($n$-gramas). Esto le permite generar vectores para palabras no vistas durante el entrenamiento, una propiedad útil para la morfología del español.
+    \item[FastText] Modelo de \textit{embeddings} de palabras desarrollado por Meta que representa cada palabra a partir de sus fragmentos de caracteres ($n$-gramas). Esto le permite generar vectores para palabras no vistas durante el entrenamiento, una propiedad útil para la morfología del español.
 
-    \item[\textit{Few-shot}] Técnica de uso de modelos de lenguaje que consiste en incluir unos pocos ejemplos resueltos dentro del propio prompt para que el modelo infiera el patrón esperado. A diferencia del \textit{fine-tuning}, no modifica los pesos del modelo.
+    \item[\textit{Few-shot}] Técnica de uso de modelos de lenguaje que consiste en incluir unos pocos ejemplos resueltos dentro del propio \textit{prompt} para que el modelo infiera el patrón esperado. A diferencia del \textit{fine-tuning}, no modifica los pesos del modelo.
 
     \item[\textit{Fine-tuning}] Reentrenamiento de un modelo preentrenado sobre un conjunto de datos específico para adaptar sus pesos a una tarea concreta. En este proyecto no se emplea: se prefiere la combinación de \textit{prompt engineering} y \textit{few-shot} por su flexibilidad y menor coste.
 
@@ -77,7 +77,7 @@ El sistema está pensado principalmente para personas con TEA que presentan difi
 
     \item[Gramática formal] Conjunto de reglas que definen cómo construir oraciones válidas en un lenguaje. En este proyecto, se usa para generar frases correctas a partir de pictogramas.
 
-    \item[Ingeniería de prompts] (\textit{Prompt engineering}) Técnica que consiste en diseñar las instrucciones textuales que se proporcionan a un modelo de lenguaje para guiar su comportamiento. En este proyecto, el prompt define reglas de fidelidad, formato y registro que restringen la generación al dominio de CAA.
+    \item[Ingeniería de \textit{prompts}] (\textit{Prompt engineering}) Técnica que consiste en diseñar las instrucciones textuales que se proporcionan a un modelo de lenguaje para guiar su comportamiento. En este proyecto, el \textit{prompt} define reglas de fidelidad, formato y registro que restringen la generación al dominio de CAA.
 
     \item[Lark] Biblioteca de Python para definir y ejecutar analizadores sintácticos a partir de gramáticas formales escritas en EBNF. Es la base sobre la que se construye el motor de la técnica de gramática formal.
 

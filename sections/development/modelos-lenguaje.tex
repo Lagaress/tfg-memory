@@ -10,7 +10,7 @@ La estrategia de adaptación es la ingeniería de \textit{prompts}~\cite{brown20
 
 La adaptación opera en tres dimensiones complementarias. La primera es un conjunto de once reglas que restringen el comportamiento del modelo: fidelidad semántica a los pictogramas, formato de salida, registro lingüístico. La segunda son quince ejemplos \textit{few-shot} que muestran al modelo el patrón concreto de transformación esperado. La tercera son metadatos gramaticales que acompañan a cada pictograma (categoría, forma) y desambiguan la entrada. En los capítulos anteriores, el conocimiento lingüístico estaba codificado en reglas explícitas (gramática formal) o representado geométricamente como vectores (\textit{embeddings}); aquí ese conocimiento ya viene en el modelo, y el trabajo de adaptación consiste en restringirlo para que opere dentro de los límites del dominio de CAA.
 
-\subsection{Diseño del prompt}
+\subsection{Diseño del \textit{prompt}}
 \label{sec:f3-prompt}
 
 
@@ -22,12 +22,12 @@ Los \textit{elementos funcionales} (regla 2) especifican qué puede añadir el m
 
 El \textit{formato y registro} (reglas 3-5, 8, 10) restringe la salida a una única oración en registro coloquial-neutro, sin explicaciones ni alternativas. Sin estas restricciones, los LLMs frecuentemente producen texto adicional como ``Aquí tienes la oración:'' o generan múltiples variantes.
 
-Las \textit{reglas lingüísticas} (reglas 6-7, 9, 11) cubren fenómenos específicos: interrogativas con signos ¿...?, posición de la negación, omisión del pronombre sujeto (\textit{pro-drop} del español) y concordancia de género. La regla 11, sobre concordancia, fue añadida respecto al diseño original para cubrir la categoría de concordancia del dataset de evaluación.
+Las \textit{reglas lingüísticas} (reglas 6-7, 9, 11) cubren fenómenos específicos: interrogativas con signos ¿...?, posición de la negación, omisión del pronombre sujeto (\textit{pro-drop} del español) y concordancia de género. La regla 11, sobre concordancia, fue añadida respecto al diseño original para cubrir la categoría de concordancia del \textit{dataset} de evaluación.
 
 
 Las reglas del \textit{system prompt} describen qué debe hacer el modelo, pero no le muestran cómo hacerlo. Sin ejemplos concretos, el modelo tiende a interpretar las instrucciones de forma demasiado literal o demasiado libre, produciendo salidas que cumplen las reglas individualmente pero no capturan el registro ni la brevedad esperados en CAA.
 
-El motor utiliza 15 ejemplos \textit{few-shot}~\cite{brown2020language} que cubren las ocho categorías del dataset, recogidos en la Tabla~\ref{tab:f3-fewshot}. Cada ejemplo es un par (pictogramas de entrada, oración esperada) que se inyecta como intercambio usuario-asistente en el historial de mensajes.
+El motor utiliza 15 ejemplos \textit{few-shot}~\cite{brown2020language} que cubren las ocho categorías del \textit{dataset}, recogidos en la Tabla~\ref{tab:f3-fewshot}. Cada ejemplo es un par (pictogramas de entrada, oración esperada) que se inyecta como intercambio usuario-asistente en el historial de mensajes.
 
 \begin{table}[H]
 \centering
@@ -56,34 +56,34 @@ El motor utiliza 15 ejemplos \textit{few-shot}~\cite{brown2020language} que cubr
 \label{tab:f3-fewshot}
 \end{table}
 
-El número de 15 se fijó porque es el mínimo que cubre las ocho categorías del dataset con al menos un ejemplo representativo; añadir más ejemplos incrementaría el coste de cada llamada sin beneficio proporcional, dado que los aproximadamente 1.204 tokens de entrada ya están dominados por el prompt fijo y los \textit{few-shot} existentes.
+El número de 15 se fijó porque es el mínimo que cubre las ocho categorías del \textit{dataset} con al menos un ejemplo representativo; añadir más ejemplos incrementaría el coste de cada llamada sin beneficio proporcional, dado que los aproximadamente 1.204 \textit{tokens} de entrada ya están dominados por el \textit{prompt} fijo y los \textit{few-shot} existentes.
 
-Los criterios de selección priorizan la cobertura de patrones que requieren inferencia: el ejemplo 4 enseña al modelo a expandir un solo sustantivo en una oración de necesidad; el ejemplo 5, a insertar la preposición contraída \textit{al}; el ejemplo 15, a corregir la concordancia de género. Los ejemplos se adaptaron al formato real del dataset, que utiliza tanto infinitivos como formas conjugadas como pictogramas de entrada.
+Los criterios de selección priorizan la cobertura de patrones que requieren inferencia: el ejemplo 4 enseña al modelo a expandir un solo sustantivo en una oración de necesidad; el ejemplo 5, a insertar la preposición contraída \textit{al}; el ejemplo 15, a corregir la concordancia de género. Los ejemplos se adaptaron al formato real del \textit{dataset}, que utiliza tanto infinitivos como formas conjugadas como pictogramas de entrada.
 
 
 Cada mensaje de usuario formatea los pictogramas incluyendo su categoría gramatical entre paréntesis (por ejemplo, ``quiero (verbo modal) + agua (sustantivo)'').
 
 Esta información desambiguadora procede del inventario de metadatos y ayuda al modelo a interpretar correctamente pictogramas polisémicos: ``como'' puede ser verbo (primera persona de ``comer'') o interrogativo (``¿cómo?''), y la categoría aclara la interpretación esperada.
 
-Cada llamada consume aproximadamente 1.204 tokens de entrada, de los cuales la gran mayoría corresponden al \textit{system prompt} y los ejemplos \textit{few-shot}. La consulta del usuario aporta típicamente 10-20 tokens adicionales. Los tokens de salida son muy reducidos: 4 tokens en promedio, coherente con la brevedad de las oraciones de CAA.
+Cada llamada consume aproximadamente 1.204 \textit{tokens} de entrada, de los cuales la gran mayoría corresponden al \textit{system prompt} y los ejemplos \textit{few-shot}. La consulta del usuario aporta típicamente 10-20 \textit{tokens} adicionales. Los \textit{tokens} de salida son muy reducidos: 4 \textit{tokens} en promedio, coherente con la brevedad de las oraciones de CAA.
 
 \subsection{Metadatos de pictogramas}
 \label{sec:f3-metadatos}
 
-La temperatura de 0.3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0.3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
+La temperatura de 0,3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0,3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
 
-El límite de 100 tokens es generoso para oraciones que promedian 4 tokens de salida, pero actúa como salvaguarda contra generaciones desbordadas. El timeout de 10 segundos refleja que, en una aplicación de comunicación asistida, el usuario espera activamente la respuesta.
+El límite de 100 \textit{tokens} es generoso para oraciones que promedian 4 \textit{tokens} de salida, pero actúa como salvaguarda contra generaciones desbordadas. El \textit{timeout} de 10 segundos refleja que, en una aplicación de comunicación asistida, el usuario espera activamente la respuesta.
 
-El cliente implementa reintentos diferenciados según el tipo de error: los errores de \textit{rate limit} se reintentan con backoff exponencial, los timeouts se reintentan inmediatamente, y los errores de servidor no se reintentan.
+El cliente implementa reintentos diferenciados según el tipo de error: los errores de \textit{rate limit} se reintentan con \textit{backoff} exponencial, los \textit{timeouts} se reintentan inmediatamente, y los errores de servidor no se reintentan.
 
-El coste se estima a partir de los precios de la API~\cite{openai2024pricing}: \$2.50/1M tokens de entrada y \$10.00/1M de salida para GPT-4o, frente a \$0.15/1M y \$0.60/1M para GPT-4o-mini.
+El coste se estima a partir de los precios de la API~\cite{openai2024pricing}: \$2.50/1M \textit{tokens} de entrada y \$10.00/1M de salida para GPT-4o, frente a \$0.15/1M y \$0.60/1M para GPT-4o-mini.
 
-Con los aproximadamente 1.204 tokens de entrada y 4 de salida descritos en la sección~\ref{sec:f3-prompt}, cada consulta cuesta \$0.00018 con GPT-4o-mini y \$0.00305 con GPT-4o, una diferencia de factor 16.7$\times$.
+Con los aproximadamente 1.204 \textit{tokens} de entrada y 4 de salida descritos en la sección~\ref{sec:f3-prompt}, cada consulta cuesta \$0.00018 con GPT-4o-mini y \$0.00305 con GPT-4o, una diferencia de factor 16,7$\times$.
 
 \subsection{Validación post-generación}
 \label{sec:f3-validacion}
 
-A diferencia de los motores basados en reglas, donde la corrección de la salida es consecuencia directa de las reglas aplicadas, un LLM puede producir respuestas vacías, omitir pictogramas de la entrada o ignorar instrucciones del prompt. En el contexto de CAA, donde el usuario depende del sistema para comunicarse, una salida que no refleje los pictogramas seleccionados es un fallo funcional. Por este motivo, el motor incorpora un validador específico que verifica dos aspectos que los LLMs no garantizan por diseño.
+A diferencia de los motores basados en reglas, donde la corrección de la salida es consecuencia directa de las reglas aplicadas, un LLM puede producir respuestas vacías, omitir pictogramas de la entrada o ignorar instrucciones del \textit{prompt}. En el contexto de CAA, donde el usuario depende del sistema para comunicarse, una salida que no refleje los pictogramas seleccionados es un fallo funcional. Por este motivo, el motor incorpora un validador específico que verifica dos aspectos que los LLMs no garantizan por diseño.
 
 El primero es la cobertura de conceptos: el validador comprueba que cada pictograma seleccionado por el usuario esté representado en la oración generada, teniendo en cuenta las variaciones morfológicas del español (el pictograma ``querer'' puede aparecer como ``quiero'' o ``quiere'' en la salida). El segundo es el formato interrogativo: cuando la entrada contiene un pictograma interrogativo, se verifica que la respuesta incluya los signos de interrogación correspondientes, una convención ortográfica del español que el modelo no siempre respeta.
 
@@ -96,4 +96,4 @@ La naturaleza no determinista de estos modelos introduce una segunda limitación
 
 Los LLMs tampoco ofrecen garantías sobre la fidelidad al contenido de entrada. A diferencia de una gramática formal, donde la salida se construye a partir de la entrada de forma trazable, un LLM genera texto de forma probabilística y puede omitir conceptos proporcionados por el usuario o introducir otros no solicitados. Este fenómeno, conocido como alucinación, requiere mecanismos de validación adicionales que las técnicas basadas en reglas no necesitan.
 
-Por último, la calidad de la generación depende en gran medida de la ingeniería de prompts: la selección de ejemplos, la formulación de las instrucciones y la estructura del contexto influyen directamente en los resultados, y no existe un método sistemático para determinar la configuración óptima para un dominio dado.
+Por último, la calidad de la generación depende en gran medida de la ingeniería de \textit{prompts}: la selección de ejemplos, la formulación de las instrucciones y la estructura del contexto influyen directamente en los resultados, y no existe un método sistemático para determinar la configuración óptima para un dominio dado.

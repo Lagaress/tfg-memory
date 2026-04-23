@@ -3,7 +3,7 @@ La arquitectura de Dixi sigue un diseño modular: la entrada (una lista ordenada
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/arquitectura-modular.png}
-    \caption{Arquitectura modular de Dixi. La secuencia de pictogramas ARASAAC atraviesa un motor de generación de lenguaje natural intercambiable ---gramática formal, embeddings, modelo de lenguaje o cualquiera de las tres hibridaciones--- y la oración resultante se reproduce mediante el motor de síntesis de voz.}
+    \caption{Arquitectura modular de Dixi. La secuencia de pictogramas ARASAAC atraviesa un motor de generación de lenguaje natural intercambiable ---gramática formal, \textit{embeddings}, modelo de lenguaje o cualquiera de las tres hibridaciones--- y la oración resultante se reproduce mediante el motor de síntesis de voz.}
     \label{fig:arquitectura-modular}
 \end{figure}
 
@@ -19,7 +19,7 @@ El dominio de la aplicación está deliberadamente acotado. El vocabulario const
 
 Esta restricción abre una pregunta concreta: ¿qué técnica de generación se adapta mejor a un entorno donde la fidelidad al contenido pictográfico, la latencia y la posibilidad de funcionar sin conexión son más relevantes que la capacidad de manejar un vocabulario abierto?
 
-Para responderla, se han implementado seis motores independientes que reciben exactamente la misma entrada y producen el mismo tipo de salida. Tres son técnicas base (gramática formal, embeddings semánticos y modelos de lenguaje) y tres son hibridaciones que combinan las anteriores: gramática con post-edición LLM, embeddings con post-edición LLM, y un sistema de sobregeneración y ranking.
+Para responderla, se han implementado seis motores independientes que reciben exactamente la misma entrada y producen el mismo tipo de salida. Tres son técnicas base (gramática formal, \textit{embeddings} semánticos y modelos de lenguaje) y tres son hibridaciones que combinan las anteriores: gramática con post-edición LLM, \textit{embeddings} con post-edición LLM, y un sistema de sobregeneración y \textit{ranking}.
 
 La comparación directa entre los seis permite identificar qué enfoque, o combinación de enfoques, ofrece el mejor compromiso para un sistema de CAA real.
 

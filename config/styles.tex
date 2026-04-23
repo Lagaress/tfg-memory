@@ -32,3 +32,13 @@
 \DeclareCaptionLabelSeparator*{spaced}{\\[1.5ex]}
 \captionsetup[table]{textfont=it,format=plain,justification=justified,
   singlelinecheck=false,labelsep=spaced,skip=0pt}
+
+% Placeholder para figuras pendientes. Sustituir por \includegraphics cuando exista la captura.
+\newcommand{\placeholderfigura}[2][0.55\textwidth]{%
+    \fcolorbox{black!40}{gray!15}{%
+        \begin{minipage}[c][#2][c]{#1}
+            \centering
+            \large\textit{[figura pendiente]}
+        \end{minipage}%
+    }%
+}

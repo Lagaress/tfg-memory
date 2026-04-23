@@ -1,9 +1,9 @@
-Esta sección confronta los seis motores sobre un mismo conjunto de casos mediante un pipeline de evaluación automatizado que aplica métricas con referencia humana, métricas sin referencia y métricas específicas de CAA, complementadas con tests de significancia estadística y una encuesta propia de naturalidad.
+Esta sección confronta los seis motores sobre un mismo conjunto de casos mediante un \textit{pipeline} de evaluación automatizado que aplica métricas con referencia humana, métricas sin referencia y métricas específicas de CAA, complementadas con tests de significancia estadística y una encuesta propia de naturalidad.
 
 \subsection{Métricas de evaluación}
 \label{sec:metricas}
 
-La evaluación emplea métricas organizadas en cuatro categorías. Las métricas con referencia comparan cada predicción contra la lista de referencias humanas del caso: Exact Match (coincidencia con alguna referencia, case-insensitive y tras normalizar puntuación), BLEU~\cite{papineni2002bleu} (precisión de $n$-gramas, en variantes BLEU-1 y BLEU-4), ROUGE-L~\cite{lin2004rouge} (subsecuencia común más larga), METEOR~\cite{banerjee2005meteor} (media armónica de precisión y recall con penalización por fragmentación), chrF++~\cite{popovic2017chrf} (similitud a nivel de caracteres, útil para la morfología del español) y BERTScore~\cite{zhang2020bertscore} (similitud semántica mediante embeddings contextuales de un modelo BERT en español). BLEU y chrF usan el soporte multi-referencia nativo de sacreBLEU; METEOR, ROUGE-L y BERTScore toman el mejor score entre las referencias del caso.
+La evaluación emplea métricas organizadas en cuatro categorías. Las métricas con referencia comparan cada predicción contra la lista de referencias humanas del caso: Exact Match (coincidencia con alguna referencia, case-insensitive y tras normalizar puntuación), BLEU~\cite{papineni2002bleu} (precisión de $n$-gramas, en variantes BLEU-1 y BLEU-4), ROUGE-L~\cite{lin2004rouge} (subsecuencia común más larga), METEOR~\cite{banerjee2005meteor} (media armónica de precisión y recall con penalización por fragmentación), chrF++~\cite{popovic2017chrf} (similitud a nivel de caracteres, útil para la morfología del español) y BERTScore~\cite{zhang2020bertscore} (similitud semántica mediante \textit{embeddings} contextuales de un modelo BERT en español). BLEU y chrF usan el soporte multi-referencia nativo de sacreBLEU; METEOR, ROUGE-L y BERTScore toman el mejor \textit{score} entre las referencias del caso.
 
 Las métricas específicas de CAA miden la fidelidad al contenido pictográfico. La cobertura verifica qué proporción de los pictogramas de entrada están representados en la salida, comparando lemas mediante spaCy. La fidelidad detecta alucinaciones (palabras de contenido no justificadas por los pictogramas), excluyendo las inferencias pragmáticas legítimas como la inserción del verbo ``querer'' a partir del pictograma ``agua''.
 
@@ -28,15 +28,15 @@ LLM (GPT-4o) & Alta & Alta & 96\% & $\sim$1500 ms \\
 \label{tab:perfil-motores}
 \end{table}
 
-La gramática produce salidas correctas y predecibles dentro de su dominio pero genera frases que, aunque correctas, suenan rígidas. Los embeddings heredan casi por completo las decisiones de la gramática. El LLM alcanza mayor naturalidad pero depende de una API externa con latencia y coste por llamada. Las tres hibridaciones exploran si la composición de motores supera a las partes.
+La gramática produce salidas correctas y predecibles dentro de su dominio pero genera frases que, aunque correctas, suenan rígidas. Los \textit{embeddings} heredan casi por completo las decisiones de la gramática. El LLM alcanza mayor naturalidad pero depende de una API externa con latencia y coste por llamada. Las tres hibridaciones exploran si la composición de motores supera a las partes.
 
 La evaluación se organiza de la siguiente forma:
 
 \begin{enumerate}
     \item Carga del \textit{golden standard}: 164 ítems con referencias humanas multi-referencia (véase la Sección~\ref{sec:eval-golden}) cargados desde \texttt{data/golden\_standard.json}.
-    \item Generación: las salidas de los seis motores sobre los 164 casos se reutilizan de una ejecución previa del pipeline sobre el catálogo completo. Los 164 identificadores del \textit{golden standard} están presentes en los \textit{outputs} cacheados de los seis motores, de modo que no se requiere regeneración.
+    \item Generación: las salidas de los seis motores sobre los 164 casos se reutilizan de una ejecución previa del \textit{pipeline} sobre el catálogo completo. Los 164 identificadores del \textit{golden standard} están presentes en los \textit{outputs} cacheados de los seis motores, de modo que no se requiere regeneración.
     \item Cálculo de métricas: para cada par (predicción, lista de referencias humanas) se calculan las métricas descritas en la Sección~\ref{sec:metricas} en su variante multi-referencia.
-    \item Análisis estadístico: tests no paramétricos (Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y \textit{bootstrap} pareado con 1000 remuestreos y semilla fija para intervalos de confianza) sobre los scores de los seis motores.
+    \item Análisis estadístico: tests no paramétricos (Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y \textit{bootstrap} pareado~\cite{koehn2004statistical} con 1000 remuestreos y semilla fija para intervalos de confianza) sobre los \textit{scores} de los seis motores.
     \item Generación de tablas comparativas, gráficas de distribución y tablas LaTeX.
     \item Análisis de la encuesta de naturalidad: contraste de preferencias humanas entre las tres técnicas base y correlación con las métricas automáticas en los ítems solapados.
 \end{enumerate}
@@ -52,13 +52,13 @@ Las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el 
 \cline{2-4} \cline{5-7}
 Métrica & Gramática & Embeddings & LLM & Hybrid1 & Hybrid2 & Hybrid3 \\
 \hline
-Exact Match & 0.52 $\pm$ 0.50 & 0.52 $\pm$ 0.50 & 0.63 $\pm$ 0.48 & 0.57 $\pm$ 0.49 & 0.55 $\pm$ 0.50 & 0.59 $\pm$ 0.49 \\
-BLEU-1 & 0.82 $\pm$ 0.25 & 0.82 $\pm$ 0.26 & 0.86 $\pm$ 0.25 & 0.84 $\pm$ 0.25 & 0.84 $\pm$ 0.25 & 0.84 $\pm$ 0.25 \\
-BLEU-4 & 0.71 $\pm$ 0.32 & 0.70 $\pm$ 0.33 & 0.78 $\pm$ 0.31 & 0.75 $\pm$ 0.31 & 0.74 $\pm$ 0.31 & 0.75 $\pm$ 0.31 \\
-METEOR & 0.79 $\pm$ 0.26 & 0.79 $\pm$ 0.26 & 0.83 $\pm$ 0.25 & 0.80 $\pm$ 0.27 & 0.80 $\pm$ 0.27 & 0.81 $\pm$ 0.26 \\
-chrF++ & 0.81 $\pm$ 0.23 & 0.81 $\pm$ 0.23 & 0.85 $\pm$ 0.22 & 0.83 $\pm$ 0.23 & 0.82 $\pm$ 0.22 & 0.83 $\pm$ 0.22 \\
-ROUGE-L $F_1$ & 0.84 $\pm$ 0.22 & 0.84 $\pm$ 0.22 & 0.87 $\pm$ 0.21 & 0.85 $\pm$ 0.23 & 0.85 $\pm$ 0.22 & 0.85 $\pm$ 0.22 \\
-BERTScore $F_1$ & 0.956 $\pm$ 0.058 & 0.956 $\pm$ 0.058 & 0.967 $\pm$ 0.049 & 0.956 $\pm$ 0.061 & 0.956 $\pm$ 0.060 & 0.958 $\pm$ 0.059 \\
+Exact Match & 0,52 $\pm$ 0,50 & 0,52 $\pm$ 0,50 & 0,63 $\pm$ 0,48 & 0,57 $\pm$ 0,49 & 0,55 $\pm$ 0,50 & 0,59 $\pm$ 0,49 \\
+BLEU-1 & 0,82 $\pm$ 0,25 & 0,82 $\pm$ 0,26 & 0,86 $\pm$ 0,25 & 0,84 $\pm$ 0,25 & 0,84 $\pm$ 0,25 & 0,84 $\pm$ 0,25 \\
+BLEU-4 & 0,71 $\pm$ 0,32 & 0,70 $\pm$ 0,33 & 0,78 $\pm$ 0,31 & 0,75 $\pm$ 0,31 & 0,74 $\pm$ 0,31 & 0,75 $\pm$ 0,31 \\
+METEOR & 0,79 $\pm$ 0,26 & 0,79 $\pm$ 0,26 & 0,83 $\pm$ 0,25 & 0,80 $\pm$ 0,27 & 0,80 $\pm$ 0,27 & 0,81 $\pm$ 0,26 \\
+chrF++ & 0,81 $\pm$ 0,23 & 0,81 $\pm$ 0,23 & 0,85 $\pm$ 0,22 & 0,83 $\pm$ 0,23 & 0,82 $\pm$ 0,22 & 0,83 $\pm$ 0,22 \\
+ROUGE-L $F_1$ & 0,84 $\pm$ 0,22 & 0,84 $\pm$ 0,22 & 0,87 $\pm$ 0,21 & 0,85 $\pm$ 0,23 & 0,85 $\pm$ 0,22 & 0,85 $\pm$ 0,22 \\
+BERTScore $F_1$ & 0,956 $\pm$ 0,058 & 0,956 $\pm$ 0,058 & 0,967 $\pm$ 0,049 & 0,956 $\pm$ 0,061 & 0,956 $\pm$ 0,060 & 0,958 $\pm$ 0,059 \\
 \hline
 \end{tabular}
 \caption{Métricas con referencia humana por motor (media $\pm$ desviación estándar, $n=164$). Todas se calculan contra la lista de referencias humanas de cada caso.}
@@ -76,10 +76,10 @@ Métrica & Gramática & Embeddings & LLM & Hybrid1 & Hybrid2 & Hybrid3 \\
 \hline
 Perplejidad & 119 & 119 & 123 & 70 & 70 & 102 \\
 Pseudo-perpl. & 25 & 25 & 25 & 11 & 11 & 21 \\
-Cobertura & 0.96 & 0.96 & 0.96 & 0.98 & 0.98 & 0.99 \\
-Fidelidad & 0.89 & 0.89 & 0.90 & 0.93 & 0.93 & 0.93 \\
-Fidelidad ajust. & 0.951 & 0.951 & 0.961 & 0.983 & 0.979 & 0.986 \\
-Latencia (ms) & 0.02 & 0.04 & 1517 & 528 & 679 & 4348 \\
+Cobertura & 0,96 & 0,96 & 0,96 & 0,98 & 0,98 & 0,99 \\
+Fidelidad & 0,89 & 0,89 & 0,90 & 0,93 & 0,93 & 0,93 \\
+Fidelidad ajust. & 0,951 & 0,951 & 0,961 & 0,983 & 0,979 & 0,986 \\
+Latencia (ms) & 0,02 & 0,04 & 1517 & 528 & 679 & 4348 \\
 Éxito & 1.000 & 1.000 & 1.000 & 1.000 & 1.000 & 1.000 \\
 \hline
 \end{tabular}
@@ -87,17 +87,17 @@ Latencia (ms) & 0.02 & 0.04 & 1517 & 528 & 679 & 4348 \\
 \label{tab:eval-sin-referencia}
 \end{table}
 
-El LLM lidera todas las métricas con referencia humana: Exact Match del 63\% (frente al 52\% de las bases), BLEU-4 de 0.78, chrF++ de 0.85 y BERTScore $F_1$ de 0.967. Los tres híbridos se sitúan en un rango intermedio entre el LLM y las bases en estas métricas (Exact Match del 55-59\%, BLEU-4 del 0.74-0.75).
+El LLM lidera todas las métricas con referencia humana: Exact Match del 63\% (frente al 52\% de las bases), BLEU-4 de 0,78, chrF++ de 0,85 y BERTScore $F_1$ de 0,967. Los tres híbridos se sitúan en un rango intermedio entre el LLM y las bases en estas métricas (Exact Match del 55-59\%, BLEU-4 del 0,74-0,75).
 
-La gramática formal y los embeddings semánticos quedan por detrás en todas las métricas de coincidencia. Su equivalencia es casi total: producen la misma salida en 163 de los 164 casos (99.4\%), como se analiza en la Sección~\ref{sec:eval-convergencia}. El componente de embeddings no altera las decisiones de la gramática para el vocabulario acotado del proyecto.
+La gramática formal y los \textit{embeddings} semánticos quedan por detrás en todas las métricas de coincidencia. Su equivalencia es casi total: producen la misma salida en 163 de los 164 casos (99,4\%), como se analiza en la Sección~\ref{sec:eval-convergencia}. El componente de \textit{embeddings} no altera las decisiones de la gramática para el vocabulario acotado del proyecto.
 
-La tabla de métricas sin referencia añade las dimensiones no capturadas por las métricas de coincidencia. La cobertura de pictogramas converge entre el 96\% y el 99\% en los seis motores, con los híbridos ligeramente por encima (0.98-0.99) respecto a las bases (0.96). La fidelidad de contenido muestra la misma pauta: los híbridos (0.93) superan a las bases y al LLM puro (0.89-0.90).
+La tabla de métricas sin referencia añade las dimensiones no capturadas por las métricas de coincidencia. La cobertura de pictogramas converge entre el 96\% y el 99\% en los seis motores, con los híbridos ligeramente por encima (0,98-0,99) respecto a las bases (0,96). La fidelidad de contenido muestra la misma pauta: los híbridos (0,93) superan a las bases y al LLM puro (0,89-0,90).
 
-La fidelidad ajustada, que descuenta las inferencias pragmáticas del recuento de alucinaciones, eleva los valores por encima de 0.95 y estrecha las diferencias, lo que indica que la mayor parte de las ``alucinaciones'' detectadas por la fidelidad estándar son inferencias legítimas como el verbo ``querer'' a partir de pictogramas de necesidad.
+La fidelidad ajustada, que descuenta las inferencias pragmáticas del recuento de alucinaciones, eleva los valores por encima de 0,95 y estrecha las diferencias, lo que indica que la mayor parte de las ``alucinaciones'' detectadas por la fidelidad estándar son inferencias legítimas como el verbo ``querer'' a partir de pictogramas de necesidad.
 
-La perplejidad distingue claramente dos bloques: Hybrid1 y Hybrid2 producen las frases con menor perplejidad mediana (70 y 70, frente a 119 de la gramática y 123 del LLM). Esto confirma que la post-edición por LLM sobre la salida determinista mejora la fluidez según los modelos de lenguaje preentrenados. Hybrid3, con mediana de 102, queda en un nivel intermedio coherente con su diseño de ranking por perplejidad aplicado sobre candidatas de calidad similar. La pseudo-perplejidad con BETO reproduce la misma ordenación (medianas de 11 para Hybrid1 y Hybrid2, 25 para las bases y el LLM, 21 para Hybrid3).
+La perplejidad distingue claramente dos bloques: Hybrid1 y Hybrid2 producen las frases con menor perplejidad mediana (70 y 70, frente a 119 de la gramática y 123 del LLM). Esto confirma que la post-edición por LLM sobre la salida determinista mejora la fluidez según los modelos de lenguaje preentrenados. Hybrid3, con mediana de 102, queda en un nivel intermedio coherente con su diseño de \textit{ranking} por perplejidad aplicado sobre candidatas de calidad similar. La pseudo-perplejidad con BETO reproduce la misma ordenación (medianas de 11 para Hybrid1 y Hybrid2, 25 para las bases y el LLM, 21 para Hybrid3).
 
-La latencia mantiene un espectro amplio: desde los 0.02 ms de la gramática formal hasta los 4.3 segundos de Hybrid3, con el LLM en 1.5 segundos por llamada a la API.
+La latencia mantiene un espectro amplio: desde los 0,02 ms de la gramática formal hasta los 4,3 segundos de Hybrid3, con el LLM en 1,5 segundos por llamada a la API.
 
 \begin{figure}[ht]
     \centering
@@ -106,7 +106,7 @@ La latencia mantiene un espectro amplio: desde los 0.02 ms de la gramática form
     \label{fig:eval-radar}
 \end{figure}
 
-La Figura~\ref{fig:eval-radar} sintetiza estas observaciones de un vistazo. El polígono del LLM se aproxima al borde exterior en BLEU-4, chrF, METEOR y ROUGE-L, mientras que los híbridos extienden su superficie hacia cobertura y fidelidad. La gramática y los embeddings comparten un perfil casi idéntico, ligeramente comprimido en todas las métricas con referencia humana.
+La Figura~\ref{fig:eval-radar} sintetiza estas observaciones de un vistazo. El polígono del LLM se aproxima al borde exterior en BLEU-4, chrF, METEOR y ROUGE-L, mientras que los híbridos extienden su superficie hacia cobertura y fidelidad. La gramática y los \textit{embeddings} comparten un perfil casi idéntico, ligeramente comprimido en todas las métricas con referencia humana.
 
 \subsection{Significancia estadística}
 \label{sec:eval-significancia}
@@ -115,7 +115,7 @@ Las diferencias numéricas entre motores solo son informativas si superan la var
 
 El test de Friedman~\cite{friedman1937use} actúa como test ómnibus: evalúa si existe al menos un motor significativamente diferente de los demás para cada métrica. Cuando Friedman rechaza la hipótesis nula, se procede a comparaciones por pares con el test de Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual}, que compara dos muestras relacionadas (los mismos 164 casos evaluados por dos motores diferentes).
 
-Con 6 motores existen $\binom{6}{2} = 15$ pares posibles, lo que requiere corrección por comparaciones múltiples. Se aplica la corrección de Holm-Bonferroni~\cite{holm1979simple}, que ordena los $p$-valores de menor a mayor y compara cada uno con un umbral adaptativo $\alpha / (m - k + 1)$, donde $m = 15$ es el número de comparaciones y $k$ la posición en el ranking. Esta corrección ofrece mayor potencia estadística que la de Bonferroni clásica sin sacrificar el control del error de tipo I familiar.
+Con 6 motores existen $\binom{6}{2} = 15$ pares posibles, lo que requiere corrección por comparaciones múltiples. Se aplica la corrección de Holm-Bonferroni~\cite{holm1979simple}, que ordena los $p$-valores de menor a mayor y compara cada uno con un umbral adaptativo $\alpha / (m - k + 1)$, donde $m = 15$ es el número de comparaciones y $k$ la posición en el \textit{ranking}. Esta corrección ofrece mayor potencia estadística que la de Bonferroni clásica sin sacrificar el control del error de tipo I familiar.
 
 \begin{table}[ht]
 \centering
@@ -123,17 +123,17 @@ Con 6 motores existen $\binom{6}{2} = 15$ pares posibles, lo que requiere correc
 \hline
 Métrica & $\chi^2$ & $p$-valor & Significativo \\
 \hline
-BLEU-4 & 29.95 & $1.5 \cdot 10^{-5}$ & Sí \\
-METEOR & 23.03 & $3.3 \cdot 10^{-4}$ & Sí \\
-ROUGE-L $F_1$ & 30.30 & $1.3 \cdot 10^{-5}$ & Sí \\
-chrF++ & 31.13 & $8.8 \cdot 10^{-6}$ & Sí \\
-Exact Match & 25.80 & $9.8 \cdot 10^{-5}$ & Sí \\
-BERTScore $F_1$ & 40.44 & $1.2 \cdot 10^{-7}$ & Sí \\
-Log-perplejidad & 232.19 & $3.6 \cdot 10^{-48}$ & Sí \\
-Log-pseudo-perpl. & 232.59 & $3.0 \cdot 10^{-48}$ & Sí \\
-Cobertura & 32.53 & $4.7 \cdot 10^{-6}$ & Sí \\
-Fidelidad & 55.13 & $1.2 \cdot 10^{-10}$ & Sí \\
-Fidelidad ajustada & 41.50 & $7.4 \cdot 10^{-8}$ & Sí \\
+BLEU-4 & 29,95 & $1{,}5 \cdot 10^{-5}$ & Sí \\
+METEOR & 23,03 & $3{,}3 \cdot 10^{-4}$ & Sí \\
+ROUGE-L $F_1$ & 30,30 & $1{,}3 \cdot 10^{-5}$ & Sí \\
+chrF++ & 31,13 & $8{,}8 \cdot 10^{-6}$ & Sí \\
+Exact Match & 25,80 & $9{,}8 \cdot 10^{-5}$ & Sí \\
+BERTScore $F_1$ & 40,44 & $1{,}2 \cdot 10^{-7}$ & Sí \\
+Log-perplejidad & 232,19 & $3{,}6 \cdot 10^{-48}$ & Sí \\
+Log-pseudo-perpl. & 232,59 & $3{,}0 \cdot 10^{-48}$ & Sí \\
+Cobertura & 32,53 & $4{,}7 \cdot 10^{-6}$ & Sí \\
+Fidelidad & 55,13 & $1{,}2 \cdot 10^{-10}$ & Sí \\
+Fidelidad ajustada & 41,50 & $7{,}4 \cdot 10^{-8}$ & Sí \\
 \hline
 \end{tabular}
 \caption{Resultados del test de Friedman por métrica ($k=6$ motores, $n=164$ casos). El test resulta significativo ($p < 10^{-3}$) para las once métricas evaluadas.}
@@ -151,23 +151,23 @@ Las comparaciones por pares con Wilcoxon y corrección de Holm-Bonferroni produc
 \hline
 Hallazgo & Métricas afectadas & $p$-valor \\
 \hline
-Gramática $\equiv$ Embeddings & Todas & $p \geq 0.05$ \\
-LLM $>$ Gramática/Embeddings & BLEU-4, METEOR, EM, chrF++, ROUGE-L, BERTScore & $p < 0.01$ \\
-Hybrid1, Hybrid2 $>$ resto & Log-perplejidad, log-pseudo-perplejidad & $p < 0.001$ \\
-Híbridos $>$ Gramática/Embeddings & Cobertura, fidelidad, fidelidad ajustada & $p < 0.001$ \\
+Gramática $\equiv$ Embeddings & Todas & $p \geq 0{,}05$ \\
+LLM $>$ Gramática/Embeddings & BLEU-4, METEOR, EM, chrF++, ROUGE-L, BERTScore & $p < 0{,}01$ \\
+Hybrid1, Hybrid2 $>$ resto & Log-perplejidad, log-pseudo-perplejidad & $p < 0{,}001$ \\
+Híbridos $>$ Gramática/Embeddings & Cobertura, fidelidad, fidelidad ajustada & $p < 0{,}001$ \\
 \hline
 \end{tabular}
 \caption{Hallazgos principales del test de Wilcoxon por pares con corrección de Holm-Bonferroni. El símbolo $\equiv$ indica ausencia de diferencia significativa; $>$ indica superioridad significativa.}
 \label{tab:eval-wilcoxon}
 \end{table}
 
-El primer hallazgo es la equivalencia estadística entre gramática formal y embeddings semánticos en todas las métricas. Producen la misma salida en 163 de 164 casos (99.4\%), lo que explica la ausencia de diferencias detectables.
+El primer hallazgo es la equivalencia estadística entre gramática formal y \textit{embeddings} semánticos en todas las métricas. Producen la misma salida en 163 de 164 casos (99,4\%), lo que explica la ausencia de diferencias detectables.
 
 El segundo hallazgo confirma el liderazgo del LLM en las seis métricas basadas en referencia humana. Las reformulaciones neuronales no sólo no penalizan, sino que coinciden con mayor frecuencia con las referencias escritas por hablantes nativos. El resultado es coherente con el comportamiento observado en la encuesta de naturalidad (Sección~\ref{sec:eval-naturalidad}), donde el LLM es también la opción preferida.
 
-El tercer hallazgo es la ventaja clara de Hybrid1 y Hybrid2 en métricas de naturalidad intrínseca. La post-edición por LLM reduce la perplejidad mediana a prácticamente la mitad respecto a la gramática. Hybrid3 ocupa una posición intermedia: su paso de ranking por perplejidad selecciona con frecuencia la salida de la gramática (véase la Sección~\ref{sec:eval-hibridos}), lo que suaviza su ganancia en naturalidad respecto a Hybrid1 y Hybrid2.
+El tercer hallazgo es la ventaja clara de Hybrid1 y Hybrid2 en métricas de naturalidad intrínseca. La post-edición por LLM reduce la perplejidad mediana a prácticamente la mitad respecto a la gramática. Hybrid3 ocupa una posición intermedia: su paso de \textit{ranking} por perplejidad selecciona con frecuencia la salida de la gramática (véase la Sección~\ref{sec:eval-hibridos}), lo que suaviza su ganancia en naturalidad respecto a Hybrid1 y Hybrid2.
 
-El cuarto hallazgo muestra que los tres híbridos mejoran cobertura y fidelidad respecto a las bases y al LLM puro. La ganancia es modesta en valor absoluto (de 0.96 a 0.98-0.99 en cobertura), pero sistemática y estadísticamente significativa.
+El cuarto hallazgo muestra que los tres híbridos mejoran cobertura y fidelidad respecto a las bases y al LLM puro. La ganancia es modesta en valor absoluto (de 0,96 a 0,98-0,99 en cobertura), pero sistemática y estadísticamente significativa.
 
 \subsection{Análisis detallado}
 \label{sec:eval-detallado}
@@ -180,13 +180,13 @@ Las secciones anteriores ofrecen una visión global del rendimiento. Las siguien
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/eval-boxplots.png}
-    \caption{Distribución de las principales métricas por motor. El LLM presenta una cola superior más densa que las bases en BLEU-4, METEOR y exact match. Los híbridos distribuyen sus scores entre los dos extremos, reflejando casos donde la post-edición coincide con la referencia humana y casos donde la reformula.}
+    \caption{Distribución de las principales métricas por motor. El LLM presenta una cola superior más densa que las bases en BLEU-4, METEOR y exact match. Los híbridos distribuyen sus \textit{scores} entre los dos extremos, reflejando casos donde la post-edición coincide con la referencia humana y casos donde la reformula.}
     \label{fig:eval-boxplots}
 \end{figure}
 
-Los diagramas de caja de la Figura~\ref{fig:eval-boxplots} complementan las medias de la tabla anterior mostrando la distribución completa de cada métrica. Las dispersiones son notables: con desviaciones estándar cercanas a 0.5 en Exact Match, una parte sustancial del corpus recibe valores extremos (0 o 1) mientras que otra queda en valores intermedios cuando la hipótesis coincide con parte de las referencias pero no con todas.
+Los diagramas de caja de la Figura~\ref{fig:eval-boxplots} complementan las medias de la tabla anterior mostrando la distribución completa de cada métrica. Las dispersiones son notables: con desviaciones estándar cercanas a 0,5 en Exact Match, una parte sustancial del corpus recibe valores extremos (0 o 1) mientras que otra queda en valores intermedios cuando la hipótesis coincide con parte de las referencias pero no con todas.
 
-El LLM se diferencia por una densidad mayor en la parte alta de cada métrica: sus predicciones coinciden con alguna referencia humana con más frecuencia que las de las bases o los híbridos. La gramática y los embeddings muestran distribuciones prácticamente superpuestas, consecuencia de la equivalencia observada en la Sección~\ref{sec:eval-convergencia}.
+El LLM se diferencia por una densidad mayor en la parte alta de cada métrica: sus predicciones coinciden con alguna referencia humana con más frecuencia que las de las bases o los híbridos. La gramática y los \textit{embeddings} muestran distribuciones prácticamente superpuestas, consecuencia de la equivalencia observada en la Sección~\ref{sec:eval-convergencia}.
 
 La dispersión tiene implicaciones prácticas para un sistema de CAA. Un motor con media alta pero alta varianza es menos predecible para el usuario: la oración generada puede coincidir con una formulación natural en unos casos y divergir notablemente en otros. Las bases ofrecen menor variabilidad entre ejecuciones (determinismo total) a costa de una media más baja. El LLM y los híbridos introducen variabilidad pero elevan la media.
 
@@ -209,7 +209,7 @@ La dispersión tiene implicaciones prácticas para un sistema de CAA. Un motor c
 
 Las Figuras~\ref{fig:eval-bleu4-complejidad} y~\ref{fig:eval-chrf-complejidad} desglosan el rendimiento por nivel de complejidad de la secuencia de entrada: simple, media y compleja. El LLM mantiene su ventaja sobre las bases en los tres niveles. La brecha entre LLM e híbridos es estable en BLEU-4 y se estrecha en chrF++, consistente con el hecho de que chrF tolera mejor las reformulaciones morfológicas menores que introduce la post-edición.
 
-La métrica chrF++ se mantiene por encima de 0.80 para todos los motores en los tres niveles, confirmando que las divergencias con las referencias humanas son predominantemente de formulación (orden de palabras, elecciones morfológicas) y no de contenido. BLEU-4, más estricta con la coincidencia exacta de 4-gramas, amplifica estas mismas diferencias.
+La métrica chrF++ se mantiene por encima de 0,80 para todos los motores en los tres niveles, confirmando que las divergencias con las referencias humanas son predominantemente de formulación (orden de palabras, elecciones morfológicas) y no de contenido. BLEU-4, más estricta con la coincidencia exacta de 4-gramas, amplifica estas mismas diferencias.
 
 \subsubsection{Análisis de errores}
 \label{sec:eval-errores}
@@ -223,7 +223,7 @@ La métrica chrF++ se mantiene por encima de 0.80 para todos los motores en los 
 
 La Figura~\ref{fig:eval-errores} muestra la distribución de los tipos de error definidos en la Sección~\ref{sec:metricas} para cada motor.
 
-El hallazgo más revelador es que la hibridación cambia la naturaleza de los errores, no sólo su frecuencia. La gramática formal y los embeddings presentan un porcentaje notable de casos clasificados como alucinación, lo que puede parecer contradictorio dado que producen salidas correctas. La explicación reside en la definición operativa de alucinación: se basa en la fidelidad de contenido, que penaliza palabras de contenido en la salida no presentes entre los pictogramas de entrada.
+El hallazgo más revelador es que la hibridación cambia la naturaleza de los errores, no sólo su frecuencia. La gramática formal y los \textit{embeddings} presentan un porcentaje notable de casos clasificados como alucinación, lo que puede parecer contradictorio dado que producen salidas correctas. La explicación reside en la definición operativa de alucinación: se basa en la fidelidad de contenido, que penaliza palabras de contenido en la salida no presentes entre los pictogramas de entrada.
 
 Cuando el motor infiere correctamente un verbo como ``quiero'' a partir del pictograma ``agua'', esa inferencia se contabiliza técnicamente como alucinación porque la palabra ``quiero'' no corresponde a ningún pictograma de la secuencia de entrada.
 
@@ -252,11 +252,11 @@ Hybrid3 & 102 & 21 \\
 \label{tab:eval-perplejidad}
 \end{table}
 
-La Tabla~\ref{tab:eval-perplejidad} revela que la post-edición por LLM es el único mecanismo que mejora de forma medible la naturalidad intrínseca de las salidas. Hybrid1 y Hybrid2 alcanzan las menores perplejidades (medianas de 70 frente a 119 de la gramática, 119 de los embeddings y 123 del LLM puro). La pseudo-perplejidad con BETO confirma la tendencia con medianas de 11 frente a 25.
+La Tabla~\ref{tab:eval-perplejidad} revela que la post-edición por LLM es el único mecanismo que mejora de forma medible la naturalidad intrínseca de las salidas. Hybrid1 y Hybrid2 alcanzan las menores perplejidades (medianas de 70 frente a 119 de la gramática, 119 de los \textit{embeddings} y 123 del LLM puro). La pseudo-perplejidad con BETO confirma la tendencia con medianas de 11 frente a 25.
 
 Hybrid3, que selecciona candidatos por perplejidad, obtiene una mediana intermedia de 102. El motivo es estructural: en el 73\% de los casos (véase la Sección~\ref{sec:eval-hibridos}) Hybrid3 selecciona la salida de la gramática, de modo que su perplejidad converge con la de su candidata mayoritaria.
 
-Las distribuciones de perplejidad en bruto presentan colas extremadamente largas por oraciones muy cortas o con vocabulario raro, lo que hace que la media sea poco informativa. La mediana es más robusta y es la que se reporta. El test de Friedman sobre log-perplejidad alcanza $\chi^2 = 232.19$ con $p < 10^{-47}$, la métrica con mayor separación entre motores de todo el estudio.
+Las distribuciones de perplejidad en bruto presentan colas extremadamente largas por oraciones muy cortas o con vocabulario raro, lo que hace que la media sea poco informativa. La mediana es más robusta y es la que se reporta. El test de Friedman sobre log-perplejidad alcanza $\chi^2 = 232{,}19$ con $p < 10^{-47}$, la métrica con mayor separación entre motores de todo el estudio.
 
 \subsection{Convergencia y diversidad entre motores}
 \label{sec:eval-convergencia}
@@ -269,22 +269,22 @@ La diversidad efectiva entre motores condiciona cuánto discriminan las métrica
 \hline
 Frases únicas & Casos & \% del total \\
 \hline
-1 (todos iguales) & 1 & 0.6\% \\
-2 & 113 & 68.9\% \\
-3 & 44 & 26.8\% \\
-4 & 5 & 3.0\% \\
-5 & 1 & 0.6\% \\
+1 (todos iguales) & 1 & 0,6\% \\
+2 & 113 & 68,9\% \\
+3 & 44 & 26,8\% \\
+4 & 5 & 3,0\% \\
+5 & 1 & 0,6\% \\
 \hline
 \end{tabular}
-\caption{Distribución de diversidad: número de frases únicas generadas por los seis motores para cada caso ($n=164$). La media es de 2.34 frases únicas por caso.}
+\caption{Distribución de diversidad: número de frases únicas generadas por los seis motores para cada caso ($n=164$). La media es de 2,34 frases únicas por caso.}
 \label{tab:eval-diversidad}
 \end{table}
 
-La Tabla~\ref{tab:eval-diversidad} muestra que la mayoría del corpus (69\%) admite exactamente dos formulaciones distintas entre los seis motores, y casi todo lo demás (27\%) admite tres. La convergencia total, con los seis motores produciendo la misma oración, ocurre sólo en 1 de 164 casos. Este patrón contrasta con lo que cabría esperar en un dominio abierto y se explica por la estructura interna del sistema: los tres motores con componente determinista (gramática, embeddings, Hybrid3 cuando selecciona la salida de la gramática) tienden a producir la misma oración, mientras que el LLM y los híbridos con post-edición introducen una o dos variantes adicionales por caso.
+La Tabla~\ref{tab:eval-diversidad} muestra que la mayoría del corpus (69\%) admite exactamente dos formulaciones distintas entre los seis motores, y casi todo lo demás (27\%) admite tres. La convergencia total, con los seis motores produciendo la misma oración, ocurre sólo en 1 de 164 casos. Este patrón contrasta con lo que cabría esperar en un dominio abierto y se explica por la estructura interna del sistema: los tres motores con componente determinista (gramática, \textit{embeddings}, Hybrid3 cuando selecciona la salida de la gramática) tienden a producir la misma oración, mientras que el LLM y los híbridos con post-edición introducen una o dos variantes adicionales por caso.
 
-Los bloques de equivalencia más relevantes son: gramática $\equiv$ embeddings en 163 de 164 casos (99.4\%), gramática $\equiv$ Hybrid3 en 120 casos (73.2\%) y gramática $\equiv$ LLM en 113 casos (68.9\%). El último es significativo: en dos tercios del corpus, el LLM genera de forma independiente la misma oración que la gramática, lo que indica que para frases cortas del dominio CAA existe una formulación canónica que distintas técnicas recuperan sin coordinación.
+Los bloques de equivalencia más relevantes son: gramática $\equiv$ \textit{embeddings} en 163 de 164 casos (99,4\%), gramática $\equiv$ Hybrid3 en 120 casos (73,2\%) y gramática $\equiv$ LLM en 113 casos (68,9\%). El último es significativo: en dos tercios del corpus, el LLM genera de forma independiente la misma oración que la gramática, lo que indica que para frases cortas del dominio CAA existe una formulación canónica que distintas técnicas recuperan sin coordinación.
 
-Las divergencias mayores aparecen con Hybrid1 y Hybrid2: gramática $\equiv$ Hybrid1 sólo en 26 casos (15.9\%) y embeddings $\equiv$ Hybrid2 en 31 casos (18.9\%). La post-edición por LLM reformula más del 80\% de las salidas base, lo que explica tanto su mejora en perplejidad como su divergencia sistemática respecto a las técnicas deterministas.
+Las divergencias mayores aparecen con Hybrid1 y Hybrid2: gramática $\equiv$ Hybrid1 sólo en 26 casos (15,9\%) y \textit{embeddings} $\equiv$ Hybrid2 en 31 casos (18,9\%). La post-edición por LLM reformula más del 80\% de las salidas base, lo que explica tanto su mejora en perplejidad como su divergencia sistemática respecto a las técnicas deterministas.
 
 \subsection{Análisis de los híbridos}
 \label{sec:eval-hibridos}
@@ -301,11 +301,11 @@ Las tres hibridaciones perseguían mejorar alguna dimensión respecto a las téc
     \label{fig:eval-mejora}
 \end{figure}
 
-La Figura~\ref{fig:eval-mejora} cuantifica la mejora relativa de cada híbrido respecto a su técnica base natural: Hybrid1 frente a la gramática formal, Hybrid2 frente a los embeddings, y Hybrid3 frente a ambas bases. El patrón es consistente: los híbridos mejoran las métricas de coincidencia con la referencia humana (exact match sube del 52\% al 55-59\%, BLEU-4 del 0.71 al 0.74-0.75) y mejoran también perplejidad, cobertura y fidelidad. El coste se concentra en la latencia y el coste económico, analizados en la subsección siguiente.
+La Figura~\ref{fig:eval-mejora} cuantifica la mejora relativa de cada híbrido respecto a su técnica base natural: Hybrid1 frente a la gramática formal, Hybrid2 frente a los \textit{embeddings}, y Hybrid3 frente a ambas bases. El patrón es consistente: los híbridos mejoran las métricas de coincidencia con la referencia humana (exact match sube del 52\% al 55-59\%, BLEU-4 del 0,71 al 0,74-0,75) y mejoran también perplejidad, cobertura y fidelidad. El coste se concentra en la latencia y el coste económico, analizados en la subsección siguiente.
 
 La mejora en exact match frente a las bases es uno de los hallazgos clave del estudio. Al reformular las salidas deterministas con un LLM de post-edición, los híbridos recuperan un 3-7\% adicional de coincidencias exactas con las referencias humanas. La explicación es que la post-edición ajusta marcas morfológicas y artículos a las formas que los hablantes eligieron con más frecuencia, acercando la salida a la mediana de formulaciones humanas.
 
-Ahora bien, esta mejora sobre las bases no alcanza el rendimiento del LLM puro, que lidera todas las métricas con referencia (Exact Match 0.63 frente a 0.55-0.59 de los híbridos). La post-edición sobre una salida determinista añade valor, pero menos que dejar al LLM generar desde cero.
+Ahora bien, esta mejora sobre las bases no alcanza el rendimiento del LLM puro, que lidera todas las métricas con referencia (Exact Match 0,63 frente a 0,55-0,59 de los híbridos). La post-edición sobre una salida determinista añade valor, pero menos que dejar al LLM generar desde cero.
 
 \subsubsection{Compromisos de diseño}
 \label{sec:eval-compromisos}
@@ -317,7 +317,7 @@ Ahora bien, esta mejora sobre las bases no alcanza el rendimiento del LLM puro, 
 \hline
 Dimensión & Gram. & Emb. & LLM & Hybrid1 & Hybrid2 & Hybrid3 \\
 \hline
-Latencia (med.) & $<$1 ms & $<$1 ms & 1517 ms & 528 ms & 679 ms & 4.3 s \\
+Latencia (med.) & $<$1 ms & $<$1 ms & 1517 ms & 528 ms & 679 ms & 4,3 s \\
 Coste & Gratis & Gratis & \$0.003 & \$0.003 & \$0.003 & \$0.009 \\
 Determinismo & Total & Total & Parcial & Parcial & Parcial & Parcial \\
 Offline & Sí & Sí & No & No & No & No \\
@@ -328,9 +328,9 @@ Dependencias & Ninguna & FastText & API OpenAI & API OpenAI & API+FastText & API
 \label{tab:eval-compromisos}
 \end{table}
 
-La Tabla~\ref{tab:eval-compromisos} amplía la comparación a dimensiones operativas que las métricas de calidad lingüística no capturan. La latencia establece tres niveles diferenciados: los motores deterministas operan en sub-milisegundos, Hybrid1 y Hybrid2 se sitúan en el rango de 500-700 ms (una sola llamada LLM para post-edición), el LLM puro en $\sim$1.5 s y Hybrid3 alcanza los 4.3 segundos debido a las múltiples generaciones y al paso de ranking por perplejidad.
+La Tabla~\ref{tab:eval-compromisos} amplía la comparación a dimensiones operativas que las métricas de calidad lingüística no capturan. La latencia establece tres niveles diferenciados: los motores deterministas operan en sub-milisegundos, Hybrid1 y Hybrid2 se sitúan en el rango de 500-700 ms (una sola llamada LLM para post-edición), el LLM puro en $\sim$1,5 s y Hybrid3 alcanza los 4,3 segundos debido a las múltiples generaciones y al paso de \textit{ranking} por perplejidad.
 
-El coste económico diferencia los motores offline (gratis) de los que dependen de la API de OpenAI. Hybrid1 y Hybrid2 realizan una llamada al LLM por caso, igualando el coste del LLM puro. Hybrid3 triplica este coste al generar múltiples candidatos.
+El coste económico diferencia los motores \textit{offline} (gratis) de los que dependen de la API de OpenAI. Hybrid1 y Hybrid2 realizan una llamada al LLM por caso, igualando el coste del LLM puro. Hybrid3 triplica este coste al generar múltiples candidatos.
 
 El determinismo (la propiedad de que la misma entrada produce siempre la misma salida) se pierde en cualquier motor que involucre al LLM, lo que incluye los tres híbridos. Para un usuario de CAA, la previsibilidad de la salida es un factor de confianza: saber que al seleccionar los mismos pictogramas obtendrá siempre la misma oración facilita el aprendizaje del sistema.
 
@@ -354,7 +354,7 @@ El diseño contempla 164 ítems organizados en 10 bloques de 16 ítems únicos m
 
 La evaluación multi-referencia consiste en calcular las métricas automáticas (BLEU, chrF, BERTScore) comparando cada predicción del motor contra todas las referencias humanas del mismo caso, en lugar de contra una sola. Un $n$-grama de la predicción cuenta como acierto si aparece en cualquiera de las referencias, de modo que las reformulaciones legítimas dejan de penalizarse. La ganancia es empírica: Zouhar y Bojar~\cite{zouhar2024quality} muestran que añadir hasta 7 referencias por segmento incrementa la correlación entre métricas automáticas y juicio humano, porque cada referencia adicional captura una formulación alternativa válida.
 
-La encuesta se difundió por canales personales del autor durante aproximadamente tres semanas. Cada participante quedaba asignado a un bloque del diseño balanceado y escribía libremente la frase que diría al ver cada una de las 20 secuencias de pictogramas de ese bloque. Se inscribieron 57 personas: 45 completaron los 20 ítems (78.9\%), 8 aportaron respuestas parciales de entre 2 y 10 ítems, y 4 no llegaron a responder. La Tabla~\ref{tab:eval-golden-cobertura} detalla la cobertura por bloque: siete alcanzaron el objetivo de seis inscritos, dos quedaron en cinco por el algoritmo de balance del servidor al detenerse la captación y el bloque 9 fue el peor cubierto, con dos completos sobre cinco inscritos.
+La encuesta se difundió por canales personales del autor durante aproximadamente tres semanas. Cada participante quedaba asignado a un bloque del diseño balanceado y escribía libremente la frase que diría al ver cada una de las 20 secuencias de pictogramas de ese bloque. Se inscribieron 57 personas: 45 completaron los 20 ítems (78,9\%), 8 aportaron respuestas parciales de entre 2 y 10 ítems, y 4 no llegaron a responder. La Tabla~\ref{tab:eval-golden-cobertura} detalla la cobertura por bloque: siete alcanzaron el objetivo de seis inscritos, dos quedaron en cinco por el algoritmo de balance del servidor al detenerse la captación y el bloque 9 fue el peor cubierto, con dos completos sobre cinco inscritos.
 
 \begin{table}[ht]
 \centering
@@ -370,18 +370,18 @@ Completos/inscritos & 3/6 & 6/6 & 3/6 & 6/6 & 5/5 & 5/5 & 6/6 & 3/6 & 2/5 & 6/6 
 \label{tab:eval-golden-cobertura}
 \end{table}
 
-El corpus recogido suma 948 respuestas humanas, que tras deduplicación exacta por ítem quedan en 615 referencias únicas. De los 160 ítems no-anchor, 22 recibieron una única referencia, 33 reunieron dos, 30 reunieron tres, 30 reunieron cuatro, 25 reunieron cinco y 20 reunieron seis, con una media de 3.39 referencias únicas por ítem (4.74 respuestas brutas por ítem sin deduplicar). Los cuatro anchors, que por diseño aparecen en todos los bloques, acumularon entre 46 y 48 respuestas cada uno.
+El corpus recogido suma 948 respuestas humanas, que tras deduplicación exacta por ítem quedan en 615 referencias únicas. De los 160 ítems no-\textit{anchor}, 22 recibieron una única referencia, 33 reunieron dos, 30 reunieron tres, 30 reunieron cuatro, 25 reunieron cinco y 20 reunieron seis, con una media de 3,39 referencias únicas por ítem (4,74 respuestas brutas por ítem sin deduplicar). Los cuatro \textit{anchors}, que por diseño aparecen en todos los bloques, acumularon entre 46 y 48 respuestas cada uno.
 
 La convergencia entre participantes es la señal más clara de que el corpus captura variabilidad genuina y no ruido. En GS001 (``agua + y + pan''), 27 de 48 respondentes escribieron literalmente ``Agua y pan'' y otros 6 ``Quiero agua y pan'', dejando solo 15 referencias únicas. En GS067 (``cansado''), 36 coincidieron en ``estoy muy cansado''. En GS143 (``yo + querer + agua''), 27 escribieron ``yo quiero agua'' y 11 ``quiero agua''. En total se registraron 168 pares (ítem, texto) repetidos por distintos participantes, y ningún respondente usó el mismo texto en cinco o más ítems distintos, lo que descarta patrones de spam o relleno.
 
-El \textit{golden standard} final contiene los 164 ítems del diseño: los 160 no-anchor más los 4 anchors, todos con referencias humanas recogidas. Cada ítem lleva asociada su lista de referencias únicas, lista para alimentar BLEU y chrF multi-referencia, junto con la frecuencia con la que cada formulación fue producida por los participantes.
+El \textit{golden standard} final contiene los 164 ítems del diseño: los 160 no-\textit{anchor} más los 4 \textit{anchors}, todos con referencias humanas recogidas. Cada ítem lleva asociada su lista de referencias únicas, lista para alimentar BLEU y chrF multi-referencia, junto con la frecuencia con la que cada formulación fue producida por los participantes.
 
-El corpus recogido presenta tres limitaciones. La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica. De los 160 ítems no-anchor, 55 cuentan con dos referencias únicas o menos, lo que aumenta la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore al presentar los resultados. El esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
+El corpus recogido presenta tres limitaciones. La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica. De los 160 ítems no-\textit{anchor}, 55 cuentan con dos referencias únicas o menos, lo que aumenta la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore al presentar los resultados. El esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
 
 \subsubsection{Encuesta de naturalidad}
 \label{sec:eval-naturalidad}
 
-La encuesta de naturalidad sigue un diseño de elección forzada (\textit{forced-choice}). El evaluador ve una secuencia de pictogramas ARASAAC y las frases generadas por las tres técnicas base (gramática formal, embeddings semánticos y LLM), sin saber qué técnica produjo cada frase. Debe seleccionar la que suene más natural en español, o elegir ``Ninguna de las anteriores'' si ninguna le convence (véase la Figura~\ref{fig:eval-naturalidad-encuesta} en el Anexo~\ref{sec:anexo-interfaces-encuestas}).
+La encuesta de naturalidad sigue un diseño de elección forzada (\textit{forced-choice}). El evaluador ve una secuencia de pictogramas ARASAAC y las frases generadas por las tres técnicas base (gramática formal, \textit{embeddings} semánticos y LLM), sin saber qué técnica produjo cada frase. Debe seleccionar la que suene más natural en español, o elegir ``Ninguna de las anteriores'' si ninguna le convence (véase la Figura~\ref{fig:eval-naturalidad-encuesta} en el Anexo~\ref{sec:anexo-interfaces-encuestas}).
 
 La elección forzada se prefirió sobre una escala Likert~\cite{likert1932} por tres razones. Con una escala Likert cada evaluador tendría que puntuar cada frase por separado (tres puntuaciones por caso), mientras que con elección forzada cada caso se resuelve con una sola decisión. La reducción de carga cognitiva es relevante porque los evaluadores son voluntarios no remunerados, y la brevedad del instrumento condiciona la tasa de finalización. La elección forzada minimiza el sesgo de aquiescencia y produce datos directamente comparables entre técnicas sin necesidad de normalizar escalas individuales.
 
@@ -391,15 +391,15 @@ La evaluación es ciega: el evaluador no conoce qué técnica generó cada frase
 
 La opción ``Ninguna de las anteriores'' evita forzar una elección cuando todas las frases son deficientes. Sin esta opción, un evaluador que encuentre las tres alternativas poco naturales se vería obligado a seleccionar la ``menos mala'', contaminando los datos con preferencias que no son tales.
 
-La selección de casos aplica un muestreo estratificado por longitud de la secuencia y tipo comunicativo. Se priorizan los casos donde las tres técnicas generan frases distintas: cuando dos técnicas producen la misma frase, la elección no aporta información diferencial, así que esos casos se excluyen. Los 44 ítems resultantes se organizan en dos sets, A y B, de 26 ítems cada uno: 18 exclusivos del set más 8 \textit{anchors} compartidos. Cada participante ve un único set, y los 8 \textit{anchors} sirven como núcleo común para detectar sesgos cruzados entre sets. Cuando dos técnicas generan exactamente la misma frase, la opción duplicada se elimina de la interfaz; si el evaluador elige una frase compartida por varias técnicas, el voto se atribuye a todas las que la generaron.
+La selección de casos aplica un muestreo estratificado por longitud de la secuencia y tipo comunicativo. Se priorizan los casos donde las tres técnicas generan frases distintas: cuando dos técnicas producen la misma frase, la elección no aporta información diferencial, así que esos casos se excluyen. Los 44 ítems resultantes se organizan en dos \textit{sets}, A y B, de 26 ítems cada uno: 18 exclusivos del \textit{set} más 8 \textit{anchors} compartidos. Cada participante ve un único \textit{set}, y los 8 \textit{anchors} sirven como núcleo común para detectar sesgos cruzados entre \textit{sets}. Cuando dos técnicas generan exactamente la misma frase, la opción duplicada se elimina de la interfaz; si el evaluador elige una frase compartida por varias técnicas, el voto se atribuye a todas las que la generaron.
 
-La encuesta se difundió por canales personales del autor. Se inscribieron 54 personas: 48 completaron los 26 ítems de su set (88.9\%), 3 aportaron respuestas parciales de entre 8 y 10 ítems y 3 no llegaron a responder. El conjunto recogido suma 1275 respuestas. La cobertura por set es asimétrica: en el set A los 27 inscritos completaron el cuestionario (100\%) y en el set B lo hicieron 21 de 27 (78\%). Los 44 ítems presentados recibieron al menos una respuesta, con una cobertura del 100\% sobre el diseño. Los 8 \textit{anchors} permiten validar la ausencia de sesgos cruzados entre sets: en los ocho ítems compartidos la técnica ganadora coincide entre el set A y el set B, lo que indica que la asignación de participantes no introdujo desviaciones sistemáticas en los resultados.
+La encuesta se difundió por canales personales del autor. Se inscribieron 54 personas: 48 completaron los 26 ítems de su \textit{set} (88,9\%), 3 aportaron respuestas parciales de entre 8 y 10 ítems y 3 no llegaron a responder. El conjunto recogido suma 1275 respuestas. La cobertura por \textit{set} es asimétrica: en el \textit{set} A los 27 inscritos completaron el cuestionario (100\%) y en el \textit{set} B lo hicieron 21 de 27 (78\%). Los 44 ítems presentados recibieron al menos una respuesta, con una cobertura del 100\% sobre el diseño. Los 8 \textit{anchors} permiten validar la ausencia de sesgos cruzados entre \textit{sets}: en los ocho ítems compartidos la técnica ganadora coincide entre el \textit{set} A y el \textit{set} B, lo que indica que la asignación de participantes no introdujo desviaciones sistemáticas en los resultados.
 
-La distribución global de preferencias sobre las 1275 respuestas sitúa al LLM (GPT-4o) como opción más elegida, con 561 votos (44.0\%), seguido por la gramática formal con 303 votos (23.8\%) y los embeddings con 300 votos (23.5\%). La opción ``Ninguna de las anteriores'' recibió 111 votos (8.7\%). El LLM dobla aproximadamente la preferencia de cada motor base, pero no domina: cerca de una de cada cuatro respuestas prefiere la gramática y otras tantas los embeddings, en casos concretos donde las formulaciones breves y directas de los motores deterministas resultan más naturales a los evaluadores que la reformulación neuronal.
+La distribución global de preferencias sobre las 1275 respuestas sitúa al LLM (GPT-4o) como opción más elegida, con 561 votos (44,0\%), seguido por la gramática formal con 303 votos (23,8\%) y los \textit{embeddings} con 300 votos (23,5\%). La opción ``Ninguna de las anteriores'' recibió 111 votos (8,7\%). El LLM dobla aproximadamente la preferencia de cada motor base, pero no domina: cerca de una de cada cuatro respuestas prefiere la gramática y otras tantas los \textit{embeddings}, en casos concretos donde las formulaciones breves y directas de los motores deterministas resultan más naturales a los evaluadores que la reformulación neuronal.
 
-Los contrastes de hipótesis confirman este patrón. El test chi-cuadrado de bondad de ajuste frente a la distribución uniforme sobre las tres técnicas (excluyendo la opción ``Ninguna'') rechaza la equiprobabilidad con $\chi^2 = 115.7$, $p < 10^{-25}$. El test de Cochran Q sobre la matriz binaria trial $\times$ técnica produce el mismo estadístico y $p$-valor, coherente con la equivalencia matemática de ambos tests en un diseño forced-choice con respuesta única. Las comparaciones por pares con McNemar y corrección de Bonferroni ($n = 3$) revelan que gramática y embeddings empatan estadísticamente ($\chi^2 = 0.01$, $p = 1.0$), mientras que el LLM supera tanto a la gramática ($\chi^2 = 76.4$, $p \cdot \text{bonf} < 10^{-17}$) como a los embeddings ($\chi^2 = 78.5$, $p \cdot \text{bonf} < 10^{-17}$). La ventaja del LLM es robusta y estadísticamente indiscutible; la del componente de embeddings sobre la gramática no existe desde el punto de vista de la preferencia humana.
+Los contrastes de hipótesis confirman este patrón. El test chi-cuadrado de bondad de ajuste frente a la distribución uniforme sobre las tres técnicas (excluyendo la opción ``Ninguna'') rechaza la equiprobabilidad con $\chi^2 = 115{,}7$, $p < 10^{-25}$. El test de Cochran Q sobre la matriz binaria trial $\times$ técnica produce el mismo estadístico y $p$-valor, coherente con la equivalencia matemática de ambos tests en un diseño \textit{forced-choice} con respuesta única. Las comparaciones por pares con McNemar y corrección de Bonferroni ($n = 3$) revelan que gramática y \textit{embeddings} empatan estadísticamente ($\chi^2 = 0{,}01$, $p = 1{,}0$), mientras que el LLM supera tanto a la gramática ($\chi^2 = 76{,}4$, $p \cdot \text{bonf} < 10^{-17}$) como a los \textit{embeddings} ($\chi^2 = 78{,}5$, $p \cdot \text{bonf} < 10^{-17}$). La ventaja del LLM es robusta y estadísticamente indiscutible; la del componente de \textit{embeddings} sobre la gramática no existe desde el punto de vista de la preferencia humana.
 
-El análisis por longitud de secuencia y por tipo comunicativo matiza esta preferencia global. La Tabla~\ref{tab:eval-naturalidad-longitud} muestra que el liderazgo del LLM crece con la longitud de la entrada. En frases \textit{short} los motores base superan conjuntamente al LLM (embeddings 37\%, gramática 33\% frente a 18\% del LLM) y la tasa de ``Ninguna'' es del 12\%. En frases \textit{medium} y \textit{long} el LLM se impone con un 46\% y un 45\% respectivamente. En frases \textit{extra\_long} el LLM triplica a cualquier motor base con un 67\%, reflejo de su capacidad para articular secuencias largas con una sintaxis más fluida.
+El análisis por longitud de secuencia y por tipo comunicativo matiza esta preferencia global. La Tabla~\ref{tab:eval-naturalidad-longitud} muestra que el liderazgo del LLM crece con la longitud de la entrada. En frases \textit{short} los motores base superan conjuntamente al LLM (\textit{embeddings} 37\%, gramática 33\% frente a 18\% del LLM) y la tasa de ``Ninguna'' es del 12\%. En frases \textit{medium} y \textit{long} el LLM se impone con un 46\% y un 45\% respectivamente. En frases \textit{extra\_long} el LLM triplica a cualquier motor base con un 67\%, reflejo de su capacidad para articular secuencias largas con una sintaxis más fluida.
 
 \begin{table}[ht]
 \centering
@@ -418,7 +418,7 @@ Longitud & $n$ & LLM & Gramática & Embeddings & Ninguna \\
 \label{tab:eval-naturalidad-longitud}
 \end{table}
 
-El desglose por tipo comunicativo (Tabla~\ref{tab:eval-naturalidad-tipo}) revela diferencias todavía más acusadas. El LLM domina con amplitud en \textit{descripciones} (89\%) y \textit{emociones y estados} (81\%), y mantiene ventaja clara en \textit{negaciones} (62\%) y \textit{peticiones y deseos} (55\%). En \textit{preguntas} la preferencia se reparte entre las tres técnicas, con el LLM al 38\% y los embeddings al 33\%. En \textit{acciones cotidianas} la gramática se impone por estrecho margen (33\%) al LLM (32\%) y a los embeddings (23\%), con un 13\% de ``Ninguna''. El hallazgo más llamativo aparece en \textit{necesidades básicas}: el LLM no recibe ni una sola elección preferente (0\%) frente al 42\% de los embeddings y el 39\% de la gramática, y un 18\% de los evaluadores marca ``Ninguna''. En un dominio donde la economía expresiva importa más que la elaboración sintáctica, los motores base, que generan formulaciones breves y directas, resultan preferidos a la reformulación del LLM.
+El desglose por tipo comunicativo (Tabla~\ref{tab:eval-naturalidad-tipo}) revela diferencias todavía más acusadas. El LLM domina con amplitud en \textit{descripciones} (89\%) y \textit{emociones y estados} (81\%), y mantiene ventaja clara en \textit{negaciones} (62\%) y \textit{peticiones y deseos} (55\%). En \textit{preguntas} la preferencia se reparte entre las tres técnicas, con el LLM al 38\% y los \textit{embeddings} al 33\%. En \textit{acciones cotidianas} la gramática se impone por estrecho margen (33\%) al LLM (32\%) y a los \textit{embeddings} (23\%), con un 13\% de ``Ninguna''. El hallazgo más llamativo aparece en \textit{necesidades básicas}: el LLM no recibe ni una sola elección preferente (0\%) frente al 42\% de los \textit{embeddings} y el 39\% de la gramática, y un 18\% de los evaluadores marca ``Ninguna''. En un dominio donde la economía expresiva importa más que la elaboración sintáctica, los motores base, que generan formulaciones breves y directas, resultan preferidos a la reformulación del LLM.
 
 \begin{table}[ht]
 \centering
@@ -440,9 +440,9 @@ Necesidades básicas & 99 & 0\% & 39\% & 42\% & 18\% \\
 \label{tab:eval-naturalidad-tipo}
 \end{table}
 
-La tasa global de ``Ninguna de las anteriores'' se sitúa en el 8.7\%, pero concentra su peso en dos tipos concretos: \textit{necesidades básicas} (18\%) y \textit{acciones cotidianas} (13\%). En \textit{descripciones} ningún evaluador marcó esta opción. El patrón sugiere que los tipos con mayor ``Ninguna'' señalan dominios donde el conjunto de las tres técnicas falla con más frecuencia ante los evaluadores.
+La tasa global de ``Ninguna de las anteriores'' se sitúa en el 8,7\%, pero concentra su peso en dos tipos concretos: \textit{necesidades básicas} (18\%) y \textit{acciones cotidianas} (13\%). En \textit{descripciones} ningún evaluador marcó esta opción. El patrón sugiere que los tipos con mayor ``Ninguna'' señalan dominios donde el conjunto de las tres técnicas falla con más frecuencia ante los evaluadores.
 
-El contraste entre métricas automáticas y preferencia humana se puede cuantificar directamente en los ítems solapados entre las dos encuestas (30 de los 44 de naturalidad aparecen en el \textit{golden standard}). Sobre ese subconjunto se calcula la correlación de Spearman entre la tasa de preferencia por técnica y las métricas automáticas de esa técnica. La correlación chrF del LLM y preferencia del LLM es $\rho = +0.37$ con $p = 0.04$, la correlación BERTScore del LLM y preferencia del LLM es $\rho = +0.37$ con $p = 0.05$, y la correlación Exact Match del LLM y preferencia del LLM es $\rho = +0.38$ con $p = 0.04$. Las correlaciones son significativas y direccionales: cuando el LLM obtiene buenas métricas, los hablantes también lo prefieren. La correlación Exact Match de los embeddings y preferencia de los embeddings es $\rho = +0.45$ con $p = 0.01$, la más alta de todas. Las correlaciones para la gramática no alcanzan significancia en ninguna métrica ($|\rho| < 0.20$, $p > 0.4$): los hablantes no eligen la salida de la gramática en función de su BLEU o chrF, sino por otras razones (brevedad, economía expresiva) que las métricas n-gramáticas no capturan.
+El contraste entre métricas automáticas y preferencia humana se puede cuantificar directamente en los ítems solapados entre las dos encuestas (30 de los 44 de naturalidad aparecen en el \textit{golden standard}). Sobre ese subconjunto se calcula la correlación de Spearman entre la tasa de preferencia por técnica y las métricas automáticas de esa técnica. La correlación chrF del LLM y preferencia del LLM es $\rho = +0{,}37$ con $p = 0{,}04$, la correlación BERTScore del LLM y preferencia del LLM es $\rho = +0{,}37$ con $p = 0{,}05$, y la correlación Exact Match del LLM y preferencia del LLM es $\rho = +0{,}38$ con $p = 0{,}04$. Las correlaciones son significativas y direccionales: cuando el LLM obtiene buenas métricas, los hablantes también lo prefieren. La correlación Exact Match de los \textit{embeddings} y preferencia de los \textit{embeddings} es $\rho = +0{,}45$ con $p = 0{,}01$, la más alta de todas. Las correlaciones para la gramática no alcanzan significancia en ninguna métrica ($|\rho| < 0{,}20$, $p > 0{,}4$): los hablantes no eligen la salida de la gramática en función de su BLEU o chrF, sino por otras razones (brevedad, economía expresiva) que las métricas n-gramáticas no capturan.
 
 Los resultados admiten varias matizaciones. La muestra es modesta (48 participantes completos) y se reclutó por canales personales del autor, de modo que la composición demográfica no pretende representatividad poblacional y el diseño no permite generalizar a usuarios finales de CAA. La ventaja del LLM, aunque clara en el conjunto, no es unánime: alrededor de una cuarta parte de las elecciones prefieren cada motor base, y en \textit{necesidades básicas} el LLM no es la opción preferida en ningún caso. El 18\% de ``Ninguna'' en ese mismo tipo apunta a un vacío del sistema en enunciados donde la formulación esperada por los evaluadores no coincide con la salida de ninguno de los tres motores.
 
@@ -457,12 +457,12 @@ La Tabla~\ref{tab:eval-ranking} resume qué motor obtiene los mejores resultados
 \hline
 Dimensión & Mejor motor & Observación \\
 \hline
-Coincidencia con referencia humana & LLM & Exact Match 0.63, BLEU-4 0.78, chrF 0.85 \\
+Coincidencia con referencia humana & LLM & Exact Match 0,63, BLEU-4 0,78, chrF 0,85 \\
 Naturalidad intrínseca (perplejidad) & Hybrid1 / Hybrid2 & Mediana 70 (frente a 119 de las bases) \\
 Cobertura de pictogramas & Hybrid3 & 99\% (frente a 96\% de las bases) \\
-Fidelidad ajustada & Hybrid3 & 0.986 (frente a 0.951 de las bases) \\
+Fidelidad ajustada & Hybrid3 & 0,986 (frente a 0,951 de las bases) \\
 Preferencia humana (encuesta) & LLM & 44\% de elecciones ($p < 10^{-17}$) \\
-Latencia & Gramática & 0.02 ms (frente a 4.3 s de Hybrid3) \\
+Latencia & Gramática & 0,02 ms (frente a 4,3 s de Hybrid3) \\
 \hline
 \end{tabular}
 \caption{Resumen: mejor motor por dimensión evaluada.}
@@ -474,16 +474,16 @@ Latencia & Gramática & 0.02 ms (frente a 4.3 s de Hybrid3) \\
 \subsection{Discusión}
 \label{sec:eval-discusion}
 
-El hallazgo central de esta evaluación es el liderazgo consistente del LLM en dos dimensiones independientes: las métricas automáticas calculadas contra referencias humanas y la preferencia humana directa recogida en la encuesta de naturalidad. Las seis métricas con referencia (Exact Match, BLEU-4, METEOR, chrF++, ROUGE-L, BERTScore) sitúan al LLM por encima de las bases y de los tres híbridos, con diferencias estadísticamente significativas tras corrección por comparaciones múltiples. La encuesta de naturalidad confirma el resultado: el LLM recibe el 44\% de las 1275 preferencias, el doble que cualquier motor base, con diferencias pareadas frente a gramática y embeddings que resisten la corrección de Bonferroni a niveles $p < 10^{-17}$.
+El hallazgo central de esta evaluación es el liderazgo consistente del LLM en dos dimensiones independientes: las métricas automáticas calculadas contra referencias humanas y la preferencia humana directa recogida en la encuesta de naturalidad. Las seis métricas con referencia (Exact Match, BLEU-4, METEOR, chrF++, ROUGE-L, BERTScore) sitúan al LLM por encima de las bases y de los tres híbridos, con diferencias estadísticamente significativas tras corrección por comparaciones múltiples. La encuesta de naturalidad confirma el resultado: el LLM recibe el 44\% de las 1275 preferencias, el doble que cualquier motor base, con diferencias pareadas frente a gramática y \textit{embeddings} que resisten la corrección de Bonferroni a niveles $p < 10^{-17}$.
 
-La equivalencia entre gramática y embeddings es el segundo hallazgo transversal. Producen la misma salida en 163 de 164 casos, sus métricas automáticas coinciden en la tercera cifra decimal, y en la encuesta de naturalidad no se distinguen estadísticamente. El componente de embeddings no modifica las decisiones de la gramática en el dominio acotado del proyecto. Ampliar el vocabulario más allá de los 232 pictogramas actuales podría cambiar este resultado, pero queda fuera del alcance de este trabajo.
+La equivalencia entre gramática y \textit{embeddings} es el segundo hallazgo transversal. Producen la misma salida en 163 de 164 casos, sus métricas automáticas coinciden en la tercera cifra decimal, y en la encuesta de naturalidad no se distinguen estadísticamente. El componente de \textit{embeddings} no modifica las decisiones de la gramática en el dominio acotado del proyecto. Ampliar el vocabulario más allá de los 232 pictogramas actuales podría cambiar este resultado, pero queda fuera del alcance de este trabajo.
 
-El perfil de los híbridos confirma sus objetivos de diseño en las dimensiones para las que fueron pensados. Hybrid1 y Hybrid2 reducen la perplejidad mediana a la mitad respecto a las bases y elevan la fidelidad adjusted por encima de 0.98, lo que se traduce en texto más fluido y con menos alucinaciones de contenido. Hybrid3 lleva estas dos dimensiones al máximo (cobertura 0.99, fidelidad ajustada 0.986) a costa de seleccionar la salida de la gramática en el 73\% de los casos, lo que diluye el efecto de su ranker por perplejidad. En las métricas con referencia humana, los tres híbridos mejoran sobre las bases pero no alcanzan al LLM puro: la post-edición sobre una salida determinista añade valor, pero menos que dejar al LLM generar desde cero.
+El perfil de los híbridos confirma sus objetivos de diseño en las dimensiones para las que fueron pensados. Hybrid1 y Hybrid2 reducen la perplejidad mediana a la mitad respecto a las bases y elevan la fidelidad adjusted por encima de 0,98, lo que se traduce en texto más fluido y con menos alucinaciones de contenido. Hybrid3 lleva estas dos dimensiones al máximo (cobertura 0,99, fidelidad ajustada 0,986) a costa de seleccionar la salida de la gramática en el 73\% de los casos, lo que diluye el efecto de su \textit{ranker} por perplejidad. En las métricas con referencia humana, los tres híbridos mejoran sobre las bases pero no alcanzan al LLM puro: la post-edición sobre una salida determinista añade valor, pero menos que dejar al LLM generar desde cero.
 
 La correlación entre métricas automáticas y preferencia humana ofrece una validación metodológica del uso de BLEU, chrF y BERTScore como indicadores de calidad percibida. En el subconjunto solapado entre ambas encuestas, chrF, BERTScore y Exact Match del LLM correlacionan significativamente con la proporción de elecciones que los hablantes conceden al LLM. El mismo análisis sobre la gramática no produce correlaciones: los hablantes no eligen la gramática en función de su BLEU. Esto es coherente con el perfil cualitativo del motor: la gramática genera frases correctas pero poco preferidas en elaboración sintáctica, y recibe sus votos por razones (brevedad en necesidades básicas, economía expresiva) que las métricas n-gramáticas no capturan.
 
-La elección del motor principal para un sistema de producción depende del escenario. En un sistema online con conexión estable, el LLM es la opción preferente por su liderazgo en ambas dimensiones de calidad. En modo offline, la gramática formal es la única alternativa viable: su determinismo, su latencia sub-milisegundo y la ausencia de dependencias externas la convierten en un \textit{fallback} natural. La gramática conserva además una ventaja específica en \textit{necesidades básicas}, donde el LLM no recibe ninguna elección humana frente al 42\% de los embeddings y el 39\% de la gramática; para secuencias cortas y urgentes (``agua'', ``cansado'', ``baño''), los hablantes prefieren la formulación directa y breve. Una arquitectura de producción puede enrutar según el tipo de secuencia: gramática para necesidades básicas y el LLM para el resto.
+La elección del motor principal para un sistema de producción depende del escenario. En un sistema \textit{online} con conexión estable, el LLM es la opción preferente por su liderazgo en ambas dimensiones de calidad. En modo \textit{offline}, la gramática formal es la única alternativa viable: su determinismo, su latencia sub-milisegundo y la ausencia de dependencias externas la convierten en un \textit{fallback} natural. La gramática conserva además una ventaja específica en \textit{necesidades básicas}, donde el LLM no recibe ninguna elección humana frente al 42\% de los \textit{embeddings} y el 39\% de la gramática; para secuencias cortas y urgentes (``agua'', ``cansado'', ``baño''), los hablantes prefieren la formulación directa y breve. Una arquitectura de producción puede enrutar según el tipo de secuencia: gramática para necesidades básicas y el LLM para el resto.
 
 Los híbridos no se recomiendan como motor principal por dos razones. Primera, no superan al LLM puro en las métricas de calidad con referencia humana, y su ventaja en perplejidad y fidelidad no se traduce en preferencia humana dado que la encuesta de naturalidad no los incluyó. Segunda, su coste operativo es igual (Hybrid1, Hybrid2) o superior (Hybrid3) al del LLM puro, sin una ganancia neta que lo compense. Su valor queda como arquitectura útil en escenarios donde la cobertura de pictogramas es crítica (Hybrid3) o donde se quiere combinar la fiabilidad determinista de la gramática con una capa de post-edición neuronal (Hybrid1). La latencia de Hybrid1 (528 ms de mediana) es compatible con un sistema interactivo de CAA y lo convierte en una alternativa razonable cuando se prioriza la robustez ante entradas imprevistas que la gramática no cubre.
 
-La evaluación presenta limitaciones. El corpus de 164 ítems es modesto en comparación con los \textit{benchmarks} de NLG general, aunque está alineado con el tamaño habitual en evaluaciones humanas del campo~\cite{reiter2009investigation}. 55 de los 160 ítems no-anchor tienen dos o menos referencias únicas, lo que aumenta la varianza de BLEU; por esta razón se priorizan chrF y BERTScore. La encuesta de naturalidad solo cubre las tres técnicas base, y los híbridos se valoran únicamente por métricas automáticas. Finalmente, la muestra de 57 participantes en el \textit{golden standard} y 54 en naturalidad, captados por canales personales del autor, no pretende representatividad demográfica ni sobre usuarios reales de CAA. La validación con usuarios finales del sistema y con profesionales del ámbito queda como continuación natural del trabajo.
+La evaluación presenta limitaciones. El corpus de 164 ítems es modesto en comparación con los \textit{benchmarks} de NLG general, aunque está alineado con el tamaño habitual en evaluaciones humanas del campo~\cite{reiter2009investigation}. 55 de los 160 ítems no-\textit{anchor} tienen dos o menos referencias únicas, lo que aumenta la varianza de BLEU; por esta razón se priorizan chrF y BERTScore. La encuesta de naturalidad solo cubre las tres técnicas base, y los híbridos se valoran únicamente por métricas automáticas. Finalmente, la muestra de 57 participantes en el \textit{golden standard} y 54 en naturalidad, captados por canales personales del autor, no pretende representatividad demográfica ni sobre usuarios reales de CAA. La validación con usuarios finales del sistema y con profesionales del ámbito queda como continuación natural del trabajo.

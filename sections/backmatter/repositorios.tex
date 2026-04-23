@@ -1,7 +1,7 @@
 \chapter{Repositorios de código}
 \label{cap:repositorios}
 
-Todo el código fuente del proyecto se ha publicado como un conjunto de repositorios públicos en GitHub, bajo la cuenta del autor. Esta forma de entrega responde a una doble necesidad. Por un lado, el volumen total de los repositorios ---incluidos modelos de embeddings, conjuntos de datos y dependencias--- supera con holgura el límite de veinte megabytes impuesto al archivo comprimido que se entrega en la plataforma de defensa. Por otro, publicar el trabajo en repositorios activos facilita el acceso reproducible al código y mantiene disponibles tanto el historial de \textit{commits} como las \textit{issues} y la documentación asociada a cada componente.
+Todo el código fuente del proyecto se ha publicado como un conjunto de repositorios públicos en GitHub, bajo la cuenta del autor. Esta forma de entrega responde a una doble necesidad. Por un lado, el volumen total de los repositorios ---incluidos modelos de \textit{embeddings}, conjuntos de datos y dependencias--- supera con holgura el límite de veinte megabytes impuesto al archivo comprimido que se entrega en la plataforma de defensa. Por otro, publicar el trabajo en repositorios activos facilita el acceso reproducible al código y mantiene disponibles tanto el historial de \textit{commits} como las \textit{issues} y la documentación asociada a cada componente.
 
 El proyecto se estructura en diez repositorios independientes, cada uno con su propio historial, su propia configuración de entorno y sus propias dependencias. Esta separación permite clonar, instalar y ejecutar cada pieza de forma autónoma sin arrastrar el resto. Las secciones siguientes describen el contenido de cada repositorio y enlazan a su URL en GitHub.
 
@@ -31,7 +31,7 @@ Los cuatro motores de generación se mantienen en repositorios separados, un enf
 
 \begin{itemize}
     \item \textit{tfg-formal-grammar} --- Motor de generación basado en gramática libre de contexto implementado con Lark en Python. \url{https://github.com/Lagaress/tfg-formal-grammar}
-    \item \textit{tfg-embeddings} --- Motor híbrido que combina la gramática formal con embeddings FastText para el ranking semántico de candidatos. \url{https://github.com/Lagaress/tfg-embeddings}
+    \item \textit{tfg-embeddings} --- Motor híbrido que combina la gramática formal con \textit{embeddings} FastText para el \textit{ranking} semántico de candidatos. \url{https://github.com/Lagaress/tfg-embeddings}
     \item \textit{tfg-llms} --- Motor basado en modelos de lenguaje (GPT-4o) mediante la API de OpenAI. \url{https://github.com/Lagaress/tfg-llms}
     \item \textit{tfg-hybridization} --- Implementación de las tres estrategias de hibridación (Hybrid1, Hybrid2, Hybrid3) descritas en el capítulo de enfoques híbridos. \url{https://github.com/Lagaress/tfg-hybridization}
 \end{itemize}

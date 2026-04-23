@@ -20,15 +20,15 @@ Los motores de generación están escritos en Python y no pueden ejecutarse en u
 \section{Decisiones tecnológicas}
 \label{sec:app-tecnologias}
 
-La elección de React Native~\cite{reactnative2024} como framework de la app responde a la necesidad de cubrir iOS y Android desde un único código fuente. El proyecto usa React Native 0.81 con React 19, compilado mediante el SDK de Expo 54~\cite{expo2024}. Expo aporta un conjunto de bibliotecas nativas preconfiguradas (cámara, audio, hápticos, almacenamiento) y un sistema de compilación que abstrae la configuración de Xcode y Gradle.
+La elección de React Native~\cite{reactnative2024} como \textit{framework} de la app responde a la necesidad de cubrir iOS y Android desde un único código fuente. El proyecto usa React Native 0.81 con React 19, compilado mediante el SDK de Expo 54~\cite{expo2024}. Expo aporta un conjunto de bibliotecas nativas preconfiguradas (cámara, audio, hápticos, almacenamiento) y un sistema de compilación que abstrae la configuración de Xcode y Gradle.
 
 La navegación se gestiona con Expo Router 6, que organiza las pantallas como ficheros en un directorio, de forma análoga a Next.js en el entorno web. La app tiene habilitada la \textit{New Architecture} de React Native, que emplea el motor Hermes para la ejecución de JavaScript. Todo el código del cliente está escrito en TypeScript 5.9, lo que añade tipado estático sobre JavaScript.
 
-El servidor usa FastAPI~\cite{fastapi2024}, un framework web para Python. La elección viene condicionada por los motores de generación: los tres están escritos en Python y dependen de bibliotecas que no existen en otros lenguajes. Portar cualquiera de estos componentes a TypeScript o Go habría supuesto reescribirlos desde cero, y alternativas como AWS Lambda quedaban descartadas porque el modelo de embeddings excede los límites de memoria de las funciones \textit{serverless}.
+El servidor usa FastAPI~\cite{fastapi2024}, un \textit{framework} web para Python. La elección viene condicionada por los motores de generación: los tres están escritos en Python y dependen de bibliotecas que no existen en otros lenguajes. Portar cualquiera de estos componentes a TypeScript o Go habría supuesto reescribirlos desde cero, y alternativas como AWS Lambda quedaban descartadas porque el modelo de \textit{embeddings} excede los límites de memoria de las funciones \textit{serverless}.
 
 La decisión de interponer un servidor entre la app y los motores tiene una motivación adicional de seguridad. El motor de LLMs requiere una clave de API de OpenAI. Si la app llamase directamente a la API de OpenAI, esa clave tendría que estar embebida en el binario de la aplicación (APK en Android, IPA en iOS), donde sería extraíble mediante ingeniería inversa. Con el servidor como intermediario, la clave reside exclusivamente en el entorno del servidor y la app nunca la conoce.
 
-El frontend se apoya en bibliotecas nativas de Expo y React Native. Las imágenes de pictogramas se cargan con \texttt{expo-image}, que cachea en disco y recicla vistas para contener el consumo de memoria cuando el usuario desplaza la cuadrícula. Las animaciones de retroalimentación táctil corren en el hilo nativo gracias a \texttt{react-native-reanimated} 4.1, manteniendo 60 fotogramas por segundo incluso en dispositivos de gama baja.
+El \textit{frontend} se apoya en bibliotecas nativas de Expo y React Native. Las imágenes de pictogramas se cargan con \texttt{expo-image}, que cachea en disco y recicla vistas para contener el consumo de memoria cuando el usuario desplaza la cuadrícula. Las animaciones de retroalimentación táctil corren en el hilo nativo gracias a \texttt{react-native-reanimated} 4.1, manteniendo 60 fotogramas por segundo incluso en dispositivos de gama baja.
 
 La síntesis de voz de respaldo se apoya en \texttt{expo-speech} 14.0, que da acceso a los motores nativos de cada plataforma (AVSpeechSynthesizer en iOS, TextToSpeech en Android); los detalles del motor principal se describen en la sección de flujo completo. La retroalimentación háptica se gestiona con \texttt{expo-haptics} 15.0, y las listas de pictogramas con \texttt{@shopify/flash-list} 2.0, que mejora el rendimiento de desplazamiento respecto al FlatList estándar de React Native.
 
@@ -70,9 +70,9 @@ Con esta arquitectura definida, las secciones siguientes describen los detalles 
 
 El servidor se organiza en tres módulos: uno con el punto de entrada, la configuración y los esquemas de datos; otro con la interfaz abstracta, el registro y los seis adaptadores de motores; y un tercero con las rutas HTTP. La configuración se lee de variables de entorno con valores por defecto. El motor por defecto seleccionado es el LLM basado en GPT-4o, que lidera la evaluación comparativa (sección~\ref{ch:evaluacion-comparativa}) en métricas con referencia humana y en preferencia subjetiva. La gramática formal se mantiene como motor de respaldo para los escenarios que requieren ejecución sin conexión a Internet.
 
-El endpoint principal recibe una lista de pictogramas (entre 1 y 20 etiquetas) y un parámetro que indica qué motor usar. La generación se ejecuta en un \textit{thread pool} con un \textit{timeout} configurable de 30 segundos: si el motor solicitado no está disponible el servidor responde con un error 400, y si la generación excede el tiempo límite, con un error 408. El servidor expone además dos endpoints de salud, uno que indica si el proceso está vivo y otro que verifica si al menos un motor está operativo.
+El \textit{endpoint} principal recibe una lista de pictogramas (entre 1 y 20 etiquetas) y un parámetro que indica qué motor usar. La generación se ejecuta en un \textit{thread pool} con un \textit{timeout} configurable de 30 segundos: si el motor solicitado no está disponible el servidor responde con un error 400, y si la generación excede el tiempo límite, con un error 408. El servidor expone además dos \textit{endpoints} de salud, uno que indica si el proceso está vivo y otro que verifica si al menos un motor está operativo.
 
-Los recursos pesados (modelos de embeddings, gramáticas, modelos de perplejidad) se cargan una sola vez al arrancar el servidor y permanecen en memoria durante toda la vida del proceso, compartiéndose entre peticiones. Sin este mecanismo, cada petición tendría que recargar modelos de varios gigabytes, lo que haría inviable el servicio.
+Los recursos pesados (modelos de \textit{embeddings}, gramáticas, modelos de perplejidad) se cargan una sola vez al arrancar el servidor y permanecen en memoria durante toda la vida del proceso, compartiéndose entre peticiones. Sin este mecanismo, cada petición tendría que recargar modelos de varios gigabytes, lo que haría inviable el servicio.
 
 La clave de API de OpenAI reside exclusivamente en la configuración del servidor. La app móvil no la contiene ni la necesita: envía las etiquetas de pictogramas y recibe la frase generada, sin conocer qué motor la produjo ni qué credenciales se usaron. El servidor no implementa autenticación propia, una simplificación aceptable en un proyecto académico donde se ejecuta en red local.
 
@@ -87,15 +87,42 @@ Los usuarios de CAA tienen con frecuencia dificultades motoras o visuales que co
 
 La pantalla principal es el tablero de comunicación, el espacio donde el usuario construye mensajes seleccionando pictogramas. En la parte superior, una barra de construcción muestra en \textit{scroll} horizontal los pictogramas que el usuario ha ido seleccionando, con la frase generada debajo. Tocar un pictograma en esta barra lo elimina de la selección, permitiendo corregir sin empezar de nuevo. Debajo, un campo de búsqueda permite filtrar el catálogo de pictogramas por nombre.
 
-Una barra de categorías muestra las nueve categorías del catálogo como píldoras horizontales con un color distintivo por categoría. El cuerpo de la pantalla muestra los pictogramas en una cuadrícula configurable de tres a cinco columnas. Cada tarjeta muestra la imagen del pictograma cargada desde el CDN de ARASAAC~\cite{arasaac} y su etiqueta textual, y al tocarla proporciona retroalimentación visual y opcionalmente háptica. Dos botones flotantes completan la pantalla: uno para añadir pictogramas personalizados mediante un modal y otro para reproducir la frase generada con síntesis de voz. El catálogo incluye más de 200 pictogramas ARASAAC organizados en las nueve categorías, más una categoría ``Todas'' que los muestra sin filtrar. La paleta dispone de dos variantes (tema claro y tema oscuro) con valores cromáticos ajustados en cada modo para mantener ratios de contraste adecuados. El código cromático tiene una función práctica: permite al usuario localizar la categoría que busca sin leer las etiquetas, lo que beneficia a personas con dificultades lectoras.
+Una barra de categorías muestra las nueve categorías del catálogo como píldoras horizontales con un color distintivo por categoría. El cuerpo de la pantalla muestra los pictogramas en una cuadrícula configurable de tres a cinco columnas. Cada tarjeta muestra la imagen del pictograma cargada desde el CDN de ARASAAC~\cite{arasaac} y su etiqueta textual, y al tocarla proporciona retroalimentación visual y opcionalmente háptica. Dos botones flotantes completan la pantalla: uno para añadir pictogramas personalizados mediante un modal y otro para reproducir la frase generada con síntesis de voz. El catálogo incluye los 232 pictogramas ARASAAC del vocabulario del sistema, organizados en las nueve categorías cromáticas más una categoría ``Todas'' que los muestra sin filtrar. La paleta dispone de dos variantes (tema claro y tema oscuro) con valores cromáticos ajustados en cada modo para mantener ratios de contraste adecuados. El código cromático tiene una función práctica: permite al usuario localizar la categoría que busca sin leer las etiquetas, lo que beneficia a personas con dificultades lectoras. La Figura~\ref{fig:app-tablero} recoge el tablero con un mensaje a medio construir.
 
-% TODO: incluir figura con captura del tablero de comunicación
+\begin{figure}[ht]
+    \centering
+    % TODO: sustituir el placeholder por la captura del tablero de comunicación
+    % con la barra de construcción poblada, la frase generada visible debajo,
+    % la barra de categorías con una categoría activa y los dos botones
+    % flotantes (añadir pictograma y reproducir).
+    \placeholderfigura{9cm}
+    \caption{Tablero de comunicación de Dixi con un mensaje en construcción. La barra superior muestra los pictogramas seleccionados y la frase generada; la cuadrícula inferior permite seguir añadiendo pictogramas de la categoría activa.}
+    \label{fig:app-tablero}
+\end{figure}
 
-La segunda pantalla contiene frases predefinidas para comunicación rápida. El usuario no necesita componer pictogramas: toca una frase y el sistema la reproduce directamente. Las frases se organizan por contexto de uso (casa, colegio, médico, social, emociones) en una lista con secciones colapsables. Cada frase tiene un botón de reproducción y un indicador de favorito. El usuario puede añadir frases propias a una sección personal (``Mis frases'') y buscar entre todas las frases con filtrado en tiempo real. Esta pantalla complementa al tablero de comunicación: el tablero permite construir mensajes nuevos con pictogramas, mientras que las frases predefinidas cubren expresiones de uso frecuente que el usuario quiere tener siempre a mano.
+La segunda pantalla contiene frases predefinidas para comunicación rápida. El usuario no necesita componer pictogramas: toca una frase y el sistema la reproduce directamente. Las frases se organizan por contexto de uso (casa, colegio, médico, social, emociones) en una lista con secciones colapsables. Cada frase tiene un botón de reproducción y un indicador de favorito. El usuario puede añadir frases propias a una sección personal (``Mis frases'') y buscar entre todas las frases con filtrado en tiempo real. Esta pantalla complementa al tablero de comunicación: el tablero permite construir mensajes nuevos con pictogramas, mientras que las frases predefinidas cubren expresiones de uso frecuente que el usuario quiere tener siempre a mano. La Figura~\ref{fig:app-frases} muestra la organización en secciones colapsables.
 
-% TODO: incluir figura con captura de la pantalla de frases predefinidas
+\begin{figure}[ht]
+    \centering
+    % TODO: sustituir el placeholder por la captura de la pestaña de frases
+    % frecuentes con al menos dos secciones visibles (una desplegada y otra
+    % plegada), el campo de búsqueda arriba, el botón flotante "+" en la esquina
+    % inferior derecha y el indicador de favorito marcado en alguna frase.
+    \placeholderfigura{9cm}
+    \caption{Pestaña de frases predefinidas de Dixi. Las secciones contextuales se colapsan para facilitar la localización, y cada frase se reproduce con un toque o se marca como favorita.}
+    \label{fig:app-frases}
+\end{figure}
 
-La tercera pantalla agrupa los ajustes de la aplicación. La sección de voz permite seleccionar una voz del sistema (filtrada a voces en español), ajustar la velocidad de habla entre 0,5x y 2,0x y modificar el tono entre 0,5 y 2,0, con un botón para probar la configuración antes de aplicarla. La sección de apariencia controla el modo claro u oscuro, el tamaño de los pictogramas (pequeño, mediano o grande) y el número de columnas de la cuadrícula. La sección de accesibilidad permite activar o desactivar la vibración háptica y los efectos de sonido, y ajustar el tamaño de fuente entre 14 y 22 píxeles. La pantalla cierra con una sección informativa que muestra el logotipo de Dixi, la versión de la aplicación y los créditos con un enlace a ARASAAC. Todos los elementos interactivos de la app están etiquetados para lectores de pantalla, y la interfaz respeta las áreas seguras del dispositivo para que el contenido no quede oculto por el \textit{notch} o la barra de estado.
+La tercera pantalla agrupa los ajustes de la aplicación. La sección de voz permite seleccionar una voz del sistema (filtrada a voces en español), ajustar la velocidad de habla entre 0,5x y 2,0x y modificar el tono entre 0,5 y 2,0, con un botón para probar la configuración antes de aplicarla. La sección de apariencia controla el modo claro u oscuro, el tamaño de los pictogramas (pequeño, mediano o grande) y el número de columnas de la cuadrícula. La sección de accesibilidad permite activar o desactivar la vibración háptica y los efectos de sonido, y ajustar el tamaño de fuente entre 14 y 22 píxeles. La pantalla cierra con una sección informativa que muestra el logotipo de Dixi, la versión de la aplicación y los créditos con un enlace a ARASAAC. Todos los elementos interactivos de la app están etiquetados para lectores de pantalla, y la interfaz respeta las áreas seguras del dispositivo para que el contenido no quede oculto por el \textit{notch} o la barra de estado. La Figura~\ref{fig:app-ajustes} muestra la pantalla con la sección de voz expandida.
 
-% TODO: incluir figura con captura de la pantalla de ajustes
+\begin{figure}[ht]
+    \centering
+    % TODO: sustituir el placeholder por la captura de la pantalla de ajustes
+    % con la sección "Voz" expandida, de forma que se vean el selector de motor
+    % TTS (Sistema / ElevenLabs), los sliders de velocidad y tono, y el botón
+    % "Probar".
+    \placeholderfigura{9cm}
+    \caption{Pestaña de ajustes de Dixi. La sección de voz permite elegir motor, velocidad y tono, y probar la configuración antes de aplicarla.}
+    \label{fig:app-ajustes}
+\end{figure}
 

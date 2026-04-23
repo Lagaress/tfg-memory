@@ -9,29 +9,29 @@ El proyecto se estructura como un conjunto de repositorios independientes, cada 
     \item Embeddings semánticos: motor híbrido que combina la gramática formal con FastText.
     \item Modelos de lenguaje: motor basado en GPT-4o mediante la API de OpenAI.
     \item Hibridación: tres técnicas que combinan los motores anteriores.
-    \item Evaluación comparativa: pipeline de métricas automáticas y tests estadísticos.
+    \item Evaluación comparativa: \textit{pipeline} de métricas automáticas y tests estadísticos.
     \item Aplicación móvil: interfaz de usuario desarrollada con React Native y Expo.
-    \item Encuestas web: monorepo con las encuestas de naturalidad y de \textit{golden standard} (sección~\ref{sec:eval-golden}).
+    \item Encuestas web: \textit{monorepo} con las encuestas de naturalidad y de \textit{golden standard} (sección~\ref{sec:eval-golden}).
 \end{itemize}
 
 \subsection{Patrones de diseño}
 
 Los motores de generación comparten varios patrones de diseño que facilitan la composición y el mantenimiento del sistema.
 
-La separación entre generación y post-procesamiento sigue el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}: un componente simbólico decide la estructura de la oración y un componente neural refina el resultado. Este patrón se aplica en Hybrid1 y Hybrid2, donde la gramática o los embeddings producen una frase estructurada y el LLM la mejora.
+La separación entre generación y post-procesamiento sigue el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}: un componente simbólico decide la estructura de la oración y un componente neural refina el resultado. Este patrón se aplica en Hybrid1 y Hybrid2, donde la gramática o los \textit{embeddings} producen una frase estructurada y el LLM la mejora.
 
-Hybrid3 implementa el patrón \textit{overgenerate-and-rank}~\cite{sharma2019overgenerate}: múltiples generadores producen candidatas, un filtro descarta las que no cumplen restricciones de fidelidad y una función de ranking selecciona la mejor. Este patrón desacopla la generación de la selección, permitiendo añadir o retirar generadores sin modificar la lógica de ranking.
+Hybrid3 implementa el patrón \textit{overgenerate-and-rank}~\cite{sharma2019overgenerate}: múltiples generadores producen candidatas, un filtro descarta las que no cumplen restricciones de fidelidad y una función de \textit{ranking} selecciona la mejor. Este patrón desacopla la generación de la selección, permitiendo añadir o retirar generadores sin modificar la lógica de \textit{ranking}.
 
-Los motores que dependen de recursos costosos (modelos de embeddings de varios GB, modelos de perplejidad) emplean inicialización perezosa: los recursos no se cargan al instanciar el motor sino en la primera llamada de generación. Esto permite instanciar múltiples pipelines sin consumir memoria innecesariamente.
+Los motores que dependen de recursos costosos (modelos de \textit{embeddings} de varios GB, modelos de perplejidad) emplean inicialización perezosa: los recursos no se cargan al instanciar el motor sino en la primera llamada de generación. Esto permite instanciar múltiples \textit{pipelines} sin consumir memoria innecesariamente.
 
-El manejo de errores sigue una estrategia de degradación progresiva: si un componente falla, el sistema recurre a un mecanismo de fallback que garantiza siempre una salida. En las hibridaciones, si la gramática no reconoce la entrada, el LLM genera la frase desde cero; en Hybrid3, si ninguna candidata alcanza cobertura completa, todas pasan al ranking.
+El manejo de errores sigue una estrategia de degradación progresiva: si un componente falla, el sistema recurre a un mecanismo de \textit{fallback} que garantiza siempre una salida. En las hibridaciones, si la gramática no reconoce la entrada, el LLM genera la frase desde cero; en Hybrid3, si ninguna candidata alcanza cobertura completa, todas pasan al \textit{ranking}.
 
 \subsection{Tecnologías y dependencias}
 
 \begin{itemize}
-    \item Python 3.13 como lenguaje principal para los motores de generación y el pipeline de evaluación.
+    \item Python 3.13 como lenguaje principal para los motores de generación y el \textit{pipeline} de evaluación.
     \item Lark~\cite{lark2024} para la definición y validación de la gramática formal en notación EBNF.
-    \item FastText~\cite{bojanowski2017fasttext} (modelo \texttt{cc.es.300.bin}) para los embeddings semánticos.
+    \item FastText~\cite{bojanowski2017fasttext} (modelo \texttt{cc.es.300.bin}) para los \textit{embeddings} semánticos.
     \item API de OpenAI (GPT-4o, GPT-4o-mini) para el motor de LLMs y la post-edición.
     \item spaCy (\texttt{es\_core\_news\_sm}) para la lematización en las métricas de cobertura y fidelidad.
     \item sacreBLEU, NLTK y HuggingFace Transformers para el cálculo de métricas automáticas.
