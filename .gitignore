@@ -76,3 +76,6 @@
 .idea/
 *.sublime-*
 .vscode/
+
+# Auditorías auxiliares de la skill /audita-seccion
+.reviews/
