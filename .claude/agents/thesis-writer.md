@@ -66,7 +66,7 @@ Este TFG trata sobre la generación de frases en español a partir de secuencias
 
 - **SAAC**: Sistema Aumentativo y Alternativo de Comunicación
 - **CAA**: Comunicación Aumentativa y Alternativa
-- **ARASAAC**: Portal Aragonés de la Comunicación Aumentativa y Alternativa (fuente de pictogramas)
+- **ARASAAC**: Centro Aragonés para la Comunicación Aumentativa y Alternativa (fuente de pictogramas)
 - **Pictograma**: Símbolo gráfico que representa un concepto, acción u objeto
 - **NLG**: Natural Language Generation (Generación de Lenguaje Natural)
 - **CFG**: Context-Free Grammar (Gramática Libre de Contexto)

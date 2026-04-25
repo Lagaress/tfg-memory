@@ -44,7 +44,7 @@ Un hook `PostToolUse` (`.claude/hooks/check-latex-style.py`) audita cada edició
 |---------|-------------|
 | SAAC | Sistema Aumentativo y Alternativo de Comunicación |
 | CAA | Comunicación Aumentativa y Alternativa |
-| ARASAAC | Portal Aragonés de la Comunicación Aumentativa y Alternativa |
+| ARASAAC | Centro Aragonés para la Comunicación Aumentativa y Alternativa |
 | Pictograma | Símbolo gráfico que representa un concepto, acción u objeto |
 | NLG | Natural Language Generation (Generación de Lenguaje Natural) |
 | CFG | Context-Free Grammar (Gramática Libre de Contexto) |
