@@ -50,13 +50,11 @@ El sistema se diseña con foco en personas con TEA con dificultades en la comuni
 \section{Glosario de términos}
 
 \begin{description}
-    \item[Alucinación] En el contexto de la inteligencia artificial, palabra o concepto que un modelo genera sin que esté justificado por la entrada. En este proyecto, una oración que incluye ``quiero'' cuando el usuario solo seleccionó el pictograma ``agua'' contiene una alucinación técnica, aunque la inferencia sea comunicativamente razonable.
-
-    \item[API (\textit{Application Programming Interface})] Interfaz de programación de aplicaciones. Conjunto de funciones y protocolos que permite que dos sistemas informáticos se comuniquen. En este proyecto se accede a los modelos de lenguaje y a los motores de síntesis de voz mediante APIs REST ofrecidas por terceros.
+    \item[Alucinación] En el contexto de la inteligencia artificial, palabra o concepto que un modelo genera sin justificación en la entrada. En este proyecto, una oración que incluye ``quiero'' cuando el usuario solo seleccionó el pictograma ``agua'' es una alucinación: el verbo no tiene anclaje en la secuencia introducida.
 
     \item[ARASAAC] Centro Aragonés para la Comunicación Aumentativa y Alternativa. Ofrece pictogramas y recursos de forma gratuita bajo licencia Creative Commons. Es la referencia más utilizada en el mundo hispanohablante.
 
-    \item[BERTScore] Métrica de evaluación de texto que mide la similitud semántica entre dos oraciones utilizando \textit{embeddings} contextuales de un modelo BERT. A diferencia de BLEU o ROUGE, reconoce sinónimos y paráfrasis.
+    \item[BERTScore] Métrica de evaluación de texto que mide la similitud semántica entre dos oraciones utilizando \textit{embeddings} contextuales de un \textit{transformer} preentrenado. A diferencia de BLEU o ROUGE, reconoce sinónimos y paráfrasis.
 
     \item[BLEU] \textit{Bilingual Evaluation Understudy}. Métrica que mide la coincidencia de $n$-gramas entre una oración generada y una de referencia. BLEU-4 considera secuencias de hasta cuatro palabras.
 
@@ -64,41 +62,61 @@ El sistema se diseña con foco en personas con TEA con dificultades en la comuni
 
     \item[CFG (\textit{Context-Free Grammar})] Gramática libre de contexto. Formalismo que define un lenguaje mediante reglas de producción. En este proyecto, la CFG se extiende con restricciones semánticas para generar oraciones a partir de pictogramas.
 
-    \item[Docker] Plataforma de contenedores que empaqueta una aplicación junto con sus dependencias en una unidad portable. Se utiliza para garantizar que el entorno de ejecución de los experimentos sea reproducible en cualquier máquina.
+    \item[chrF] Métrica que mide la coincidencia de caracteres y subsecuencias entre la oración generada y las referencias. Más tolerante que BLEU con variaciones morfológicas, lo que la hace especialmente útil en español por su riqueza flexiva.
+
+    \item[Cobertura] Métrica propia del proyecto que mide la proporción de pictogramas de la entrada que aparecen reflejados en la oración generada por un motor.
 
     \item[EBNF (\textit{Extended Backus-Naur Form})] Notación estándar para describir gramáticas formales. Las reglas de la gramática libre de contexto de este proyecto se expresan en una variante de EBNF soportada por la biblioteca Lark.
 
-    \item[\textit{Embedding}] Representación de palabras o conceptos como vectores numéricos en un espacio donde elementos similares quedan cerca entre sí. Permite a los algoritmos trabajar con el significado de las palabras.
+    \item[\textit{Embedding}] Representación de palabras o conceptos como vectores numéricos en un espacio donde elementos similares quedan cercanos. Permite a los algoritmos trabajar con el significado de las palabras.
+
+    \item[Exact Match] Métrica binaria que vale 1 si la oración generada coincide carácter a carácter con alguna de las referencias del \textit{golden standard}, y 0 en caso contrario.
 
     \item[FastText] Modelo de \textit{embeddings} de palabras desarrollado por Meta que representa cada palabra a partir de sus fragmentos de caracteres ($n$-gramas). Esto le permite generar vectores para palabras no vistas durante el entrenamiento, una propiedad útil para la morfología del español.
 
     \item[\textit{Few-shot}] Técnica de uso de modelos de lenguaje que consiste en incluir unos pocos ejemplos resueltos dentro del propio \textit{prompt} para que el modelo infiera el patrón esperado. A diferencia del \textit{fine-tuning}, no modifica los pesos del modelo.
 
-    \item[\textit{Fine-tuning}] Reentrenamiento de un modelo preentrenado sobre un conjunto de datos específico para adaptar sus pesos a una tarea concreta. En este proyecto no se emplea: se prefiere la combinación de \textit{prompt engineering} y \textit{few-shot} por su flexibilidad y menor coste.
+    \item[Fidelidad] Métrica propia del proyecto que mide el grado en que el contenido semántico de la oración generada se ciñe a los pictogramas de la entrada sin añadir información no presente.
 
-    \item[GLN / NLG] Generación de Lenguaje Natural (\textit{Natural Language Generation}). Subcampo del PLN enfocado en producir texto a partir de datos o representaciones estructuradas.
+    \item[Fidelidad ajustada] Variante de la métrica de fidelidad que descuenta del recuento de alucinaciones las inferencias pragmáticas legítimas, como el verbo ``querer'' inferido a partir de pictogramas de necesidad. Métrica propia del proyecto.
+
+    \item[\textit{Fine-tuning}] Reentrenamiento de un modelo preentrenado sobre un conjunto de datos específico para adaptar sus pesos a una tarea concreta.
+
+    \item[\textit{Golden standard}] Conjunto de casos de prueba en el que cada caso lleva asociadas múltiples referencias humanas válidas. Permite que las métricas automáticas no penalicen reformulaciones legítimas.
 
     \item[Gramática formal] Conjunto de reglas que definen cómo construir oraciones válidas en un lenguaje. En este proyecto, se usa para generar frases correctas a partir de pictogramas.
 
-    \item[Ingeniería de \textit{prompts}] (\textit{Prompt engineering}) Técnica que consiste en diseñar las instrucciones textuales que se proporcionan a un modelo de lenguaje para guiar su comportamiento. En este proyecto, el \textit{prompt} define reglas de fidelidad, formato y registro que restringen la generación al dominio de CAA.
+    \item[Hibridación] Combinación de dos o más técnicas de generación en un mismo \textit{pipeline} para mitigar las limitaciones de cada una por separado. El motor que resulta de esa combinación se denomina motor híbrido.
+
+    \item[Ingeniería de \textit{prompts} (\textit{Prompt engineering})] Técnica que consiste en diseñar las instrucciones textuales que se proporcionan a un modelo de lenguaje para guiar su comportamiento. En este proyecto, el \textit{prompt} define reglas de fidelidad, formato y registro que restringen la generación al dominio de CAA.
 
     \item[Lark] Biblioteca de Python para definir y ejecutar analizadores sintácticos a partir de gramáticas formales escritas en EBNF. Es la base sobre la que se construye el motor de la técnica de gramática formal.
 
-    \item[Lematización] Proceso de reducir una palabra a su forma base o lema (``comer'' es el lema de ``como'', ``comí'', ``comerá''). Se utiliza en este proyecto para verificar si un pictograma está representado en la oración generada independientemente de la forma flexiva.
+    \item[Likert] Escala numérica, típicamente de 1 a 5 o de 1 a 7 puntos, usada en encuestas para medir actitudes o preferencias frente a una afirmación.
 
     \item[LLM (\textit{Large Language Model})] Modelo de lenguaje de gran escala, basado en redes neuronales, capaz de generar y comprender texto natural. Ejemplos conocidos son GPT o LLaMA.
 
+    \item[METEOR] Métrica que combina precisión y \textit{recall} de unigramas reconociendo sinónimos y derivaciones léxicas. Pondera el orden de las palabras y aplica una penalización por fragmentación.
+
+    \item[Motor] Implementación ejecutable de una técnica de generación que produce salida sobre las entradas. En este proyecto hay seis motores: tres correspondientes a las técnicas base y tres motores híbridos.
+
     \item[N-grama] Secuencia contigua de $n$ elementos (palabras o caracteres) en un texto. Las métricas de evaluación como BLEU comparan los $n$-gramas de la oración generada con los de la referencia para medir su similitud.
 
-    \item[Perplejidad] Métrica que cuantifica cuán probable considera un modelo de lenguaje una oración dada. Valores bajos indican texto más natural y fluido; valores altos, construcciones inusuales o agramaticales. Se utiliza como proxy de naturalidad lingüística.
+    \item[NLG] Generación de Lenguaje Natural (\textit{Natural Language Generation}). Subcampo del PLN enfocado en producir texto a partir de datos o representaciones estructuradas.
+
+    \item[Perplejidad] Métrica que cuantifica cuán probable considera un modelo de lenguaje una oración dada. Valores bajos indican texto más natural y fluido; valores altos, construcciones inusuales o agramaticales. Se utiliza como aproximación a la naturalidad lingüística.
 
     \item[Pictograma] Símbolo gráfico que representa un concepto, acción u objeto. Es el elemento básico de muchos sistemas de comunicación aumentativa.
+
+    \item[\textit{Picto-to-text}] Tarea de generar una oración en lenguaje natural a partir de una secuencia de pictogramas seleccionados por el usuario. Es la tarea central de Dixi.
 
     \item[PLN] Procesamiento del Lenguaje Natural. Área de la inteligencia artificial que trabaja con la comprensión y generación de lenguaje humano por parte de máquinas.
 
     \item[\textit{Pro-drop}] Propiedad de los idiomas que permiten omitir el sujeto cuando puede deducirse del contexto o de la flexión verbal. El español es una lengua \textit{pro-drop}, lo que condiciona la generación de oraciones naturales: ``quiero agua'' suena más natural que ``yo quiero agua''.
 
-    \item[Realización superficial] (\textit{Surface realization}) Etapa final de la generación de lenguaje natural donde una representación abstracta se convierte en texto gramaticalmente correcto.
+    \item[Realización superficial (\textit{Surface realization})] Etapa final de la generación de lenguaje natural donde una representación abstracta se convierte en texto gramaticalmente correcto.
+
+    \item[REST (\textit{Representational State Transfer})] Estilo arquitectónico para servicios web basado en operaciones HTTP sobre recursos identificados por URL. La API de ARASAAC y los servicios externos consumidos por el sistema (modelos de lenguaje, motor TTS) se acceden mediante interfaces REST.
 
     \item[ROUGE] \textit{Recall-Oriented Understudy for Gisting Evaluation}. Métrica que mide la coincidencia entre una oración generada y una de referencia. ROUGE-L se basa en la subsecuencia común más larga, lo que la hace más tolerante con variaciones de orden que BLEU.
 
@@ -108,7 +126,11 @@ El sistema se diseña con foco en personas con TEA con dificultades en la comuni
 
     \item[TEA] Trastorno del Espectro Autista. Condición del desarrollo que afecta a la comunicación e interacción social, con un amplio rango de manifestaciones.
 
+    \item[Técnica] Estrategia conceptual de generación. En este proyecto se distinguen tres técnicas base: gramática formal, \textit{embeddings} y LLM.
+
     \item[Temperatura] Parámetro de los modelos de lenguaje que controla la aleatoriedad de la generación. Valores cercanos a 0 producen salidas deterministas y conservadoras; valores más altos favorecen la variabilidad a costa de la consistencia.
+
+    \item[Tests no paramétricos] Pruebas estadísticas que no asumen una distribución específica de los datos. En este proyecto se usan el test de Friedman para detectar diferencias entre los seis motores en cada métrica, y comparaciones pareadas (Wilcoxon o McNemar según el tipo de variable) con corrección de Bonferroni o Holm-Bonferroni para identificar entre qué motores aparecen las diferencias.
 
     \item[\textit{Token}] Unidad mínima con la que un modelo de lenguaje procesa el texto. No coincide necesariamente con una palabra: puede ser una palabra, un fragmento o un signo de puntuación. El coste y la longitud máxima de los modelos comerciales se miden en \textit{tokens}.
 
