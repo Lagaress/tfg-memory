@@ -35,15 +35,13 @@ La API de ElevenLabs~\cite{elevenlabs2026pricing}, prevista para la síntesis de
 \section{Gestión de riesgos}
 \label{sec:riesgos}
 
-El desarrollo del proyecto está condicionado por cinco riesgos relevantes.
+El desarrollo del proyecto está condicionado por cuatro riesgos relevantes.
 
 El tamaño del modelo de FastText utilizado por el motor de \textit{embeddings} condiciona el despliegue. El modelo preentrenado sobre \textit{Common Crawl} en español ocupa alrededor de 7 GB en disco, lo que descarta funciones \textit{serverless} y servicios con restricciones de memoria. La mitigación consiste en desplegar el servidor mediante contenedores Docker con disco suficiente, lo que restringe la infraestructura pero no impide el funcionamiento.
 
 La dependencia de la API de OpenAI afecta al motor de modelos de lenguaje y a las dos hibridaciones que lo incorporan: sin acceso a Internet, la mitad de los motores deja de operar. El servidor implementa \textit{fallback} automático a la gramática formal y a la gramática enriquecida con \textit{embeddings}, que funcionan en local y permiten seguir dando servicio.
 
 El vocabulario cerrado del sistema, limitado a 232 pictogramas de ARASAAC, deja fuera cualquier concepto no representado. La mitigación se abordó en la fase de selección, priorizando los conceptos más frecuentes en la comunicación cotidiana de usuarios de CAA y cubriendo varias categorías semánticas.
-
-La evaluación comparativa podría producir resultados inconcluyentes y comprometer las conclusiones del proyecto. Para minimizar este riesgo se combinan once métricas automáticas (entre ellas BLEU, ROUGE, BERTScore y perplejidad) con evaluación humana mediante encuestas, y se aplican tests no paramétricos: Friedman~\cite{friedman1937use} como prueba ómnibus y, cuando rechaza la hipótesis nula, comparaciones pareadas con Wilcoxon~\cite{wilcoxon1945individual} y corrección de Holm-Bonferroni~\cite{holm1979simple} para discriminar qué diferencias entre motores son estadísticamente significativas.
 
 La compatibilidad multiplataforma de la aplicación móvil introduce diferencias de comportamiento entre iOS y Android en renderizado, animaciones y acceso a APIs nativas. Se mitiga apoyándose en Expo como capa de abstracción, que unifica las APIs para la mayoría de funcionalidades que la aplicación necesita.
 
