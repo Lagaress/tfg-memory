@@ -18,8 +18,6 @@ Dixi cubre el objetivo 6 (interfaz accesible) en ese mismo capítulo: una aplica
 
 \section{Lecciones aprendidas}
 
-El desarrollo de seis motores de generación sobre el mismo dominio acotado (frases cortas en español a partir de 232 pictogramas) ha producido aprendizajes que los resultados numéricos por sí solos no reflejan.
-
 GPT-4o lidera la evaluación con más claridad de lo que el proyecto anticipaba, tanto en métricas automáticas como en preferencia humana. El motor basado en este modelo encabeza las seis métricas con referencia humana (Exact Match del 63\%, BLEU-4 de 0,78, chrF de 0,85, BERTScore de 0,967) y recoge el 44\% de las elecciones en la encuesta de naturalidad, el doble que cualquier motor base, con diferencias pareadas que resisten la corrección de Bonferroni. La correlación entre chrF, BERTScore y Exact Match del LLM y la preferencia humana en los ítems solapados entre ambas encuestas ($\rho \approx 0{,}37\text{--}0{,}38$, $p < 0{,}05$) valida empíricamente el uso de estas métricas como indicadores de calidad percibida.
 
 Frente a esa diferencia, gramática formal y \textit{embeddings} semánticos se equiparan en la práctica. Producen la misma salida en 163 de los 164 casos del \textit{golden standard} (99,4\%), sus métricas coinciden en la tercera cifra decimal y la encuesta de naturalidad no los distingue estadísticamente. El componente de \textit{embeddings}, diseñado para resolver predicción de preposiciones y \textit{ranking} semántico, no altera las decisiones de la gramática en el vocabulario acotado del proyecto. Los \textit{embeddings} pueden diferenciarse en escenarios con vocabulario más amplio donde las reglas léxicas no cubran todos los casos, una hipótesis que queda como línea abierta.
