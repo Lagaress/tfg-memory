@@ -1,4 +1,4 @@
-Este capítulo describe la gestión del proyecto: la metodología de desarrollo adoptada y su planificación temporal, las tecnologías y herramientas empleadas, los costes estimados, los riesgos identificados y las prácticas de aseguramiento de la calidad.
+Una vez delimitados los antecedentes técnicos del proyecto, este capítulo describe la gestión del desarrollo: la metodología adoptada y su planificación temporal, las tecnologías y herramientas empleadas, los costes estimados, los riesgos identificados y las prácticas de aseguramiento de la calidad.
 
 \section{Metodología de desarrollo}
 \label{sec:metodologia}
@@ -28,7 +28,7 @@ Las tecnologías empleadas en cada una de las implementaciones se describen en l
 
 Por la naturaleza del Trabajo de Fin de Grado, la estimación de costes se limita a los servicios externos que el sistema consume en ejecución. El trabajo del alumno y la supervisión de las tutoras no se computan como gasto al formar parte de la dedicación académica propia del TFG, y el resto de herramientas empleadas son gratuitas o de código abierto.
 
-La API de OpenAI~\cite{openai2024pricing} se utiliza en el motor de modelos de lenguaje y en las hibridaciones que lo incorporan. A precios de abril de 2026, GPT-4o factura \$2.50 por millón de \textit{tokens} de entrada y \$10.00 por millón de salida, mientras que GPT-4o-mini se queda en \$0.15 y \$0.60 respectivamente; el desglose del coste por consulta aparece en el capítulo~\ref{ch:modelos-lenguaje}.
+La API de OpenAI~\cite{openai2024pricing} se utiliza en el motor de modelos de lenguaje y en las hibridaciones que lo incorporan. A precios de abril de 2026, GPT-4o factura \$2.50 por millón de \textit{tokens} de entrada y \$10.00 por millón de salida, mientras que GPT-4o-mini se queda en \$0.15 y \$0.60 respectivamente; el desglose del coste por consulta aparece en la sección~\ref{ch:modelos-lenguaje}.
 
 La API de ElevenLabs~\cite{elevenlabs2026pricing}, prevista para la síntesis de voz neuronal en la aplicación móvil, factura por caracteres: \$0.06 por cada 1.000 caracteres con los modelos \textit{Flash} y \textit{Turbo}, y \$0.12 con los modelos \textit{Multilingual v2} y \textit{v3}.
 
@@ -50,7 +50,7 @@ El aseguramiento de la calidad combina cuatro prácticas: pruebas unitarias sobr
 
 Los motores de generación incorporan tests unitarios que verifican cada componente de forma aislada (concordancia de género y número, inserción de determinantes y preposiciones, conjugación verbal o inferencia de elementos faltantes, entre otros fenómenos) y actúan como red de seguridad frente a regresiones cuando se modifican reglas o parámetros.
 
-La evaluación comparativa automatizada ejecuta los seis motores sobre un conjunto de 164 casos de prueba y calcula para cada uno métricas como BLEU~\cite{papineni2002bleu}, ROUGE~\cite{lin2004rouge}, BERTScore~\cite{zhang2020bertscore} o perplejidad. Las diferencias observadas se someten al test de Friedman~\cite{friedman1937use} como prueba ómnibus y a comparaciones pareadas con Wilcoxon~\cite{wilcoxon1945individual} y corrección de Holm-Bonferroni~\cite{holm1979simple}. El detalle del proceso se recoge en el capítulo~\ref{ch:evaluacion-comparativa}.
+La evaluación comparativa automatizada ejecuta los seis motores sobre un conjunto de 164 casos de prueba y calcula para cada uno métricas como BLEU~\cite{papineni2002bleu}, ROUGE~\cite{lin2004rouge}, BERTScore~\cite{zhang2020bertscore} o perplejidad. Las diferencias observadas se someten al test de Friedman~\cite{friedman1937use} como prueba ómnibus y a comparaciones pareadas con Wilcoxon~\cite{wilcoxon1945individual} y corrección de Holm-Bonferroni~\cite{holm1979simple}. El detalle del proceso se recoge en la sección~\ref{ch:evaluacion-comparativa}.
 
 La evaluación humana complementa las métricas automáticas con la percepción de personas reales mediante dos encuestas. La primera sigue un paradigma de elección forzada (sección~\ref{sec:eval-naturalidad}): el evaluador ve las frases generadas por las tres técnicas base y selecciona la que suena más natural. La segunda es una tarea de generación en la que hablantes nativos escriben sus propias frases para cada secuencia de pictogramas, construyendo así un \textit{golden standard}~(sección~\ref{sec:eval-golden}) con el que recalcular las métricas multi-referencia. Ambas encuestas, junto con sus resultados, se detallan en la sección~\ref{ch:evaluacion-comparativa}.
 
