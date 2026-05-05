@@ -37,11 +37,11 @@ Blissymbolics & 6.000+ & CC BY-SA / dual & 19+ & No & Gratuito \\
 \label{tab:pictogram-databases}
 \end{table}
 
-Con los pictogramas y las etiquetas asociadas de ARASAAC como entrada, el problema se traslada a cómo convertir una secuencia de palabras en una oración natural en español. Las técnicas que abordan esta transformación son el objeto de la siguiente sección.
+Con los pictogramas y las etiquetas asociadas de ARASAAC como entrada, el problema se traslada a cómo convertir una secuencia de palabras en una oración natural en español.
 
 \section{Técnicas de generación de texto natural}
 
-Cada pictograma en un sistema SAAC lleva asociada una etiqueta textual (el pictograma de una casa lleva la palabra ``casa''). El problema \textit{picto-to-text} se reduce, por tanto, a generar una oración natural a partir de una secuencia de palabras. Este proceso involucra decisiones que van desde la conjugación verbal y la concordancia de género hasta la inserción de artículos y preposiciones, pasando por la reformulación semántica cuando la entrada es ambigua o incompleta.
+Convertir esa secuencia de palabras en una oración natural exige decisiones que van desde la conjugación verbal y la concordancia de género hasta la inserción de artículos y preposiciones, pasando por la reformulación semántica cuando la entrada es ambigua o incompleta.
 
 La literatura distingue dos direcciones. La traducción de texto a pictogramas (\textit{text-to-picto}) permite a una persona sin dificultades comunicativas expresarse en un formato comprensible para usuarios de SAAC; la iniciativa ImageCLEF ToPicto~\cite{imageclef2024topicto} propuso en 2024 un desafío específico para esta dirección en francés, y Norré et al.~\cite{norre2023wsd} aplicaron desambiguación del sentido de las palabras a la traducción de diálogos médicos a pictografías. La generación de texto a partir de pictogramas (\textit{picto-to-text}), que es el foco de este trabajo, ha recibido menos atención~\cite{curtis2022stateofart} y es la que se revisa a continuación.
 
@@ -105,6 +105,8 @@ LLM como generador de reglas & Proyecto de investigación completo, fuera del al
 \label{tab:h-patrones-descartados}
 \end{table}
 
+Las técnicas revisadas describen el espacio de soluciones disponibles para generar oraciones a partir de pictogramas. Queda por ver hasta qué punto las aplicaciones de CAA en uso aprovechan ese espacio.
+
 \section{Aplicaciones actuales de comunicación aumentativa}
 
 Aplicaciones comerciales como \textit{LetMeTalk}~\cite{letmetalk2024} o \textit{Proloquo2Go}~\cite{proloquo2go2024} ofrecen tableros de pictogramas con síntesis de voz: el usuario selecciona los símbolos y el sistema los convierte en audio. Sin embargo, se limitan a concatenar las etiquetas sin procesamiento lingüístico.
@@ -123,6 +125,6 @@ La generación de texto cubre solo una mitad del problema. La otra mitad es conv
 
 Las plataformas móviles incorporan sus propios motores de síntesis. Google TTS Engine~\cite{googletts-android} en Android y AVSpeechSynthesizer~\cite{avspeechsynthesizer-ios} en iOS ofrecen síntesis \textit{offline} gratuita con voces en español peninsular y latencia mínima. La calidad de estas voces es inferior a la de los motores neuronales en la nube, pero su disponibilidad inmediata y su funcionamiento sin conexión los convierten en una alternativa práctica frente a las soluciones \textit{online}.
 
-La voz sintetizada se convierte en la voz del usuario, y como tal forma parte de su identidad comunicativa. Pullin y Hennig~\cite{pullin2015seventeen} documentaron 17 formas distintas en que una persona puede decir ``sí'' y las contrastaron con el control expresivo de los sistemas de CAA actuales, donde el usuario dispone de una única entonación. Patel y Threats~\cite{patel2016voice} argumentaron que la voz constituye un componente central de los factores personales en el marco de la Clasificación Internacional del Funcionamiento (CIF) de la Organización Mundial de la Salud (OMS).
+A la calidad técnica se suma una dimensión identitaria que los motores actuales apenas cubren. La voz sintetizada se convierte en la voz del usuario, y como tal forma parte de su identidad comunicativa. Pullin y Hennig~\cite{pullin2015seventeen} documentaron 17 formas distintas en que una persona puede decir ``sí'' y las contrastaron con el control expresivo de los sistemas de CAA actuales, donde el usuario dispone de una única entonación. Patel y Threats~\cite{patel2016voice} argumentaron que la voz constituye un componente central de los factores personales en el marco de la Clasificación Internacional del Funcionamiento (CIF) de la Organización Mundial de la Salud (OMS).
 
 En el contexto hispanohablante, esta carencia es todavía más pronunciada: no se documentan voces infantiles en español peninsular para CAA, ni evaluaciones de su aceptabilidad en menores usuarios de estos sistemas~\cite{terblanche2025childvoices}.
