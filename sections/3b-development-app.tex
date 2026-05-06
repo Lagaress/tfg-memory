@@ -20,7 +20,7 @@ Los motores de generación están escritos en Python y no pueden ejecutarse en u
 \section{Decisiones tecnológicas}
 \label{sec:app-tecnologias}
 
-La elección de React Native~\cite{reactnative2024} como \textit{framework} de la app responde a la necesidad de cubrir iOS y Android desde un único código fuente. El proyecto usa React Native 0.81 con React 19, compilado mediante el SDK de Expo 54~\cite{expo2024}. Expo aporta un conjunto de bibliotecas nativas preconfiguradas (cámara, audio, hápticos, almacenamiento) y un sistema de compilación que abstrae la configuración de Xcode y Gradle.
+Cada lado de esta arquitectura impone sus propios condicionantes: el cliente debe cubrir iOS y Android, y el servidor está atado al lenguaje en que se escribieron los motores. La elección de React Native~\cite{reactnative2024} como \textit{framework} de la app responde a la necesidad de cubrir iOS y Android desde un único código fuente. El proyecto usa React Native 0.81 con React 19, compilado mediante el SDK de Expo 54~\cite{expo2024}. Expo aporta un conjunto de bibliotecas nativas preconfiguradas (cámara, audio, hápticos, almacenamiento) y un sistema de compilación que abstrae la configuración de Xcode y Gradle.
 
 La navegación se gestiona con Expo Router 6, que organiza las pantallas como ficheros en un directorio, de forma análoga a Next.js en el entorno web. La app tiene habilitada la \textit{New Architecture} de React Native~\cite{reactnative-newarchitecture}, que emplea el motor Hermes~\cite{hermesengine} para la ejecución de JavaScript. Todo el código del cliente está escrito en TypeScript 5.9, lo que añade tipado estático sobre JavaScript.
 
@@ -35,7 +35,7 @@ La síntesis de voz de respaldo se apoya en \texttt{expo-speech} 14.0~\cite{expo
 \section{Arquitectura del sistema}
 \label{sec:app-arquitectura}
 
-El flujo de comunicación completo atraviesa cuatro etapas:
+Sobre estas piezas tecnológicas se articula el flujo que conecta la selección de pictogramas con la frase que recibe el usuario. El flujo de comunicación completo atraviesa cuatro etapas:
 
 \begin{enumerate}
     \item El usuario selecciona pictogramas en el tablero de la app.
@@ -62,7 +62,7 @@ Un registro central mantiene la relación entre nombres de motores y sus impleme
 \section{Servidor de generación}
 \label{sec:app-servidor}
 
-El servidor se organiza en tres módulos: uno con el punto de entrada, la configuración y los esquemas de datos; otro con la interfaz abstracta, el registro y los seis adaptadores de motores; y un tercero con las rutas HTTP. La configuración se lee de variables de entorno con valores por defecto. El motor por defecto seleccionado es el LLM basado en GPT-4o, que lidera la evaluación comparativa (sección~\ref{ch:evaluacion-comparativa}) en métricas con referencia humana y en preferencia subjetiva. La gramática formal se mantiene como motor de respaldo para los escenarios que requieren ejecución sin conexión a Internet.
+El servidor que materializa estos patrones se organiza en tres módulos: uno con el punto de entrada, la configuración y los esquemas de datos; otro con la interfaz abstracta, el registro y los seis adaptadores de motores; y un tercero con las rutas HTTP. La configuración se lee de variables de entorno con valores por defecto. El motor por defecto seleccionado es el LLM basado en GPT-4o, que lidera la evaluación comparativa (sección~\ref{ch:evaluacion-comparativa}) en métricas con referencia humana y en preferencia subjetiva. La gramática formal se mantiene como motor de respaldo para los escenarios que requieren ejecución sin conexión a Internet.
 
 El \textit{endpoint} principal recibe una lista de pictogramas (entre 1 y 20 etiquetas) y un parámetro que indica qué motor usar. La generación se ejecuta en un \textit{thread pool} con un \textit{timeout} configurable de 30 segundos: si el motor solicitado no está disponible el servidor responde con un error 400, y si la generación excede el tiempo límite, con un error 408. El servidor expone además dos \textit{endpoints} de salud, uno que indica si el proceso está vivo y otro que verifica si al menos un motor está operativo.
 
@@ -79,7 +79,7 @@ La contenerización convierte el despliegue en una operación reproducible: la m
 \section{Síntesis de voz}
 \label{sec:app-tts}
 
-Tres criterios condicionan la elección del motor de síntesis de voz. El primero es el funcionamiento sin conexión, porque un usuario que depende del dispositivo para comunicarse no puede asumir interrupciones por falta de cobertura. El segundo es la disponibilidad de voces infantiles en español, donde la única opción comercial documentada es \textit{es-MX-MarinaNeural} de Azure, con acento mexicano y sin equivalente peninsular. El tercero es la latencia, porque en una conversación presencial un retardo superior a unos pocos cientos de milisegundos rompe el ritmo natural del diálogo.
+La frase que el servidor devuelve cierra la mitad textual del flujo; la otra mitad consiste en convertirla en voz audible. Tres criterios condicionan la elección del motor de síntesis de voz. El primero es el funcionamiento sin conexión, porque un usuario que depende del dispositivo para comunicarse no puede asumir interrupciones por falta de cobertura. El segundo es la disponibilidad de voces infantiles en español, donde la única opción comercial documentada es \textit{es-MX-MarinaNeural} de Azure, con acento mexicano y sin equivalente peninsular. El tercero es la latencia, porque en una conversación presencial un retardo superior a unos pocos cientos de milisegundos rompe el ritmo natural del diálogo.
 
 Para conjugar estos criterios la app combina dos motores complementarios: un servicio neuronal externo como motor principal cuando hay conexión a Internet y los motores nativos de la plataforma como respaldo \textit{offline}.
 
@@ -90,7 +90,7 @@ Cuando la petición al servidor falla o no hay conexión, la app recurre a los m
 \section{Interfaz de usuario}
 \label{sec:app-interfaz}
 
-El diseño de Dixi prioriza la accesibilidad para usuarios de CAA con dificultades motoras o visuales: retroalimentación multisensorial configurable (visual, háptica y auditiva), tamaños ajustables y paletas con contraste adecuado. La app organiza sus tres pantallas mediante una barra de pestañas inferior, el patrón estándar en aplicaciones móviles de uso frecuente.
+Servidor y síntesis de voz quedan ocultos al usuario; lo que ve y toca es la interfaz de la app, donde estas piezas se integran en una experiencia unificada. El diseño de Dixi prioriza la accesibilidad para usuarios de CAA con dificultades motoras o visuales: retroalimentación multisensorial configurable (visual, háptica y auditiva), tamaños ajustables y paletas con contraste adecuado. La app organiza sus tres pantallas mediante una barra de pestañas inferior, el patrón estándar en aplicaciones móviles de uso frecuente.
 
 La pantalla principal es el tablero de comunicación, el espacio donde el usuario construye mensajes seleccionando pictogramas. En la parte superior, una barra de construcción muestra en \textit{scroll} horizontal los pictogramas que el usuario ha ido seleccionando, con la frase generada debajo. Tocar un pictograma en esta barra lo elimina de la selección, permitiendo corregir sin empezar de nuevo. Debajo, un campo de búsqueda permite filtrar el catálogo de pictogramas por nombre.
 
