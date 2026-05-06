@@ -80,6 +80,8 @@ Cada llamada consume aproximadamente 1.204 \textit{tokens} de entrada, de los cu
 \subsection{Hiperparámetros y manejo de errores}
 \label{sec:f3-hiperparametros}
 
+La configuración del cliente combina hiperparámetros de generación, una política de reintentos según el tipo de error y una estimación del coste por llamada.
+
 La temperatura de 0,3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0,3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
 
 El límite de 100 \textit{tokens} es generoso para oraciones que promedian 4 \textit{tokens} de salida, pero actúa como salvaguarda contra generaciones desbordadas. El \textit{timeout} de 10 segundos refleja que, en una aplicación de comunicación asistida, el usuario espera activamente la respuesta.
