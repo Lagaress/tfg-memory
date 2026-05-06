@@ -30,7 +30,7 @@ La decisión de interponer un servidor entre la app y los motores tiene una moti
 
 El \textit{frontend} se apoya en bibliotecas nativas de Expo y React Native. Las imágenes de pictogramas se cargan con \texttt{expo-image}~\cite{expo-image}, que cachea en disco y recicla vistas para contener el consumo de memoria cuando el usuario desplaza la cuadrícula. Las animaciones de retroalimentación táctil corren en el hilo nativo gracias a \texttt{react-native-reanimated} 4.1~\cite{reanimated}, manteniendo 60 fotogramas por segundo incluso en dispositivos de gama baja.
 
-La síntesis de voz de respaldo se apoya en \texttt{expo-speech} 14.0, que da acceso a los motores nativos de cada plataforma (AVSpeechSynthesizer en iOS, TextToSpeech en Android); los detalles del motor principal se describen en la sección de flujo completo. La retroalimentación háptica se gestiona con \texttt{expo-haptics} 15.0, y las listas de pictogramas con \texttt{@shopify/flash-list} 2.0, que mejora el rendimiento de desplazamiento respecto al FlatList estándar de React Native.
+La síntesis de voz de respaldo se apoya en \texttt{expo-speech} 14.0~\cite{expo-speech}, que da acceso a los motores nativos de cada plataforma (AVSpeechSynthesizer en iOS, TextToSpeech en Android); los detalles del motor principal se describen en la sección de flujo completo. La retroalimentación háptica se gestiona con \texttt{expo-haptics} 15.0~\cite{expo-haptics}, y las listas de pictogramas con \texttt{@shopify/flash-list} 2.0~\cite{flash-list}, que mejora el rendimiento de desplazamiento respecto al FlatList estándar de React Native.
 
 \section{Arquitectura del sistema}
 \label{sec:app-arquitectura}
