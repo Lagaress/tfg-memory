@@ -16,7 +16,7 @@ Si la gramática no reconoce la entrada, se activa un mecanismo de \textit{fallb
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/hibridacion1.png}
-    \caption{Pipeline de Hybrid1: la gramática formal produce la frase inicial y el LLM la pos-edita con ocho reglas de fidelidad; si la gramática no reconoce la entrada, el LLM la genera desde cero como \textit{fallback}.}
+    \caption{\textit{Pipeline} secuencial de Hybrid1: gramática como generador y LLM como post-editor.}
     \label{fig:hibridacion1}
 \end{figure}
 
@@ -36,7 +36,7 @@ Las limitaciones son las mismas que las de Hybrid1: dependencia del LLM externo 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/hibridacion2.png}
-    \caption{\textit{Pipeline} de Hybrid2: el motor de gramática enriquecida con \textit{embeddings} produce la frase inicial y el mismo post-editor LLM la refina con ocho reglas de fidelidad; el \textit{fallback} es idéntico al de Hybrid1.}
+    \caption{\textit{Pipeline} de Hybrid2: la frase inicial procede del motor de \textit{embeddings} en lugar de la gramática pura.}
     \label{fig:hibridacion2}
 \end{figure}
 
@@ -48,7 +48,7 @@ A diferencia de Hybrid1 y Hybrid2, que mejoran con post-edición la salida de un
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/hibridacion3.png}
-    \caption{\textit{Pipeline} de Hybrid3 (\textit{Overgenerate-and-Rank}): cinco generadores (gramática formal, \textit{embeddings}, LLM, Hybrid1 y Hybrid2) producen una candidata cada uno; el filtro de fidelidad selecciona las que cubren el 100\,\% de los pictogramas de entrada y el \textit{ranking} por perplejidad (GPT-2 en español) elige la más natural.}
+    \caption{\textit{Pipeline} de tres etapas de Hybrid3 (\textit{Overgenerate-and-Rank}): generación multimotor, filtro de fidelidad y \textit{ranking} por perplejidad.}
     \label{fig:hibridacion3}
 \end{figure}
 
