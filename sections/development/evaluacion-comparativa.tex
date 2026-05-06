@@ -38,7 +38,7 @@ Las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el 
 
 \begin{table}[ht]
 \centering
-\small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{l c c c c c c}
 \hline
  & \multicolumn{3}{c}{Técnicas base} & \multicolumn{3}{c}{Hibridaciones} \\
@@ -53,7 +53,8 @@ chrF++ & 0,81 $\pm$ 0,23 & 0,81 $\pm$ 0,23 & 0,85 $\pm$ 0,22 & 0,83 $\pm$ 0,23 &
 ROUGE-L $F_1$ & 0,84 $\pm$ 0,22 & 0,84 $\pm$ 0,22 & 0,87 $\pm$ 0,21 & 0,85 $\pm$ 0,23 & 0,85 $\pm$ 0,22 & 0,85 $\pm$ 0,22 \\
 BERTScore $F_1$ & 0,956 $\pm$ 0,058 & 0,956 $\pm$ 0,058 & 0,967 $\pm$ 0,049 & 0,956 $\pm$ 0,061 & 0,956 $\pm$ 0,060 & 0,958 $\pm$ 0,059 \\
 \hline
-\end{tabular}
+\end{tabular}%
+}
 \caption{Métricas con referencia humana por motor (media $\pm$ desviación estándar, $n=164$). Todas se calculan contra la lista de referencias humanas de cada caso.}
 \label{tab:eval-referencia}
 \end{table}
