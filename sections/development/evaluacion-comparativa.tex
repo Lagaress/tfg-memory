@@ -181,7 +181,9 @@ Los diagramas de caja de la Figura~\ref{fig:eval-boxplots} complementan las medi
 
 El LLM se diferencia por una densidad mayor en la parte alta de cada métrica: sus predicciones coinciden con alguna referencia humana con más frecuencia que las de las bases o los híbridos. La gramática y los \textit{embeddings} muestran distribuciones prácticamente superpuestas, consecuencia de la equivalencia observada en la Sección~\ref{sec:eval-convergencia}.
 
-La dispersión tiene implicaciones prácticas para un sistema de CAA. Un motor con media alta pero alta varianza es menos predecible para el usuario: la oración generada puede coincidir con una formulación natural en unos casos y divergir notablemente en otros. Las bases ofrecen menor variabilidad entre ejecuciones (determinismo total) a costa de una media más baja. El LLM y los híbridos introducen variabilidad pero elevan la media. La distribución global, sin embargo, no captura cómo varía el rendimiento con la longitud de la entrada, factor que se examina a continuación.
+La dispersión tiene implicaciones prácticas para un sistema de CAA. Un motor con media alta pero alta varianza es menos predecible para el usuario: la oración generada puede coincidir con una formulación natural en unos casos y divergir notablemente en otros.
+
+Las bases ofrecen menor variabilidad entre ejecuciones (determinismo total) a costa de una media más baja. El LLM y los híbridos introducen variabilidad pero elevan la media. La distribución global, sin embargo, no captura cómo varía el rendimiento con la longitud de la entrada, factor que se examina a continuación.
 
 \subsubsection{Análisis por complejidad}
 \label{sec:eval-complejidad}
