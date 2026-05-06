@@ -30,16 +30,7 @@ LLM (GPT-4o) & Alta & Alta & 96\% & $\sim$1500 ms \\
 
 La gramática produce salidas correctas y predecibles dentro de su dominio pero genera frases que, aunque correctas, suenan rígidas. Los \textit{embeddings} heredan casi por completo las decisiones de la gramática. El LLM alcanza mayor naturalidad pero depende de una API externa con latencia y coste por llamada. Las tres hibridaciones exploran si la composición de motores supera a las partes.
 
-La evaluación se organiza de la siguiente forma:
-
-\begin{enumerate}
-    \item Carga del \textit{golden standard}: 164 ítems con referencias humanas multi-referencia (véase la Sección~\ref{sec:eval-golden}) cargados desde \texttt{data/golden\_standard.json}.
-    \item Generación: las salidas de los seis motores sobre los 164 casos se reutilizan de una ejecución previa del \textit{pipeline} sobre el catálogo completo. Los 164 identificadores del \textit{golden standard} están presentes en los \textit{outputs} cacheados de los seis motores, de modo que no se requiere regeneración.
-    \item Cálculo de métricas: para cada par (predicción, lista de referencias humanas) se calculan las métricas descritas en la Sección~\ref{sec:metricas} en su variante multi-referencia.
-    \item Análisis estadístico: tests no paramétricos (Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y \textit{bootstrap} pareado~\cite{koehn2004statistical} con 1000 remuestreos y semilla fija para intervalos de confianza) sobre los \textit{scores} de los seis motores.
-    \item Generación de tablas comparativas, gráficas de distribución y tablas LaTeX.
-    \item Análisis de la encuesta de naturalidad: contraste de preferencias humanas entre las tres técnicas base y correlación con las métricas automáticas en los ítems solapados.
-\end{enumerate}
+El \textit{pipeline} de evaluación carga el \textit{golden standard} de 164 ítems con referencias humanas multi-referencia (sección~\ref{sec:eval-golden}) y recupera de la caché las salidas precomputadas de los seis motores sobre el catálogo completo, de modo que no se requiere regeneración. Sobre cada par (predicción, lista de referencias humanas) calcula las métricas en su variante multi-referencia (sección~\ref{sec:metricas}) y aplica los tests no paramétricos correspondientes: Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y \textit{bootstrap} pareado~\cite{koehn2004statistical} con 1000 remuestreos y semilla fija para los intervalos de confianza. Como salida produce las tablas comparativas y las gráficas de distribución que se utilizan en el análisis posterior. La encuesta de naturalidad se procesa por separado y se contrasta con las métricas automáticas en los ítems solapados entre ambas encuestas.
 
 Las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el rendimiento de los seis motores. Cada celda muestra la media $\pm$ desviación estándar sobre los 164 casos.
 
@@ -171,8 +162,6 @@ El cuarto hallazgo muestra que los tres híbridos mejoran cobertura y fidelidad 
 
 \subsection{Análisis detallado}
 \label{sec:eval-detallado}
-
-Las secciones anteriores ofrecen una visión global del rendimiento. Las siguientes subsecciones examinan dimensiones específicas: la distribución de las métricas, el efecto de la complejidad de la entrada, la tipología de errores y la naturalidad medida por perplejidad.
 
 \subsubsection{Distribución de métricas}
 \label{sec:eval-distribuciones}

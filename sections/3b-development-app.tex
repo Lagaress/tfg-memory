@@ -15,7 +15,7 @@ El sistema sigue una arquitectura cliente-servidor:
     \item El servidor es una API REST desarrollada con FastAPI~\cite{fastapi2024}. Recibe las etiquetas de los pictogramas seleccionados, las pasa al motor de generación correspondiente y devuelve la frase resultante.
 \end{itemize}
 
-Los motores de generación están escritos en Python y no pueden ejecutarse en un dispositivo móvil, lo que justifica esta separación. Las secciones siguientes detallan las tecnologías elegidas para cada lado de esta arquitectura y cómo se integran entre sí.
+Los motores de generación están escritos en Python y no pueden ejecutarse en un dispositivo móvil, lo que justifica esta separación.
 
 \section{Decisiones tecnológicas}
 \label{sec:app-tecnologias}
@@ -62,8 +62,6 @@ La última etapa del flujo es la síntesis de voz. La app combina dos motores co
 El motor principal se apoya en la API de ElevenLabs~\cite{elevenlabs2026pricing}, concretamente en el modelo \textit{Flash v2.5}, diseñado para agentes conversacionales en tiempo real con una latencia de inferencia en torno a 75~ms. La app nunca contacta con ElevenLabs directamente: envía la frase al servidor a través de una ruta dedicada, el servidor realiza la llamada a la API con la clave almacenada en su configuración, recibe el audio sintetizado y lo devuelve al cliente, que lo reproduce. Este intermediario cumple la misma función de seguridad que con la API de OpenAI (proteger la clave frente a extracción por ingeniería inversa del binario) y permite además aplicar caché de frases frecuentes en el servidor para reducir coste y latencia.
 
 Cuando la petición al servidor falla o no hay conexión, la app recurre a los motores nativos descritos antes mediante \texttt{expo-speech}. La naturalidad es inferior, pero la respuesta es inmediata y completamente local. La pantalla de ajustes permite seleccionar voz, velocidad y tono; la app traduce esos parámetros a los atributos correspondientes de ElevenLabs o de \texttt{expo-speech} según el motor activo, manteniendo la configuración coherente para el usuario.
-
-Con esta arquitectura definida, las secciones siguientes describen los detalles concretos de cada lado: primero el servidor y después la app.
 
 \section{Servidor de generación}
 \label{sec:app-servidor}
