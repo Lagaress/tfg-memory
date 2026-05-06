@@ -1,18 +1,4 @@
-El código del proyecto se distribuye en varios repositorios independientes alojados en GitHub, cada uno con su propio entorno de ejecución, dependencias y ciclo de vida. El Anexo~\ref{cap:repositorios} recoge el mapa completo de repositorios y los enlaces de acceso a cada uno.
-
-\subsection{Organización del código}
-
-El proyecto se estructura como un conjunto de repositorios independientes, cada uno con su propio entorno de ejecución y dependencias. Esta separación permite desarrollar, probar y desplegar cada componente de forma autónoma:
-
-\begin{itemize}
-    \item Gramática formal: motor de generación basado en reglas CFG con Lark y Python.
-    \item Embeddings semánticos: motor híbrido que combina la gramática formal con FastText.
-    \item Modelos de lenguaje: motor basado en GPT-4o mediante la API de OpenAI.
-    \item Hibridación: tres técnicas que combinan los motores anteriores.
-    \item Evaluación comparativa: \textit{pipeline} de métricas automáticas y tests estadísticos.
-    \item Aplicación móvil: interfaz de usuario desarrollada con React Native y Expo.
-    \item Encuestas web: \textit{monorepo} con las encuestas de naturalidad y de \textit{golden standard} (sección~\ref{sec:eval-golden}).
-\end{itemize}
+Los seis motores presentados comparten una base común de patrones de diseño y de tecnologías. El código se distribuye en varios repositorios independientes alojados en GitHub, cada uno con su propio entorno de ejecución, dependencias y ciclo de vida. El Anexo~\ref{cap:repositorios} recoge el mapa completo de repositorios y los enlaces de acceso a cada uno.
 
 \subsection{Patrones de diseño}
 
