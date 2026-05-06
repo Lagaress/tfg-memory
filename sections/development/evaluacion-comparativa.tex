@@ -465,7 +465,7 @@ Ningún motor lidera todas las dimensiones, y la Tabla~\ref{tab:eval-ranking} cr
 
 \begin{table}[ht]
 \centering
-\small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{l l l}
 \hline
 Dimensión & Mejor motor & Observación \\
@@ -477,7 +477,8 @@ Fidelidad ajustada & Hybrid3 & 0,986 (frente a 0,951 de las bases) \\
 Preferencia humana (encuesta) & LLM & 44\% de elecciones ($p < 10^{-17}$) \\
 Latencia & Gramática & 0,02 ms (frente a 4,3 s de Hybrid3) \\
 \hline
-\end{tabular}
+\end{tabular}%
+}
 \caption{Resumen: mejor motor por dimensión evaluada.}
 \label{tab:eval-ranking}
 \end{table}
