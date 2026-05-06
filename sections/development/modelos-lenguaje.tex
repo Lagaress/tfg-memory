@@ -16,7 +16,9 @@ La estrategia de adaptación es la ingeniería de \textit{prompts}~\cite{brown20
 
 Esta elección responde a razones prácticas: permite iterar con rapidez sobre el diseño sin necesidad de infraestructura GPU ni de un corpus de entrenamiento propio, y aprovecha el conocimiento lingüístico del español que el modelo ya ha adquirido durante su entrenamiento original.
 
-La adaptación opera en tres dimensiones complementarias. La primera es un conjunto de once reglas que restringen el comportamiento del modelo: fidelidad semántica a los pictogramas, formato de salida, registro lingüístico. La segunda son quince ejemplos \textit{few-shot} que muestran al modelo el patrón concreto de transformación esperado. La tercera son metadatos gramaticales que acompañan a cada pictograma (categoría, forma) y desambiguan la entrada. En los capítulos anteriores, el conocimiento lingüístico estaba codificado en reglas explícitas (gramática formal) o representado geométricamente como vectores (\textit{embeddings}); aquí ese conocimiento ya viene en el modelo, y el trabajo de adaptación consiste en restringirlo para que opere dentro de los límites del dominio de CAA.
+La adaptación opera en tres dimensiones complementarias. La primera es un conjunto de once reglas que restringen el comportamiento del modelo: fidelidad semántica a los pictogramas, formato de salida, registro lingüístico. La segunda son quince ejemplos \textit{few-shot} que muestran al modelo el patrón concreto de transformación esperado. La tercera son metadatos gramaticales que acompañan a cada pictograma (categoría, forma) y desambiguan la entrada.
+
+En los capítulos anteriores, el conocimiento lingüístico estaba codificado en reglas explícitas (gramática formal) o representado geométricamente como vectores (\textit{embeddings}); aquí ese conocimiento ya viene en el modelo, y el trabajo de adaptación consiste en restringirlo para que opere dentro de los límites del dominio de CAA.
 
 \subsection{Diseño del \textit{prompt}}
 \label{sec:f3-prompt}
