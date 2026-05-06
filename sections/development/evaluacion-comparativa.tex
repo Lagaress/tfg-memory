@@ -158,7 +158,7 @@ El segundo hallazgo confirma el liderazgo del LLM en las seis métricas basadas 
 
 El tercer hallazgo es la ventaja clara de Hybrid1 y Hybrid2 en métricas de naturalidad intrínseca. La post-edición por LLM reduce la perplejidad mediana a prácticamente la mitad respecto a la gramática. Hybrid3 ocupa una posición intermedia: su paso de \textit{ranking} por perplejidad selecciona con frecuencia la salida de la gramática (véase la Sección~\ref{sec:eval-hibridos}), lo que suaviza su ganancia en naturalidad respecto a Hybrid1 y Hybrid2.
 
-El cuarto hallazgo muestra que los tres híbridos mejoran cobertura y fidelidad respecto a las bases y al LLM puro. La ganancia es modesta en valor absoluto (de 0,96 a 0,98-0,99 en cobertura), pero sistemática y estadísticamente significativa.
+El cuarto hallazgo muestra que los tres híbridos mejoran cobertura y fidelidad respecto a las bases y al LLM puro. La ganancia es modesta en valor absoluto (de 0,96 a 0,98-0,99 en cobertura), pero sistemática y estadísticamente significativa. Estas diferencias agregadas se explican mejor al examinar la distribución completa de cada métrica y su comportamiento ante variaciones de longitud y tipo de error.
 
 \subsection{Análisis detallado}
 \label{sec:eval-detallado}
@@ -278,7 +278,7 @@ Las divergencias mayores aparecen con Hybrid1 y Hybrid2: gramática $\equiv$ Hyb
 \subsection{Análisis de los híbridos}
 \label{sec:eval-hibridos}
 
-Las tres hibridaciones perseguían mejorar alguna dimensión respecto a las técnicas base. Las siguientes subsecciones evalúan en qué medida cumplen el objetivo, qué intercambios introducen respecto a los motores individuales y cuáles son sus compromisos operativos.
+Las tres hibridaciones perseguían mejorar alguna dimensión respecto a las técnicas base. Cada una se evalúa contra su técnica base natural (Hybrid1 frente a la gramática, Hybrid2 frente a los \textit{embeddings}, Hybrid3 frente a ambas) y, en paralelo, contra el LLM puro como techo de calidad lingüística.
 
 \subsubsection{Mejora relativa}
 \label{sec:eval-mejora}
@@ -294,7 +294,7 @@ La Figura~\ref{fig:eval-mejora} cuantifica la mejora relativa de cada híbrido r
 
 La mejora en exact match frente a las bases es uno de los hallazgos clave del estudio. Al reformular las salidas deterministas con un LLM de post-edición, los híbridos recuperan un 3-7\% adicional de coincidencias exactas con las referencias humanas. La explicación es que la post-edición ajusta marcas morfológicas y artículos a las formas que los hablantes eligieron con más frecuencia, acercando la salida a la mediana de formulaciones humanas.
 
-Ahora bien, esta mejora sobre las bases no alcanza el rendimiento del LLM puro, que lidera todas las métricas con referencia (Exact Match 0,63 frente a 0,55-0,59 de los híbridos). La post-edición sobre una salida determinista añade valor, pero menos que dejar al LLM generar desde cero.
+Ahora bien, esta mejora sobre las bases no alcanza el rendimiento del LLM puro, que lidera todas las métricas con referencia (Exact Match 0,63 frente a 0,55-0,59 de los híbridos). La post-edición sobre una salida determinista añade valor, pero menos que dejar al LLM generar desde cero. Más allá de la calidad lingüística, los híbridos también difieren entre sí en latencia, coste y determinismo, dimensiones que pesan tanto como la calidad en un sistema de CAA.
 
 \subsubsection{Compromisos de diseño}
 \label{sec:eval-compromisos}
@@ -332,12 +332,12 @@ La encuesta de \textit{golden standard} construye el corpus de referencias contr
 
 Ambas encuestas se desplegaron como aplicaciones web con React y TypeScript~\cite{dixigoldensurvey2026,dixinaturalsurvey2026}. La interfaz muestra los pictogramas ARASAAC reales con bordes coloreados por categoría según el sistema Fitzgerald, ofrece sesiones reanudables con el progreso guardado en \textit{localStorage} del navegador y envía las respuestas en tiempo real a una base de datos Supabase alojada en la Unión Europea. El consentimiento informado cumple el Reglamento General de Protección de Datos: se recogen datos mínimos (sólo email para detectar envíos duplicados), el consentimiento es explícito, el almacenamiento se realiza en la UE y la retención está limitada a la defensa del TFG más seis meses.
 
-Para la captación de participantes se diseñaron carteles de difusión que acompañaron la convocatoria de ambas encuestas. Cada cartel resume el objetivo del estudio, el tiempo estimado de participación y un código QR con el enlace al formulario. Su diseño íntegro se recoge en el Anexo~\ref{sec:anexo-carteles}.
+La captación de participantes se apoyó en carteles de difusión que acompañaron la convocatoria de ambas encuestas, con el objetivo del estudio, el tiempo estimado de participación y un código QR con el enlace al formulario. Su diseño íntegro se recoge en el Anexo~\ref{sec:anexo-carteles}.
 
 \subsubsection{Encuesta de golden standard}
 \label{sec:eval-golden}
 
-La encuesta de \textit{golden standard} recoge referencias humanas independientes de las salidas de los motores. Cada respondente ve una secuencia de pictogramas ARASAAC y escribe libremente la frase que diría, sin restricciones de vocabulario ni de estructura, y sin ver ninguna salida de los motores (véase la Figura~\ref{fig:eval-golden-encuesta} en el Anexo~\ref{sec:anexo-interfaces-encuestas}).
+Cada respondente ve una secuencia de pictogramas ARASAAC y escribe libremente la frase que diría, sin restricciones de vocabulario ni de estructura, y sin ver ninguna salida de los motores (véase la Figura~\ref{fig:eval-golden-encuesta} en el Anexo~\ref{sec:anexo-interfaces-encuestas}). Esta independencia respecto a las salidas existentes es lo que permite usar las respuestas como referencia neutra contra la que medir cualquier motor.
 
 El diseño contempla 164 ítems organizados en 10 bloques de 16 ítems únicos más 4 \textit{anchors} compartidos. Cada participante ve 20 ítems (16 + 4) dentro del umbral de fatiga de 20 minutos que Van der Lee et al.~\cite{vanderlee2021human} recomiendan no exceder en tareas de evaluación de texto generado. Los 4 \textit{anchors} aparecen en los diez bloques y permiten detectar sesgos cruzados entre participantes. Los 160 ítems únicos cubren ocho funciones comunicativas y tres niveles de complejidad, con aproximadamente 20 observaciones por función comunicativa~\cite{reiter2009investigation}.
 
@@ -437,7 +437,7 @@ Los resultados admiten varias matizaciones. La muestra es modesta (48 participan
 
 \subsection{Resumen de resultados}
 
-La Tabla~\ref{tab:eval-ranking} resume qué motor obtiene los mejores resultados en cada dimensión evaluada.
+Ningún motor lidera todas las dimensiones, y la Tabla~\ref{tab:eval-ranking} cruza cada criterio relevante con el motor que mejor lo satisface.
 
 \begin{table}[ht]
 \centering
