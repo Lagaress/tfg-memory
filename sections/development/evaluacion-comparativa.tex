@@ -140,7 +140,7 @@ Las comparaciones por pares con Wilcoxon y corrección de Holm-Bonferroni produc
 
 \begin{table}[ht]
 \centering
-\small
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{l l l}
 \hline
 Hallazgo & Métricas afectadas & $p$-valor \\
@@ -150,7 +150,8 @@ LLM $>$ Gramática/Embeddings & BLEU-4, METEOR, EM, chrF++, ROUGE-L, BERTScore &
 Hybrid1, Hybrid2 $>$ resto & Log-perplejidad, log-pseudo-perplejidad & $p < 0{,}001$ \\
 Híbridos $>$ Gramática/Embeddings & Cobertura, fidelidad, fidelidad ajustada & $p < 0{,}001$ \\
 \hline
-\end{tabular}
+\end{tabular}%
+}
 \caption{Hallazgos principales del test de Wilcoxon por pares con corrección de Holm-Bonferroni. El símbolo $\equiv$ indica ausencia de diferencia significativa; $>$ indica superioridad significativa.}
 \label{tab:eval-wilcoxon}
 \end{table}
