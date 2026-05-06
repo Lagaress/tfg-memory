@@ -488,7 +488,9 @@ Latencia & Gramática & 0,02 ms (frente a 4,3 s de Hybrid3) \\
 \subsection{Discusión}
 \label{sec:eval-discusion}
 
-El hallazgo central de esta evaluación es el liderazgo consistente del LLM en dos dimensiones independientes: las métricas automáticas calculadas contra referencias humanas y la preferencia humana directa recogida en la encuesta de naturalidad. Las seis métricas con referencia (Exact Match, BLEU-4, METEOR, chrF++, ROUGE-L, BERTScore) sitúan al LLM por encima de las bases y de los tres híbridos, con diferencias estadísticamente significativas tras corrección por comparaciones múltiples. La encuesta de naturalidad confirma el resultado: el LLM recibe el 44\% de las 1275 preferencias, el doble que cualquier motor base, con diferencias pareadas frente a gramática y \textit{embeddings} que resisten la corrección de Bonferroni a niveles $p < 10^{-17}$.
+El hallazgo central de esta evaluación es el liderazgo consistente del LLM en dos dimensiones independientes: las métricas automáticas calculadas contra referencias humanas y la preferencia humana directa recogida en la encuesta de naturalidad. Las seis métricas con referencia (Exact Match, BLEU-4, METEOR, chrF++, ROUGE-L, BERTScore) sitúan al LLM por encima de las bases y de los tres híbridos, con diferencias estadísticamente significativas tras corrección por comparaciones múltiples.
+
+La encuesta de naturalidad confirma el resultado: el LLM recibe el 44\% de las 1275 preferencias, el doble que cualquier motor base, con diferencias pareadas frente a gramática y \textit{embeddings} que resisten la corrección de Bonferroni a niveles $p < 10^{-17}$.
 
 La equivalencia entre gramática y \textit{embeddings} es el segundo hallazgo transversal. Producen la misma salida en 163 de 164 casos, sus métricas automáticas coinciden en la tercera cifra decimal, y en la encuesta de naturalidad no se distinguen estadísticamente. El componente de \textit{embeddings} no modifica las decisiones de la gramática en el dominio acotado del proyecto. Ampliar el vocabulario más allá de los 232 pictogramas actuales podría cambiar este resultado, pero queda fuera del alcance de este trabajo.
 
