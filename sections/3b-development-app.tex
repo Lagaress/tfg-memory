@@ -30,7 +30,7 @@ La decisión de interponer un servidor entre la app y los motores tiene una moti
 
 El \textit{frontend} se apoya en bibliotecas nativas de Expo y React Native. Las imágenes de pictogramas se cargan con \texttt{expo-image}~\cite{expo-image}, que cachea en disco y recicla vistas para contener el consumo de memoria cuando el usuario desplaza la cuadrícula. Las animaciones de retroalimentación táctil corren en el hilo nativo gracias a \texttt{react-native-reanimated} 4.1~\cite{reanimated}, manteniendo 60 fotogramas por segundo incluso en dispositivos de gama baja.
 
-La síntesis de voz de respaldo se apoya en \texttt{expo-speech} 14.0~\cite{expo-speech}, que da acceso a los motores nativos de cada plataforma (AVSpeechSynthesizer en iOS, TextToSpeech en Android); los detalles del motor principal se describen en la sección de flujo completo. La retroalimentación háptica se gestiona con \texttt{expo-haptics} 15.0~\cite{expo-haptics}, y las listas de pictogramas con \texttt{@shopify/flash-list} 2.0~\cite{flash-list}, que mejora el rendimiento de desplazamiento respecto al FlatList estándar de React Native.
+La síntesis de voz de respaldo se apoya en \texttt{expo-speech} 14.0~\cite{expo-speech}, que da acceso a los motores nativos de cada plataforma (AVSpeechSynthesizer en iOS, TextToSpeech en Android); los detalles del motor principal se describen en la sección~\ref{sec:app-tts}. La retroalimentación háptica se gestiona con \texttt{expo-haptics} 15.0~\cite{expo-haptics}, y las listas de pictogramas con \texttt{@shopify/flash-list} 2.0~\cite{flash-list}, que mejora el rendimiento de desplazamiento respecto al FlatList estándar de React Native.
 
 \section{Arquitectura del sistema}
 \label{sec:app-arquitectura}
@@ -59,14 +59,6 @@ Todos los motores implementan una misma interfaz abstracta que define tres opera
 
 Un registro central mantiene la relación entre nombres de motores y sus implementaciones. Al arrancar, el servidor lee de sus variables de entorno la lista de motores que debe cargar, los instancia y ejecuta su carga de recursos. Cada motor se inicializa una sola vez y atiende todas las peticiones posteriores como \textit{singleton}~\cite{refactoringguru_registry}. Añadir un motor nuevo consiste en implementar la interfaz abstracta, registrarlo e incluir su nombre en la configuración, sin modificar el código existente.
 
-La última etapa del flujo es la síntesis de voz. Tres criterios condicionan la elección del motor. El primero es el funcionamiento sin conexión, porque un usuario que depende del dispositivo para comunicarse no puede asumir interrupciones por falta de cobertura. El segundo es la disponibilidad de voces infantiles en español, donde la única opción comercial documentada es \textit{es-MX-MarinaNeural} de Azure, con acento mexicano y sin equivalente peninsular. El tercero es la latencia, porque en una conversación presencial un retardo superior a unos pocos cientos de milisegundos rompe el ritmo natural del diálogo.
-
-Para conjugar estos criterios la app combina dos motores complementarios: un servicio neuronal externo como motor principal cuando hay conexión a Internet y los motores nativos de la plataforma como respaldo \textit{offline}.
-
-El motor principal se apoya en la API de ElevenLabs~\cite{elevenlabs2026pricing}, concretamente en el modelo \textit{Flash v2.5}, diseñado para agentes conversacionales en tiempo real con una latencia de inferencia en torno a 75~ms. La app nunca contacta con ElevenLabs directamente: envía la frase al servidor a través de una ruta dedicada, el servidor realiza la llamada a la API con la clave almacenada en su configuración, recibe el audio sintetizado y lo devuelve al cliente, que lo reproduce. Este intermediario cumple la misma función de seguridad que con la API de OpenAI (proteger la clave frente a extracción por ingeniería inversa del binario) y permite además aplicar caché de frases frecuentes en el servidor para reducir coste y latencia.
-
-Cuando la petición al servidor falla o no hay conexión, la app recurre a los motores nativos descritos antes mediante \texttt{expo-speech}. La naturalidad es inferior, pero la respuesta es inmediata y completamente local. La pantalla de ajustes permite seleccionar voz, velocidad y tono; la app traduce esos parámetros a los atributos correspondientes de ElevenLabs o de \texttt{expo-speech} según el motor activo, manteniendo la configuración coherente para el usuario.
-
 \section{Servidor de generación}
 \label{sec:app-servidor}
 
@@ -81,6 +73,17 @@ La clave de API de OpenAI reside exclusivamente en la configuración del servido
 El manejo de errores sigue una estrategia de degradación. Si un motor falla durante la generación, el adaptador devuelve la respuesta con un indicador de error en lugar de provocar un fallo completo del servidor. Esto permite que la app distinga entre un fallo de red (que requiere reintentar) y un fallo del motor (que puede resolverse mostrando un mensaje al usuario o recurriendo al generador local como respaldo).
 
 El servidor está contenerizado con Docker~\cite{docker2024} para facilitar su despliegue. La imagen parte de una distribución ligera de Python 3.13, copia el código de la API y el del motor de generación, instala las dependencias e inicia el servidor en el puerto 8000. Un fichero de configuración de Docker Compose permite levantar el servicio con un solo comando, sin necesidad de instalar Python ni las dependencias en la máquina anfitriona. La contenerización convierte el despliegue en una operación reproducible: la misma imagen que se ejecuta en la máquina del desarrollador puede subirse a un registro y desplegarse en cualquier servicio \textit{cloud} (AWS ECS, Google Cloud Run, Azure Container Instances) sin ajustes adicionales, ya que el contenedor encapsula el intérprete, las dependencias y el código en un artefacto autocontenido.
+
+\section{Síntesis de voz}
+\label{sec:app-tts}
+
+Tres criterios condicionan la elección del motor de síntesis de voz. El primero es el funcionamiento sin conexión, porque un usuario que depende del dispositivo para comunicarse no puede asumir interrupciones por falta de cobertura. El segundo es la disponibilidad de voces infantiles en español, donde la única opción comercial documentada es \textit{es-MX-MarinaNeural} de Azure, con acento mexicano y sin equivalente peninsular. El tercero es la latencia, porque en una conversación presencial un retardo superior a unos pocos cientos de milisegundos rompe el ritmo natural del diálogo.
+
+Para conjugar estos criterios la app combina dos motores complementarios: un servicio neuronal externo como motor principal cuando hay conexión a Internet y los motores nativos de la plataforma como respaldo \textit{offline}.
+
+El motor principal se apoya en la API de ElevenLabs~\cite{elevenlabs2026pricing}, concretamente en el modelo \textit{Flash v2.5}, diseñado para agentes conversacionales en tiempo real con una latencia de inferencia en torno a 75~ms. La app nunca contacta con ElevenLabs directamente: envía la frase al servidor a través de una ruta dedicada, el servidor realiza la llamada a la API con la clave almacenada en su configuración, recibe el audio sintetizado y lo devuelve al cliente, que lo reproduce. Este intermediario cumple la misma función de seguridad que con la API de OpenAI (proteger la clave frente a extracción por ingeniería inversa del binario) y permite además aplicar caché de frases frecuentes en el servidor para reducir coste y latencia.
+
+Cuando la petición al servidor falla o no hay conexión, la app recurre a los motores nativos descritos antes mediante \texttt{expo-speech}. La naturalidad es inferior, pero la respuesta es inmediata y completamente local. La pantalla de ajustes permite seleccionar voz, velocidad y tono; la app traduce esos parámetros a los atributos correspondientes de ElevenLabs o de \texttt{expo-speech} según el motor activo, manteniendo la configuración coherente para el usuario.
 
 \section{Interfaz de usuario}
 \label{sec:app-interfaz}
