@@ -7,14 +7,6 @@ La arquitectura de Dixi sigue un diseño modular: la entrada (una lista ordenada
     \label{fig:arquitectura-modular}
 \end{figure}
 
-En cuanto al motor de síntesis de voz, tres aspectos condicionan la elección:
-
-\begin{enumerate}
-    \item Funcionamiento sin conexión: una persona que depende de un dispositivo de comunicación no puede asumir interrupciones por falta de cobertura.
-    \item Disponibilidad de voces infantiles en español: la única voz infantil en español ofrecida por los proveedores comerciales es es-MX-MarinaNeural de Azure, con acento mexicano y sin equivalente peninsular.
-    \item Latencia: en una conversación presencial, un retardo superior a unos pocos cientos de milisegundos rompe el ritmo natural del diálogo.
-\end{enumerate}
-
 El dominio de la aplicación está deliberadamente acotado. El vocabulario consta de 232 pictogramas ARASAAC organizados en nueve categorías cromáticas, una cantidad seleccionada para cubrir las necesidades comunicativas básicas del día a día (pedir necesidades, expresar emociones, hacer preguntas, describir estados, referirse a personas cercanas y lugares habituales) sin desbordar el alcance del proyecto. Este dominio controlado, con frases cortas y un conjunto cerrado de conceptos, es una decisión de diseño que permite explorar y comparar técnicas de generación sobre un problema acotado, sin las complejidades del lenguaje abierto.
 
 Esta restricción abre una pregunta concreta: ¿qué técnica de generación se adapta mejor a un entorno donde la fidelidad al contenido pictográfico, la latencia y la posibilidad de funcionar sin conexión son más relevantes que la capacidad de manejar un vocabulario abierto?
