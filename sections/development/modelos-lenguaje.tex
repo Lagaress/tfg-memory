@@ -67,8 +67,8 @@ Esta información desambiguadora procede del inventario de metadatos y ayuda al 
 
 Cada llamada consume aproximadamente 1.204 \textit{tokens} de entrada, de los cuales la gran mayoría corresponden al \textit{system prompt} y los ejemplos \textit{few-shot}. La consulta del usuario aporta típicamente 10-20 \textit{tokens} adicionales. Los \textit{tokens} de salida son muy reducidos: 4 \textit{tokens} en promedio, coherente con la brevedad de las oraciones de CAA.
 
-\subsection{Metadatos de pictogramas}
-\label{sec:f3-metadatos}
+\subsection{Hiperparámetros y manejo de errores}
+\label{sec:f3-hiperparametros}
 
 La temperatura de 0,3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0,3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
 
