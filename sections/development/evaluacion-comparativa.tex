@@ -177,7 +177,7 @@ Los diagramas de caja de la Figura~\ref{fig:eval-boxplots} complementan las medi
 
 El LLM se diferencia por una densidad mayor en la parte alta de cada métrica: sus predicciones coinciden con alguna referencia humana con más frecuencia que las de las bases o los híbridos. La gramática y los \textit{embeddings} muestran distribuciones prácticamente superpuestas, consecuencia de la equivalencia observada en la Sección~\ref{sec:eval-convergencia}.
 
-La dispersión tiene implicaciones prácticas para un sistema de CAA. Un motor con media alta pero alta varianza es menos predecible para el usuario: la oración generada puede coincidir con una formulación natural en unos casos y divergir notablemente en otros. Las bases ofrecen menor variabilidad entre ejecuciones (determinismo total) a costa de una media más baja. El LLM y los híbridos introducen variabilidad pero elevan la media.
+La dispersión tiene implicaciones prácticas para un sistema de CAA. Un motor con media alta pero alta varianza es menos predecible para el usuario: la oración generada puede coincidir con una formulación natural en unos casos y divergir notablemente en otros. Las bases ofrecen menor variabilidad entre ejecuciones (determinismo total) a costa de una media más baja. El LLM y los híbridos introducen variabilidad pero elevan la media. La distribución global, sin embargo, no captura cómo varía el rendimiento con la longitud de la entrada, factor que se examina a continuación.
 
 \subsubsection{Análisis por complejidad}
 \label{sec:eval-complejidad}
@@ -198,7 +198,7 @@ La dispersión tiene implicaciones prácticas para un sistema de CAA. Un motor c
 
 Las Figuras~\ref{fig:eval-bleu4-complejidad} y~\ref{fig:eval-chrf-complejidad} desglosan el rendimiento por nivel de complejidad de la secuencia de entrada: simple, media y compleja. El LLM mantiene su ventaja sobre las bases en los tres niveles. La brecha entre LLM e híbridos es estable en BLEU-4 y se estrecha en chrF++, consistente con el hecho de que chrF tolera mejor las reformulaciones morfológicas menores que introduce la post-edición.
 
-La métrica chrF++ se mantiene por encima de 0,80 para todos los motores en los tres niveles, confirmando que las divergencias con las referencias humanas son predominantemente de formulación (orden de palabras, elecciones morfológicas) y no de contenido. BLEU-4, más estricta con la coincidencia exacta de 4-gramas, amplifica estas mismas diferencias.
+La métrica chrF++ se mantiene por encima de 0,80 para todos los motores en los tres niveles, confirmando que las divergencias con las referencias humanas son predominantemente de formulación (orden de palabras, elecciones morfológicas) y no de contenido. BLEU-4, más estricta con la coincidencia exacta de 4-gramas, amplifica estas mismas diferencias. Estas divergencias de formulación tienen orígenes distintos según el motor; la siguiente subsubsección las clasifica por tipo.
 
 \subsubsection{Análisis de errores}
 \label{sec:eval-errores}
@@ -218,7 +218,7 @@ Cuando el motor infiere correctamente un verbo como ``quiero'' a partir del pict
 
 Los híbridos, al pasar la salida base por un LLM de post-edición, tienden a reducir las alucinaciones pero introducen errores morfológicos y léxicos: conjugaciones ligeramente diferentes, artículos cambiados o sinónimos parciales. El LLM presenta un perfil intermedio: menos alucinaciones que la gramática pero más errores léxicos que los motores deterministas.
 
-La hibridación no reduce los errores en términos absolutos, sino que los transforma: intercambia inferencias pragmáticas por variaciones morfológicas y léxicas propias de la reformulación neuronal.
+La hibridación no reduce los errores en términos absolutos, sino que los transforma: intercambia inferencias pragmáticas por variaciones morfológicas y léxicas propias de la reformulación neuronal. Si los errores describen cómo se equivocan los motores, la perplejidad mide cuán naturales suenan sus salidas a un modelo de lenguaje, una dimensión que las métricas de coincidencia con referencia no capturan.
 
 \subsubsection{Perplejidad y naturalidad}
 \label{sec:eval-perplejidad}

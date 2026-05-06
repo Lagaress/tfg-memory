@@ -13,8 +13,6 @@ Para abordar estos problemas, la gramática de este proyecto extiende la CFG con
 \subsection{Planteamiento de la técnica}
 \label{sec:f1-planteamiento}
 
-El sistema no emplea una gramática libre de contexto (CFG) pura en el sentido de Chomsky~\cite{chomsky1957syntactic}. En lugar de reglas de producción clásicas del tipo $S \rightarrow NP\ VP$, implementa una CFG extendida mediante tres mecanismos complementarios.
-
 La gramática se define formalmente con Lark~\cite{lark2024}, un \textit{toolkit} de \textit{parsing} para Python que acepta gramáticas en notación EBNF. Las producciones principales describen la jerarquía de tipos oracionales y las estructuras sintagmáticas que el sistema reconoce.
 
 \begin{lstlisting}[caption={Producciones principales de la gramática CFG (notación EBNF/Lark).},label={lst:cfg-producciones},basicstyle=\ttfamily\small,xleftmargin=1cm]
@@ -80,6 +78,8 @@ La decisión de qué determinante acompaña a cada sustantivo depende de reglas 
 \subsubsection{Inserción de preposiciones}
 
 La selección de la preposición correcta para complementos de lugar utiliza tres diccionarios construidos manualmente: preposiciones por verbo de movimiento (9 verbos: ``ir'' $\rightarrow$ ``a'', ``venir'' $\rightarrow$ ``de''), preposiciones por lugar con verbos de movimiento (35 lugares: ``baño'' $\rightarrow$ ``al'', ``escuela'' $\rightarrow$ ``a la'') y preposiciones de ubicación para verbos de estado (19 lugares: ``colegio'' $\rightarrow$ ``en el''). La lógica busca hacia atrás desde el lugar hasta encontrar el verbo que lo rige, y selecciona el diccionario apropiado según el tipo de verbo.
+
+Inferencia de elementos faltantes, inserción de determinantes y selección de preposiciones completan en conjunto la transformación de la secuencia tokenizada en una oración natural, y son las que aportan el conocimiento de dominio que la CFG por sí sola no captura.
 
 \subsection{Limitaciones}
 \label{sec:f1-limitaciones}
