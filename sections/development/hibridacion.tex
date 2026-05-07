@@ -11,7 +11,7 @@ Hybrid1 se basa en dos patrones complementarios. El primero es el uso de un LLM 
 
 La primera hibridación conecta la gramática formal con el LLM en un \textit{pipeline} secuencial de dos pasos (Figura~\ref{fig:hibridacion1}). Los pictogramas de entrada se procesan primero con la gramática, que intenta generar una frase estructurada. Si la gramática tiene éxito, la frase resultante se envía al LLM para su refinamiento. El LLM actúa como post-editor con ocho reglas estrictas que priorizan la fidelidad al contenido: no puede añadir ni eliminar conceptos, solo mejorar la concordancia, los artículos, el orden y la conjugación.
 
-Si la gramática no reconoce la entrada, se activa un mecanismo de \textit{fallback}: el LLM genera la frase desde cero. En una aplicación de CAA, dejar al usuario sin respuesta constituye un problema de accesibilidad más grave que devolver una frase imperfecta: la comunicación no puede quedar interrumpida porque el motor no reconozca un patrón.
+Si la gramática no reconoce la entrada, se activa un mecanismo de \textit{fallback}: el LLM genera la frase desde cero. En una aplicación de CAA, dejar al usuario sin respuesta es un problema de accesibilidad más grave que devolver una frase imperfecta: la comunicación no puede quedar interrumpida porque el motor no reconozca un patrón.
 
 \begin{figure}[ht]
     \centering
