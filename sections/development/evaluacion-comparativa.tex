@@ -158,7 +158,7 @@ Híbridos $>$ Gramática/Embeddings & Cobertura, fidelidad, fidelidad ajustada &
 
 El primer hallazgo es la equivalencia estadística entre gramática formal y \textit{embeddings} semánticos en todas las métricas. Producen la misma salida en 163 de 164 casos (99,4\%), lo que explica la ausencia de diferencias detectables.
 
-El segundo hallazgo confirma el liderazgo del LLM en las seis métricas basadas en referencia humana. Las reformulaciones neuronales no sólo no penalizan, sino que coinciden con mayor frecuencia con las referencias escritas por hablantes nativos. El resultado es coherente con el comportamiento observado en la encuesta de naturalidad (Sección~\ref{sec:eval-naturalidad}), donde el LLM es también la opción preferida.
+El segundo hallazgo confirma el liderazgo del LLM en las seis métricas basadas en referencia humana. Las reformulaciones neuronales coinciden con las referencias escritas por hablantes nativos con mayor frecuencia que las salidas deterministas, sin penalizar las métricas. El resultado es coherente con el comportamiento observado en la encuesta de naturalidad (Sección~\ref{sec:eval-naturalidad}), donde el LLM es también la opción preferida.
 
 El tercer hallazgo es la ventaja clara de Hybrid1 y Hybrid2 en métricas de naturalidad intrínseca. La post-edición por LLM reduce la perplejidad mediana a prácticamente la mitad respecto a la gramática. Hybrid3 ocupa una posición intermedia: su paso de \textit{ranking} por perplejidad selecciona con frecuencia la salida de la gramática (véase la Sección~\ref{sec:eval-hibridos}), lo que suaviza su ganancia en naturalidad respecto a Hybrid1 y Hybrid2.
 
@@ -224,7 +224,7 @@ Cuando el motor infiere correctamente un verbo como ``quiero'' a partir del pict
 
 Los híbridos, al pasar la salida base por un LLM de post-edición, tienden a reducir las alucinaciones pero introducen errores morfológicos y léxicos: conjugaciones ligeramente diferentes, artículos cambiados o sinónimos parciales. El LLM presenta un perfil intermedio: menos alucinaciones que la gramática pero más errores léxicos que los motores deterministas.
 
-La hibridación no reduce los errores en términos absolutos, sino que los transforma: intercambia inferencias pragmáticas por variaciones morfológicas y léxicas propias de la reformulación neuronal. Si los errores describen cómo se equivocan los motores, la perplejidad mide cuán naturales suenan sus salidas a un modelo de lenguaje, una dimensión que las métricas de coincidencia con referencia no capturan.
+La hibridación transforma los errores en lugar de reducirlos en términos absolutos: intercambia inferencias pragmáticas por variaciones morfológicas y léxicas propias de la reformulación neuronal. Si los errores describen cómo se equivocan los motores, la perplejidad mide cuán naturales suenan sus salidas a un modelo de lenguaje, una dimensión que las métricas de coincidencia con referencia no capturan.
 
 \subsubsection{Perplejidad y naturalidad}
 \label{sec:eval-perplejidad}
