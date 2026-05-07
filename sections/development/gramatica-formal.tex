@@ -61,7 +61,7 @@ Esta combinación permite manejar la ambigüedad inherente a la entrada abreviad
 \subsection{Decisiones de diseño específicas}
 \label{sec:f1-postprocesamiento}
 
-El postprocesador transforma la secuencia tokenizada en una oración natural. Tres de sus etapas incorporan decisiones de diseño específicas de este proyecto que van más allá de lo que una gramática formal estándar resolvería.
+El postprocesador transforma la secuencia tokenizada en una oración natural. Tres de sus etapas incorporan decisiones de diseño específicas de este proyecto que una gramática formal estándar no resolvería.
 
 \subsubsection{Inferencia de elementos faltantes}
 
@@ -92,4 +92,4 @@ Las gramáticas formales presentan limitaciones inherentes a las técnicas simb�
 
 En tercer lugar, la cobertura lingüística depende enteramente de las reglas codificadas: cada nueva estructura oracional, tiempo verbal o fenómeno morfológico requiere añadir reglas explícitamente, un esfuerzo de mantenimiento que crece con la complejidad del dominio. La limitación más relevante quizá sea que las reglas son específicas de un idioma y un dominio concretos: las decisiones sobre inferencia de verbos modales, selección de preposiciones o inserción de determinantes están codificadas para el español y para el vocabulario de CAA de este proyecto. Extender el sistema a otro idioma o a un dominio comunicativo diferente requeriría reescribir la práctica totalidad de las reglas, ya que ninguna de ellas es transferible.
 
-Esta falta de portabilidad es inherente a las gramáticas formales aplicadas a la generación de lenguaje natural, y es precisamente lo que motiva y justifica la exploración de técnicas complementarias (\textit{embeddings} semánticos, modelos de lenguaje) que puedan generalizar más allá del dominio para el que fueron diseñadas.
+Esta falta de portabilidad es inherente a las gramáticas formales aplicadas a la generación de lenguaje natural, y es precisamente lo que motiva y justifica la exploración de técnicas complementarias (\textit{embeddings} semánticos, modelos de lenguaje) que puedan generalizar a otros dominios distintos del original.
