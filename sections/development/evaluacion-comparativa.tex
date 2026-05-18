@@ -105,7 +105,7 @@ La Figura~\ref{fig:eval-radar} sintetiza estas observaciones de un vistazo. El p
 \subsection{Significancia estadística}
 \label{sec:eval-significancia}
 
-Las diferencias numéricas entre motores solo son informativas si superan la variabilidad aleatoria del muestreo. Para verificarlo, se aplica un protocolo de tests no paramétricos: pruebas estadísticas que comparan rangos en lugar de valores absolutos y no requieren que los datos sigan una distribución concreta. Se eligen porque las distribuciones de métricas de NLP presentan efecto techo, asimetría pronunciada y, en el caso de la perplejidad, valores extremos que hacen inviable la media como estadístico resumen.
+Las diferencias numéricas entre motores solo son informativas si superan la variabilidad aleatoria del muestreo. Para verificarlo, se aplica un protocolo de tests no paramétricos: pruebas estadísticas que comparan rangos en lugar de valores absolutos y no requieren que los datos sigan una distribución concreta. Se eligen porque las distribuciones de métricas de PLN presentan efecto techo, asimetría pronunciada y, en el caso de la perplejidad, valores extremos que hacen inviable la media como estadístico resumen.
 
 El test de Friedman~\cite{friedman1937use} actúa como test ómnibus: evalúa si existe al menos un motor significativamente diferente de los demás para cada métrica. Cuando Friedman rechaza la hipótesis nula, se procede a comparaciones por pares con el test de Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual}, que compara dos muestras relacionadas (los mismos 164 casos evaluados por dos motores diferentes).
 
@@ -338,9 +338,9 @@ La encuesta de \textit{golden standard} construye el corpus de referencias contr
 
 Ambas encuestas se desplegaron como aplicaciones web con React y TypeScript~\cite{dixigoldensurvey2026,dixinaturalsurvey2026}. La interfaz muestra los pictogramas ARASAAC reales con bordes coloreados por categoría según el sistema Fitzgerald, ofrece sesiones reanudables con el progreso guardado en \textit{localStorage} del navegador y envía las respuestas en tiempo real a una base de datos Supabase alojada en la Unión Europea.
 
-El consentimiento informado cumple el Reglamento General de Protección de Datos: se recogen datos mínimos (sólo email para detectar envíos duplicados), el consentimiento es explícito, el almacenamiento se realiza en la UE y la retención está limitada a la defensa del TFG más seis meses.
+El consentimiento informado cumple el Reglamento General de Protección de Datos: se recogen datos mínimos (sólo email para detectar envíos duplicados), el consentimiento es explícito, el almacenamiento se realiza en la Unión Europea (UE) y la retención está limitada a la defensa del TFG más seis meses.
 
-La captación de participantes se apoyó en carteles de difusión que acompañaron la convocatoria de ambas encuestas, con el objetivo del estudio, el tiempo estimado de participación y un código QR con el enlace al formulario. Su diseño íntegro se recoge en el Anexo~\ref{sec:anexo-carteles}.
+La captación de participantes se apoyó en carteles de difusión que acompañaron la convocatoria de ambas encuestas, con el objetivo del estudio, el tiempo estimado de participación y un código QR (\textit{Quick Response}) con el enlace al formulario. Su diseño íntegro se recoge en el Anexo~\ref{sec:anexo-carteles}.
 
 \subsubsection{Encuesta de golden standard}
 \label{sec:eval-golden}
