@@ -47,6 +47,8 @@ La solución más simple consiste en concatenar las etiquetas de los pictogramas
 
 Un paso intermedio son los sistemas basados en plantillas. Estas aproximaciones definen estructuras predefinidas (por ejemplo, \texttt{[SUJETO] quiere [OBJETO]}) y rellenan los huecos con las palabras correspondientes. Las plantillas garantizan corrección gramatical dentro de su ámbito, pero adolecen de rigidez: cubren solo las estructuras anticipadas por los diseñadores, y cualquier combinación no prevista produce resultados pobres o nulos.
 
+Sin embargo, la tecnología ha permitido crear aproximaciones más avanzadas. Se describen algunas de las más relevantes en las siguientes secciones.
+
 \subsection{Técnicas basadas en gramáticas}
 
 Una aproximación más sofisticada consiste en definir gramáticas formales que capturen las reglas de construcción de oraciones. En el campo de la Generación de Lenguaje Natural (NLG), el sistema puede entonces generar texto aplicando estas reglas a las palabras de entrada, tratando el problema como una tarea de realización superficial (\textit{surface realization}): la fase final del \textit{pipeline} de NLG que transforma una representación abstracta de la oración en texto bien formado, gestionando la morfología, la concordancia, el orden de palabras y la inserción de elementos funcionales como artículos y preposiciones~\cite{gatt2018survey}. La biblioteca SimpleNLG~\cite{gatt2009simplenlg}, originalmente desarrollada para inglés, ha sido adaptada a múltiples idiomas incluyendo español~\cite{ramos2017simplenlg, garciamendez2019spanish}.
