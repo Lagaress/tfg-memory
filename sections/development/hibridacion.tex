@@ -4,7 +4,7 @@ La hibridación parte de la hipótesis de que combinar estas técnicas puede pro
 
 Se implementan tres estrategias de hibridación con objetivos diferenciados. Las dos primeras se basan en el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep} y en la post-edición neuronal de texto generado por reglas~\cite{chen2025axsemantics}. La tercera implementa el paradigma de sobregeneración y \textit{ranking}~\cite{sharma2019overgenerate}. Los resultados de la evaluación comparativa (sección~\ref{ch:evaluacion-comparativa}) permitirán determinar si esta hipótesis se confirma en la práctica.
 
-\subsection{Hybrid1: Gramática + LLM como post-editor}
+\subsection{Hybrid1: gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
 
 Hybrid1 se basa en dos patrones complementarios. El primero es el uso de un LLM como post-editor de sistemas de reglas, documentado por Chen et al.~\cite{chen2025axsemantics} en un sistema de producción de AX Semantics: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. El segundo es el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}, que separa la generación en un planificador simbólico que decide qué decir y un realizador neural que lo transforma en texto fluido. Elder et al.~\cite{elder2019intermediate} mostraron que esta separación reduce las alucinaciones respecto a aproximaciones puramente neurales.
@@ -24,7 +24,7 @@ Para la entrada ``quiero, agua'', la gramática detecta el patrón de necesidad 
 
 Esta hibridación depende de un LLM externo para la post-edición, lo que introduce latencia de red, coste por llamada y falta de disponibilidad \textit{offline}. La calidad de la post-edición depende enteramente de la ingeniería de \textit{prompts}, y no existe un criterio formal para determinar si el conjunto de reglas del post-editor es óptimo ni completo.
 
-\subsection{Hybrid2: (Gramática + Embeddings) + LLM como post-editor}
+\subsection{Hybrid2: (gramática + \textit{embeddings}) + LLM como post-editor}
 \label{sec:h-hybrid2}
 
 Hybrid2 replica la estructura de Hybrid1 pero sustituye la gramática pura por el motor de \textit{embeddings}, que combina gramática con \textit{embeddings} semánticos, como fuente de la frase inicial (Figura~\ref{fig:hibridacion2}). La frase generada por este motor, que ya incorpora refinamiento de preposiciones y \textit{ranking} semántico, se envía al mismo post-editor LLM con las mismas ocho reglas.
@@ -40,15 +40,15 @@ Las limitaciones son las mismas que las de Hybrid1: dependencia del LLM externo 
     \label{fig:hibridacion2}
 \end{figure}
 
-\subsection{Hybrid3: Overgenerate-and-Rank multimotor}
+\subsection{Hybrid3: \textit{overgenerate-and-rank} multimotor}
 \label{sec:h-hybrid3}
 
-A diferencia de Hybrid1 y Hybrid2, que mejoran con post-edición la salida de un motor individual, Hybrid3 busca la mejor frase entre todas las que los motores pueden producir. Implementa el paradigma \textit{Generate-Filter-Rank}, formalizado por Sharma et al.~\cite{sharma2019overgenerate}: se generan múltiples candidatas, se filtran por criterios de calidad y se selecciona la mejor según una función de \textit{ranking}. El \textit{pipeline} se ejecuta en tres etapas secuenciales (Figura~\ref{fig:hibridacion3}).
+A diferencia de Hybrid1 y Hybrid2, que mejoran con post-edición la salida de un motor individual, Hybrid3 busca la mejor frase entre todas las que los motores pueden producir. Implementa el paradigma \textit{generate-filter-rank}, formalizado por Sharma et al.~\cite{sharma2019overgenerate}: se generan múltiples candidatas, se filtran por criterios de calidad y se selecciona la mejor según una función de \textit{ranking}. El \textit{pipeline} se ejecuta en tres etapas secuenciales (Figura~\ref{fig:hibridacion3}).
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.9\textwidth]{figures/hibridacion3.png}
-    \caption{\textit{Pipeline} de tres etapas de Hybrid3 (\textit{Overgenerate-and-Rank}): generación multimotor, filtro de fidelidad y \textit{ranking} por perplejidad.}
+    \caption{\textit{Pipeline} de tres etapas de Hybrid3 (\textit{overgenerate-and-rank}): generación multimotor, filtro de fidelidad y \textit{ranking} por perplejidad.}
     \label{fig:hibridacion3}
 \end{figure}
 
