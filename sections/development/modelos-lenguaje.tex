@@ -70,7 +70,7 @@ Cada llamada consume aproximadamente 1.204 \textit{tokens} de entrada, de los cu
 
 La configuración del cliente combina hiperparámetros de generación, una política de reintentos según el tipo de error y una estimación del coste por llamada.
 
-La temperatura de 0,3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0,3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
+La temperatura de 0.3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0.3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
 
 El límite de 100 \textit{tokens} es generoso para oraciones que promedian 4 \textit{tokens} de salida, pero actúa como salvaguarda contra generaciones desbordadas. El \textit{timeout} de 10 segundos refleja que, en una aplicación de comunicación asistida, el usuario espera activamente la respuesta.
 
@@ -78,7 +78,7 @@ El cliente implementa reintentos diferenciados según el tipo de error: los erro
 
 El coste se estima a partir de los precios de la API~\cite{openai2024pricing}: \$2.50/1M \textit{tokens} de entrada y \$10.00/1M de salida para GPT-4o, frente a \$0.15/1M y \$0.60/1M para GPT-4o-mini.
 
-Con los aproximadamente 1.204 \textit{tokens} de entrada y 4 de salida descritos en la sección~\ref{sec:f3-prompt}, cada consulta cuesta \$0.00018 con GPT-4o-mini y \$0.00305 con GPT-4o, una diferencia de factor 16,7$\times$.
+Con los aproximadamente 1.204 \textit{tokens} de entrada y 4 de salida descritos en la sección~\ref{sec:f3-prompt}, cada consulta cuesta \$0.00018 con GPT-4o-mini y \$0.00305 con GPT-4o, una diferencia de factor 16.7$\times$.
 
 \subsection{Validación post-generación}
 \label{sec:f3-validacion}
