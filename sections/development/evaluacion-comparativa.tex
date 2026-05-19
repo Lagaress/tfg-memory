@@ -153,26 +153,7 @@ La encuesta de naturalidad se procesa por separado y se contrasta con las métri
 \subsection{Resultados globales}
 \label{sec:eval-resultados-globales}
 
-Con la metodología descrita, los resultados son los siguientes. Ninguno de los tres motores base domina simultáneamente en fidelidad, naturalidad, cobertura y latencia. La Tabla~\ref{tab:perfil-motores} resume el perfil cualitativo de cada uno en estas cuatro dimensiones.
-
-\begin{table}[H]
-\centering
-\begin{tabular}{l c c c c}
-\hline
-Motor & Fidelidad & Naturalidad & Cobertura & Latencia \\
-\hline
-Gramática formal (CFG) & Alta & Baja & 96\% & $<$1 ms \\
-Embeddings (CFG + FastText) & Alta & Baja & 96\% & $<$1 ms \\
-LLM (GPT-4o) & Alta & Alta & 96\% & $\sim$1500 ms \\
-\hline
-\end{tabular}
-\caption{Perfil cualitativo de cada motor base en las dimensiones relevantes para CAA.}
-\label{tab:perfil-motores}
-\end{table}
-
-La gramática produce salidas correctas y predecibles dentro de su dominio pero genera frases que, aunque correctas, suenan rígidas. Los \textit{embeddings} heredan casi por completo las decisiones de la gramática. El LLM alcanza mayor naturalidad pero depende de una API externa con latencia y coste por llamada. Las tres hibridaciones exploran si la composición de motores supera a las partes.
-
-Las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el rendimiento de los seis motores. Cada celda muestra la media $\pm$ desviación estándar sobre los 164 casos.
+Con la metodología descrita, las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el rendimiento de los seis motores. Cada celda muestra la media $\pm$ desviación estándar sobre los 164 casos.
 
 \begin{table}[ht]
 \centering
@@ -239,6 +220,25 @@ La latencia mantiene un espectro amplio: desde los 0.02 ms de la gramática form
 \end{figure}
 
 La Figura~\ref{fig:eval-radar} sintetiza estas observaciones de un vistazo. El polígono del LLM se aproxima al borde exterior en BLEU-4, chrF, METEOR y ROUGE-L, mientras que los híbridos extienden su superficie hacia cobertura y fidelidad. La gramática y los \textit{embeddings} comparten un perfil casi idéntico, ligeramente comprimido en todas las métricas con referencia humana.
+
+A partir de estos datos puede sintetizarse el perfil cualitativo de los tres motores base en las cuatro dimensiones más relevantes para CAA (Tabla~\ref{tab:perfil-motores}).
+
+\begin{table}[H]
+\centering
+\begin{tabular}{l c c c c}
+\hline
+Motor & Fidelidad & Naturalidad & Cobertura & Latencia \\
+\hline
+Gramática formal (CFG) & Alta & Baja & 96\% & $<$1 ms \\
+Embeddings (CFG + FastText) & Alta & Baja & 96\% & $<$1 ms \\
+LLM (GPT-4o) & Alta & Alta & 96\% & $\sim$1500 ms \\
+\hline
+\end{tabular}
+\caption{Perfil cualitativo de cada motor base en las dimensiones relevantes para CAA.}
+\label{tab:perfil-motores}
+\end{table}
+
+La gramática produce salidas correctas y predecibles dentro de su dominio pero genera frases que, aunque correctas, suenan rígidas. Los \textit{embeddings} heredan casi por completo las decisiones de la gramática. El LLM alcanza mayor naturalidad pero depende de una API externa con latencia y coste por llamada. Ninguno de los tres motores base domina simultáneamente las cuatro dimensiones, lo que motiva las tres hibridaciones, que exploran si la composición de motores supera a las partes.
 
 \subsection{Significancia estadística}
 \label{sec:eval-significancia}
