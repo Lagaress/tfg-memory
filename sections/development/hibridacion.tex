@@ -2,7 +2,7 @@ Las secciones anteriores han mostrado que cada técnica de generación tiene for
 
 La hibridación parte de la hipótesis de que combinar estas técnicas puede producir resultados superiores a los de cada una por separado: una gramática que garantice la estructura, enriquecida con la naturalidad de un LLM, o un sistema que genere múltiples candidatos y seleccione el mejor.
 
-Se implementan tres estrategias de hibridación con objetivos diferenciados. Las dos primeras se basan en el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep} y en la post-edición neuronal de texto generado por reglas~\cite{chen2025axsemantics}. La tercera implementa el paradigma de sobregeneración y \textit{ranking}~\cite{sharma2019overgenerate}. Los resultados de la evaluación comparativa (sección~\ref{ch:evaluacion-comparativa}) permitirán determinar si esta hipótesis se confirma en la práctica.
+Se implementan tres estrategias de hibridación con objetivos diferenciados. Las dos primeras se basan en el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep} y en la post-edición neuronal de texto generado por reglas~\cite{chen2025axsemantics}. La tercera implementa el paradigma de sobregeneración y \textit{ranking}~\cite{sharma2019overgenerate}. Los resultados de la evaluación comparativa (sección~\ref{sec:evaluacion-comparativa}) permitirán determinar si esta hipótesis se confirma en la práctica.
 
 \subsection{Hybrid1: gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
@@ -62,4 +62,4 @@ Hybrid3 acumula la latencia de todos los motores que invoca, lo que la convierte
 
 El umbral de fidelidad de cobertura completa puede descartar frases naturales que omiten un pictograma con representación implícita: ``Quiero agua'' para la entrada ``yo, quiero, agua'' podría fallar si el sistema no reconoce el sujeto implícito.
 
-Las tres hibridaciones se evalúan junto a las tres técnicas base en la sección~\ref{ch:evaluacion-comparativa}, donde la comparación cuantitativa permite contrastar la hipótesis de partida: combinar técnicas no produce automáticamente resultados superiores a usarlas por separado, y solo la evaluación detallada permite identificar en qué dimensiones cada hibridación aporta valor.
+Las tres hibridaciones se evalúan junto a las tres técnicas base en la sección~\ref{sec:evaluacion-comparativa}, donde la comparación cuantitativa permite contrastar la hipótesis de partida: combinar técnicas no produce automáticamente resultados superiores a usarlas por separado, y solo la evaluación detallada permite identificar en qué dimensiones cada hibridación aporta valor.
