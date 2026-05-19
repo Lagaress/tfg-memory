@@ -1,4 +1,4 @@
-Esta sección confronta los seis motores sobre un mismo conjunto de casos mediante un \textit{pipeline} de evaluación automatizado que aplica métricas con referencia humana, métricas sin referencia y métricas específicas de CAA, complementadas con tests de significancia estadística y una encuesta propia de naturalidad.
+Implementados los seis motores, queda la pregunta que vertebra el trabajo: ¿cuál de ellos genera las frases más naturales? Esta sección la responde combinando un \textit{pipeline} de evaluación automatizado con dos encuestas a hablantes nativos, contrastando métricas con referencia humana, métricas sin referencia y métricas específicas de CAA con tests de significancia estadística y preferencia humana directa.
 
 \subsection{Diseño experimental}
 \label{sec:eval-diseno}
@@ -155,7 +155,7 @@ La encuesta de naturalidad se procesa por separado y se contrasta con las métri
 \subsection{Resultados globales}
 \label{sec:eval-resultados-globales}
 
-Con la metodología descrita, las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el rendimiento de los seis motores. Cada celda muestra la media $\pm$ desviación estándar sobre los 164 casos.
+Las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el rendimiento de los seis motores. Las cifras anticipan dos patrones que el análisis confirmará: ningún motor lidera en todas las dimensiones a la vez, y el LLM destaca con claridad en las métricas medidas contra referencia humana. Cada celda muestra la media $\pm$ desviación estándar sobre los 164 casos.
 
 \begin{table}[ht]
 \centering
@@ -247,7 +247,7 @@ La gramática produce salidas correctas y predecibles dentro de su dominio pero 
 \subsection{Significancia estadística}
 \label{sec:eval-significancia}
 
-Aplicando el protocolo no paramétrico descrito en la Sección~\ref{sec:eval-tests}, los resultados de Friedman y de las comparaciones pareadas con Wilcoxon son los siguientes.
+Las diferencias observadas en las tablas anteriores podrían ser fruto del azar de muestreo. Para descartar esa hipótesis se aplica el protocolo no paramétrico descrito en la Sección~\ref{sec:eval-tests}: los resultados de Friedman y de las comparaciones pareadas con Wilcoxon son los siguientes.
 
 \begin{table}[ht]
 \centering
@@ -304,6 +304,8 @@ El cuarto hallazgo muestra que los tres híbridos mejoran cobertura y fidelidad 
 
 \subsection{Análisis detallado}
 \label{sec:eval-detallado}
+
+Las medias agregadas ocultan información relevante. Las cuatro subsecciones siguientes desglosan los resultados por distribución de cada métrica, complejidad de la entrada, tipo de error y naturalidad medida por perplejidad.
 
 \subsubsection{Distribución de métricas}
 \label{sec:eval-distribuciones}
@@ -458,7 +460,7 @@ El determinismo se pierde en cualquier motor que involucre al LLM, incluidos los
 \subsection{Resultados de la encuesta de naturalidad}
 \label{sec:eval-naturalidad}
 
-Con el diseño descrito en la Sección~\ref{sec:eval-naturalidad-diseno}, la captación y la cobertura final del cuestionario son las siguientes. Se inscribieron 54 personas: 48 completaron los 26 ítems de su \textit{set} (88.9\%), 3 aportaron respuestas parciales de entre 8 y 10 ítems y 3 no llegaron a responder. El conjunto recogido suma 1275 respuestas. La cobertura por \textit{set} es asimétrica: en el \textit{set} A los 27 inscritos completaron el cuestionario (100\%) y en el \textit{set} B lo hicieron 21 de 27 (78\%). Los 44 ítems presentados recibieron al menos una respuesta, con una cobertura del 100\% sobre el diseño. Los 8 \textit{anchors} permiten validar la ausencia de sesgos cruzados entre \textit{sets}: en los ocho ítems compartidos la técnica ganadora coincide entre el \textit{set} A y el \textit{set} B, lo que indica que la asignación de participantes no introdujo desviaciones sistemáticas en los resultados.
+Las métricas automáticas apuntan al LLM como ganador. ¿Coincide la preferencia humana directa? La encuesta de naturalidad descrita en la Sección~\ref{sec:eval-naturalidad-diseno} responde a esa pregunta; la captación y la cobertura del cuestionario son las siguientes. Se inscribieron 54 personas: 48 completaron los 26 ítems de su \textit{set} (88.9\%), 3 aportaron respuestas parciales de entre 8 y 10 ítems y 3 no llegaron a responder. El conjunto recogido suma 1275 respuestas. La cobertura por \textit{set} es asimétrica: en el \textit{set} A los 27 inscritos completaron el cuestionario (100\%) y en el \textit{set} B lo hicieron 21 de 27 (78\%). Los 44 ítems presentados recibieron al menos una respuesta, con una cobertura del 100\% sobre el diseño. Los 8 \textit{anchors} permiten validar la ausencia de sesgos cruzados entre \textit{sets}: en los ocho ítems compartidos la técnica ganadora coincide entre el \textit{set} A y el \textit{set} B, lo que indica que la asignación de participantes no introdujo desviaciones sistemáticas en los resultados.
 
 Sobre las 1275 respuestas, el LLM (GPT-4o) aparece como opción más elegida, con 561 votos (44.0\%), seguido por la gramática formal con 303 votos (23.8\%) y los \textit{embeddings} con 300 votos (23.5\%). La opción ``Ninguna de las anteriores'' recibió 111 votos (8.7\%). El LLM dobla aproximadamente la preferencia de cada motor base, pero no domina: cerca de una de cada cuatro respuestas prefiere la gramática y otras tantas los \textit{embeddings}, en casos concretos donde las formulaciones breves y directas de los motores deterministas resultan más naturales a los evaluadores que la reformulación neuronal.
 
