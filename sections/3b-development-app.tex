@@ -35,6 +35,15 @@ La síntesis de voz de respaldo se apoya en \texttt{expo-speech} 14.0~\cite{expo
 \section{Arquitectura del sistema}
 \label{sec:app-arquitectura}
 
+La arquitectura de Dixi sigue un diseño modular: la entrada (una lista ordenada de etiquetas de pictogramas) atraviesa un motor de generación de lenguaje natural que produce una oración gramaticalmente correcta, y un motor de síntesis de voz la convierte en audio. La Figura~\ref{fig:arquitectura-modular} resume este flujo.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=\textwidth]{figures/arquitectura-modular.png}
+    \caption{Arquitectura modular de Dixi. El motor de generación es intercambiable entre gramática formal, \textit{embeddings}, modelo de lenguaje o cualquiera de las tres hibridaciones.}
+    \label{fig:arquitectura-modular}
+\end{figure}
+
 Sobre estas piezas tecnológicas se articula el flujo que conecta la selección de pictogramas con la frase que recibe el usuario. El flujo de comunicación completo atraviesa cuatro etapas:
 
 \begin{enumerate}

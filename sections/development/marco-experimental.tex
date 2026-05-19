@@ -1,12 +1,3 @@
-La arquitectura de Dixi sigue un diseño modular: la entrada (una lista ordenada de etiquetas de pictogramas) atraviesa un motor de generación de lenguaje natural que produce una oración gramaticalmente correcta, y un motor de síntesis de voz la convierte en audio. La Figura~\ref{fig:arquitectura-modular} resume este flujo.
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=\textwidth]{figures/arquitectura-modular.png}
-    \caption{Arquitectura modular de Dixi. El motor de generación es intercambiable entre gramática formal, \textit{embeddings}, modelo de lenguaje o cualquiera de las tres hibridaciones.}
-    \label{fig:arquitectura-modular}
-\end{figure}
-
 El dominio de la aplicación está deliberadamente acotado: 232 pictogramas ARASAAC organizados en nueve categorías cromáticas, suficientes para cubrir las necesidades comunicativas básicas del día a día sin desbordar el alcance del proyecto. Frases cortas y vocabulario cerrado permiten comparar técnicas de generación sobre un problema controlado, al margen de las complejidades del lenguaje abierto.
 
 Esta restricción abre una pregunta concreta: ¿qué técnica de generación se adapta mejor a un entorno donde la fidelidad al contenido pictográfico, la latencia y la posibilidad de funcionar sin conexión son más relevantes que la capacidad de manejar un vocabulario abierto?
