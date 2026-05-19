@@ -1,6 +1,73 @@
 Esta sección confronta los seis motores sobre un mismo conjunto de casos mediante un \textit{pipeline} de evaluación automatizado que aplica métricas con referencia humana, métricas sin referencia y métricas específicas de CAA, complementadas con tests de significancia estadística y una encuesta propia de naturalidad.
 
-\subsection{Métricas de evaluación}
+\subsection{Diseño experimental}
+\label{sec:eval-diseno}
+
+El experimento compara los seis motores sobre un mismo conjunto de 164 casos: un \textit{golden standard} construido por encuesta a hablantes nativos, un segundo cuestionario que mide la preferencia humana directa entre las tres técnicas base, un repertorio de métricas automáticas con y sin referencia y un protocolo de tests no paramétricos para acotar la significancia de las diferencias observadas. Los siguientes apartados detallan cada uno de estos componentes antes de pasar a los resultados.
+
+Las dos encuestas se desplegaron como aplicaciones web con React y TypeScript~\cite{dixigoldensurvey2026,dixinaturalsurvey2026}. La interfaz muestra los pictogramas ARASAAC reales con bordes coloreados por categoría según el sistema Fitzgerald, ofrece sesiones reanudables con el progreso guardado en \textit{localStorage} del navegador y envía las respuestas en tiempo real a una base de datos Supabase alojada en la Unión Europea. El consentimiento informado cumple el Reglamento General de Protección de Datos: se recogen datos mínimos (sólo email para detectar envíos duplicados), el consentimiento es explícito, el almacenamiento se realiza en la Unión Europea (UE) y la retención está limitada a la defensa del TFG más seis meses. La captación de participantes se apoyó en carteles de difusión que acompañaron la convocatoria de ambas encuestas, con el objetivo del estudio, el tiempo estimado de participación y un código QR (\textit{Quick Response}) con el enlace al formulario. Su diseño íntegro se recoge en el Anexo~\ref{sec:anexo-carteles}.
+
+\subsubsection{Conjunto de evaluación: golden standard}
+\label{sec:eval-golden}
+
+La encuesta de \textit{golden standard} construye el corpus de referencias contra el que operan todas las métricas: pide a hablantes escribir la frase que ellos dirían al ver cada secuencia de pictogramas, sin exposición a las salidas de los motores, y produce varias formulaciones válidas por caso a partir de decenas de respondentes distintos.
+
+Cada respondente ve una secuencia de pictogramas ARASAAC y escribe libremente la frase que diría, sin restricciones de vocabulario ni de estructura, y sin ver ninguna salida de los motores (véase la Figura~\ref{fig:eval-golden-encuesta} en el Anexo~\ref{sec:anexo-interfaces-encuestas}). Esta independencia respecto a las salidas existentes es lo que permite usar las respuestas como referencia neutra contra la que medir cualquier motor.
+
+El diseño contempla 164 ítems organizados en 10 bloques de 16 ítems únicos más 4 \textit{anchors} compartidos. Cada participante ve 20 ítems (16 + 4) dentro del umbral de fatiga de 20 minutos que Van der Lee et al.~\cite{vanderlee2021human} recomiendan no exceder en tareas de evaluación de texto generado. Los 4 \textit{anchors} aparecen en los diez bloques y permiten detectar sesgos cruzados entre participantes. Los 160 ítems únicos cubren ocho funciones comunicativas y tres niveles de complejidad, con aproximadamente 20 observaciones por función comunicativa~\cite{reiter2009investigation}.
+
+El diseño con múltiples referencias por caso habilita la evaluación multi-referencia: las métricas automáticas (BLEU, chrF, BERTScore) comparan cada predicción contra todas las referencias humanas del mismo caso, en lugar de contra una sola. Un $n$-grama de la predicción cuenta como acierto si aparece en cualquiera de las referencias, de modo que las reformulaciones legítimas dejan de penalizarse. La ganancia es empírica: Zouhar y Bojar~\cite{zouhar2024quality} muestran que añadir hasta 7 referencias por segmento incrementa la correlación entre métricas automáticas y juicio humano, porque cada referencia adicional captura una formulación alternativa válida.
+
+Cada participante quedaba asignado a un bloque del diseño balanceado y escribía libremente la frase que diría al ver cada una de las 20 secuencias de pictogramas de ese bloque. Se inscribieron 57 personas: 45 completaron los 20 ítems (78,9\%), 8 aportaron respuestas parciales de entre 2 y 10 ítems, y 4 no llegaron a responder. La Tabla~\ref{tab:eval-golden-cobertura} detalla la cobertura por bloque: siete alcanzaron el objetivo de seis inscritos, dos quedaron en cinco por el algoritmo de balance del servidor al detenerse la captación y el bloque 9 fue el peor cubierto, con dos completos sobre cinco inscritos.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{l c c c c c c c c c c}
+\hline
+Bloque & B1 & B2 & B3 & B4 & B5 & B6 & B7 & B8 & B9 & B10 \\
+\hline
+Completos/inscritos & 3/6 & 6/6 & 3/6 & 6/6 & 5/5 & 5/5 & 6/6 & 3/6 & 2/5 & 6/6 \\
+\hline
+\end{tabular}
+\caption{Cobertura por bloque de la encuesta de \textit{golden standard}: participantes que completaron los 20 ítems sobre el total de inscritos.}
+\label{tab:eval-golden-cobertura}
+\end{table}
+
+El corpus recogido suma 948 respuestas humanas, que tras deduplicación exacta por ítem quedan en 615 referencias únicas. De los 160 ítems no-\textit{anchor}, 22 recibieron una única referencia, 33 reunieron dos, 30 reunieron tres, 30 reunieron cuatro, 25 reunieron cinco y 20 reunieron seis, con una media de 3,39 referencias únicas por ítem (4,74 respuestas brutas por ítem sin deduplicar). Los cuatro \textit{anchors}, que por diseño aparecen en todos los bloques, acumularon entre 46 y 48 respuestas cada uno.
+
+La convergencia entre participantes es la señal más clara de que el corpus captura variabilidad genuina y no ruido. En GS001 (``agua + y + pan''), 27 de 48 respondentes escribieron literalmente ``Agua y pan'' y otros 6 ``Quiero agua y pan'', dejando solo 15 referencias únicas. En GS067 (``cansado''), 36 coincidieron en ``estoy muy cansado''. En GS143 (``yo + querer + agua''), 27 escribieron ``yo quiero agua'' y 11 ``quiero agua''. En total se registraron 168 pares (ítem, texto) repetidos por distintos participantes, y ningún respondente usó el mismo texto en cinco o más ítems distintos, lo que descarta patrones de spam o relleno.
+
+El \textit{golden standard} final contiene los 164 ítems del diseño: los 160 no-\textit{anchor} más los 4 \textit{anchors}, todos con referencias humanas recogidas. Cada ítem lleva asociada su lista de referencias únicas, lista para alimentar BLEU y chrF multi-referencia, junto con la frecuencia con la que cada formulación fue producida por los participantes.
+
+El corpus recogido presenta tres limitaciones. La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica.
+
+De los 160 ítems no-\textit{anchor}, 55 cuentan con dos referencias únicas o menos, lo que aumenta la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore al presentar los resultados.
+
+El esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
+
+Con esto, la encuesta de \textit{golden standard} cumple su función: producir un corpus de referencias humanas contra el que medir cualquier motor. La siguiente encuesta complementa esa medida indirecta con una preferencia humana directa entre las salidas de los tres motores base.
+
+\subsubsection{Encuesta de naturalidad}
+\label{sec:eval-naturalidad-diseno}
+
+La encuesta de naturalidad sigue un diseño de elección forzada (\textit{forced-choice}). El evaluador ve una secuencia de pictogramas ARASAAC y las frases generadas por las tres técnicas base (gramática formal, \textit{embeddings} semánticos y LLM), sin saber qué técnica produjo cada frase. Debe seleccionar la que suene más natural en español, o elegir ``Ninguna de las anteriores'' si ninguna le convence (véase la Figura~\ref{fig:eval-naturalidad-encuesta} en el Anexo~\ref{sec:anexo-interfaces-encuestas}).
+
+Frente a una escala Likert~\cite{likert1932}, este formato se prefirió por tres razones. Con una escala Likert cada evaluador tendría que puntuar cada frase por separado (tres puntuaciones por caso), mientras que con elección forzada cada caso se resuelve con una sola decisión. La reducción de carga cognitiva es relevante porque los evaluadores son voluntarios no remunerados, y la brevedad del instrumento condiciona la tasa de finalización. La elección forzada minimiza el sesgo de aquiescencia y produce datos directamente comparables entre técnicas sin necesidad de normalizar escalas individuales.
+
+Se evalúan únicamente las tres técnicas base, no los híbridos. Los motores híbridos combinan las técnicas base mediante post-edición o selección, de modo que su evaluación humana no aportaría información independiente sobre la percepción de naturalidad de cada técnica individual. La evaluación de los híbridos queda cubierta por las métricas automáticas.
+
+Para evitar que la identidad del motor sesgue las respuestas, la evaluación es ciega: el evaluador no conoce qué técnica generó cada frase. El orden de presentación de las opciones se aleatoriza con un \textit{seed} determinístico por caso, de modo que la aleatorización es reproducible pero impide que la posición de una técnica influya en la elección. La decodificación (qué opción corresponde a qué motor) se realiza post-hoc con una clave separada.
+
+Incluir ``Ninguna de las anteriores'' como opción evita forzar una elección cuando todas las frases son deficientes. Sin esta opción, un evaluador que encuentre las tres alternativas poco naturales se vería obligado a seleccionar la ``menos mala'', contaminando los datos con preferencias que no son tales.
+
+Para seleccionar los casos se aplica un muestreo estratificado por longitud de la secuencia y tipo comunicativo. Se priorizan los casos donde las tres técnicas generan frases distintas: cuando dos técnicas producen la misma frase, la elección no aporta información diferencial, así que esos casos se excluyen.
+
+Los 44 ítems resultantes se organizan en dos \textit{sets}, A y B, de 26 ítems cada uno: 18 exclusivos del \textit{set} más 8 \textit{anchors} compartidos. Cada participante ve un único \textit{set}, y los 8 \textit{anchors} sirven como núcleo común para detectar sesgos cruzados entre \textit{sets}.
+
+Cuando dos técnicas generan exactamente la misma frase, la opción duplicada se elimina de la interfaz; si el evaluador elige una frase compartida por varias técnicas, el voto se atribuye a todas las que la generaron.
+
+\subsubsection{Métricas}
 \label{sec:metricas}
 
 La evaluación emplea métricas organizadas en cuatro categorías: con referencia humana, específicas de CAA, sin referencia y operativas. Las métricas con referencia comparan cada predicción contra la lista de referencias humanas del caso: Exact Match (coincidencia con alguna referencia, case-insensitive y tras normalizar puntuación), BLEU~\cite{papineni2002bleu} (precisión de $n$-gramas, en variantes BLEU-1 y BLEU-4), ROUGE-L~\cite{lin2004rouge} (subsecuencia común más larga), METEOR~\cite{banerjee2005meteor} (media armónica de precisión y recall con penalización por fragmentación), chrF++~\cite{popovic2017chrf} (similitud a nivel de caracteres, útil para la morfología del español) y BERTScore~\cite{zhang2020bertscore} (similitud semántica mediante \textit{embeddings} contextuales de un \textit{transformer} preentrenado en español). BLEU y chrF usan el soporte multi-referencia nativo de sacreBLEU; METEOR, ROUGE-L y BERTScore toman el mejor \textit{score} entre las referencias del caso.
@@ -11,7 +78,26 @@ Las métricas sin referencia evalúan la naturalidad intrínseca del texto. La p
 
 Las métricas operativas registran la latencia por consulta y el coste económico de los motores que dependen de APIs externas.
 
-Ninguno de los tres motores base domina simultáneamente en fidelidad, naturalidad, cobertura y latencia. La Tabla~\ref{tab:perfil-motores} resume el perfil cualitativo de cada uno en estas cuatro dimensiones.
+\subsubsection{Tests estadísticos}
+\label{sec:eval-tests}
+
+Las diferencias numéricas entre motores solo son informativas si superan la variabilidad aleatoria del muestreo. Para verificarlo, se aplica un protocolo de tests no paramétricos: pruebas estadísticas que comparan rangos en lugar de valores absolutos y no requieren que los datos sigan una distribución concreta. Se eligen porque las distribuciones de métricas de PLN presentan efecto techo, asimetría pronunciada y, en el caso de la perplejidad, valores extremos que hacen inviable la media como estadístico resumen.
+
+El test de Friedman~\cite{friedman1937use} actúa como test ómnibus: evalúa si existe al menos un motor significativamente diferente de los demás para cada métrica. Cuando Friedman rechaza la hipótesis nula, se procede a comparaciones por pares con el test de Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual}, que compara dos muestras relacionadas (los mismos 164 casos evaluados por dos motores diferentes).
+
+Con 6 motores existen $\binom{6}{2} = 15$ pares posibles, lo que requiere corrección por comparaciones múltiples. Se aplica la corrección de Holm-Bonferroni~\cite{holm1979simple}, que ordena los $p$-valores de menor a mayor y compara cada uno con un umbral adaptativo $\alpha / (m - k + 1)$, donde $m = 15$ es el número de comparaciones y $k$ la posición en el \textit{ranking}. Esta corrección ofrece mayor potencia estadística que la de Bonferroni clásica sin sacrificar el control del error de tipo I familiar.
+
+\subsubsection{Pipeline de evaluación}
+\label{sec:eval-pipeline}
+
+El \textit{pipeline} de evaluación carga el \textit{golden standard} de 164 ítems con referencias humanas multi-referencia (Sección~\ref{sec:eval-golden}) y recupera de la caché las salidas precomputadas de los seis motores sobre el catálogo completo, de modo que no se requiere regeneración. Sobre cada par (predicción, lista de referencias humanas) calcula las métricas en su variante multi-referencia (Sección~\ref{sec:metricas}) y aplica los tests no paramétricos correspondientes: Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y \textit{bootstrap} pareado~\cite{koehn2004statistical} con 1000 remuestreos y semilla fija para los intervalos de confianza. Como salida produce las tablas comparativas y las gráficas de distribución que se utilizan en el análisis posterior.
+
+La encuesta de naturalidad se procesa por separado y se contrasta con las métricas automáticas en los ítems solapados entre ambas encuestas.
+
+\subsection{Resultados globales}
+\label{sec:eval-resultados-globales}
+
+Con la metodología descrita, los resultados son los siguientes. Ninguno de los tres motores base domina simultáneamente en fidelidad, naturalidad, cobertura y latencia. La Tabla~\ref{tab:perfil-motores} resume el perfil cualitativo de cada uno en estas cuatro dimensiones.
 
 \begin{table}[H]
 \centering
@@ -29,10 +115,6 @@ LLM (GPT-4o) & Alta & Alta & 96\% & $\sim$1500 ms \\
 \end{table}
 
 La gramática produce salidas correctas y predecibles dentro de su dominio pero genera frases que, aunque correctas, suenan rígidas. Los \textit{embeddings} heredan casi por completo las decisiones de la gramática. El LLM alcanza mayor naturalidad pero depende de una API externa con latencia y coste por llamada. Las tres hibridaciones exploran si la composición de motores supera a las partes.
-
-El \textit{pipeline} de evaluación carga el \textit{golden standard} de 164 ítems con referencias humanas multi-referencia (sección~\ref{sec:eval-golden}) y recupera de la caché las salidas precomputadas de los seis motores sobre el catálogo completo, de modo que no se requiere regeneración. Sobre cada par (predicción, lista de referencias humanas) calcula las métricas en su variante multi-referencia (sección~\ref{sec:metricas}) y aplica los tests no paramétricos correspondientes: Friedman~\cite{friedman1937use} como test ómnibus, Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual} por pares con corrección de Holm-Bonferroni~\cite{holm1979simple}, y \textit{bootstrap} pareado~\cite{koehn2004statistical} con 1000 remuestreos y semilla fija para los intervalos de confianza. Como salida produce las tablas comparativas y las gráficas de distribución que se utilizan en el análisis posterior.
-
-La encuesta de naturalidad se procesa por separado y se contrasta con las métricas automáticas en los ítems solapados entre ambas encuestas.
 
 Las Tablas~\ref{tab:eval-referencia} y~\ref{tab:eval-sin-referencia} resumen el rendimiento de los seis motores. Cada celda muestra la media $\pm$ desviación estándar sobre los 164 casos.
 
@@ -105,11 +187,7 @@ La Figura~\ref{fig:eval-radar} sintetiza estas observaciones de un vistazo. El p
 \subsection{Significancia estadística}
 \label{sec:eval-significancia}
 
-Las diferencias numéricas entre motores solo son informativas si superan la variabilidad aleatoria del muestreo. Para verificarlo, se aplica un protocolo de tests no paramétricos: pruebas estadísticas que comparan rangos en lugar de valores absolutos y no requieren que los datos sigan una distribución concreta. Se eligen porque las distribuciones de métricas de PLN presentan efecto techo, asimetría pronunciada y, en el caso de la perplejidad, valores extremos que hacen inviable la media como estadístico resumen.
-
-El test de Friedman~\cite{friedman1937use} actúa como test ómnibus: evalúa si existe al menos un motor significativamente diferente de los demás para cada métrica. Cuando Friedman rechaza la hipótesis nula, se procede a comparaciones por pares con el test de Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual}, que compara dos muestras relacionadas (los mismos 164 casos evaluados por dos motores diferentes).
-
-Con 6 motores existen $\binom{6}{2} = 15$ pares posibles, lo que requiere corrección por comparaciones múltiples. Se aplica la corrección de Holm-Bonferroni~\cite{holm1979simple}, que ordena los $p$-valores de menor a mayor y compara cada uno con un umbral adaptativo $\alpha / (m - k + 1)$, donde $m = 15$ es el número de comparaciones y $k$ la posición en el \textit{ranking}. Esta corrección ofrece mayor potencia estadística que la de Bonferroni clásica sin sacrificar el control del error de tipo I familiar.
+Aplicando el protocolo no paramétrico descrito en la Sección~\ref{sec:eval-tests}, los resultados de Friedman y de las comparaciones pareadas con Wilcoxon son los siguientes.
 
 \begin{table}[ht]
 \centering
@@ -329,78 +407,10 @@ El coste económico diferencia los motores \textit{offline} (gratis) de los que 
 
 El determinismo se pierde en cualquier motor que involucre al LLM, lo que incluye los tres híbridos. Para un usuario de CAA, la previsibilidad de la salida es un factor de confianza: saber que al seleccionar los mismos pictogramas obtendrá siempre la misma oración facilita el aprendizaje del sistema.
 
-\subsection{Evaluación humana}
-\label{sec:eval-humana}
-
-Las métricas automáticas descritas en las secciones anteriores son objetivas y reproducibles, pero descansan sobre una lista de referencias humanas limitada por caso. Para corroborar que los resultados reflejan la preferencia real de hablantes nativos, y para captar una dimensión de naturalidad que las métricas automáticas no miden directamente, se diseñaron y ejecutaron dos encuestas complementarias con hablantes nativos de español.
-
-La encuesta de \textit{golden standard} construye el corpus de referencias contra el que operan todas las métricas: pide a hablantes escribir la frase que ellos dirían al ver cada secuencia de pictogramas, sin exposición a las salidas de los motores, y produce varias formulaciones válidas por caso a partir de decenas de respondentes distintos. La encuesta de naturalidad es complementaria: presenta las frases de las tres técnicas base a los evaluadores, en orden aleatorizado y sin etiquetar, y mide cuál les suena más natural.
-
-Ambas encuestas se desplegaron como aplicaciones web con React y TypeScript~\cite{dixigoldensurvey2026,dixinaturalsurvey2026}. La interfaz muestra los pictogramas ARASAAC reales con bordes coloreados por categoría según el sistema Fitzgerald, ofrece sesiones reanudables con el progreso guardado en \textit{localStorage} del navegador y envía las respuestas en tiempo real a una base de datos Supabase alojada en la Unión Europea.
-
-El consentimiento informado cumple el Reglamento General de Protección de Datos: se recogen datos mínimos (sólo email para detectar envíos duplicados), el consentimiento es explícito, el almacenamiento se realiza en la Unión Europea (UE) y la retención está limitada a la defensa del TFG más seis meses.
-
-La captación de participantes se apoyó en carteles de difusión que acompañaron la convocatoria de ambas encuestas, con el objetivo del estudio, el tiempo estimado de participación y un código QR (\textit{Quick Response}) con el enlace al formulario. Su diseño íntegro se recoge en el Anexo~\ref{sec:anexo-carteles}.
-
-\subsubsection{Encuesta de golden standard}
-\label{sec:eval-golden}
-
-Cada respondente ve una secuencia de pictogramas ARASAAC y escribe libremente la frase que diría, sin restricciones de vocabulario ni de estructura, y sin ver ninguna salida de los motores (véase la Figura~\ref{fig:eval-golden-encuesta} en el Anexo~\ref{sec:anexo-interfaces-encuestas}). Esta independencia respecto a las salidas existentes es lo que permite usar las respuestas como referencia neutra contra la que medir cualquier motor.
-
-El diseño contempla 164 ítems organizados en 10 bloques de 16 ítems únicos más 4 \textit{anchors} compartidos. Cada participante ve 20 ítems (16 + 4) dentro del umbral de fatiga de 20 minutos que Van der Lee et al.~\cite{vanderlee2021human} recomiendan no exceder en tareas de evaluación de texto generado. Los 4 \textit{anchors} aparecen en los diez bloques y permiten detectar sesgos cruzados entre participantes. Los 160 ítems únicos cubren ocho funciones comunicativas y tres niveles de complejidad, con aproximadamente 20 observaciones por función comunicativa~\cite{reiter2009investigation}.
-
-El diseño con múltiples referencias por caso habilita la evaluación multi-referencia: las métricas automáticas (BLEU, chrF, BERTScore) comparan cada predicción contra todas las referencias humanas del mismo caso, en lugar de contra una sola. Un $n$-grama de la predicción cuenta como acierto si aparece en cualquiera de las referencias, de modo que las reformulaciones legítimas dejan de penalizarse. La ganancia es empírica: Zouhar y Bojar~\cite{zouhar2024quality} muestran que añadir hasta 7 referencias por segmento incrementa la correlación entre métricas automáticas y juicio humano, porque cada referencia adicional captura una formulación alternativa válida.
-
-Cada participante quedaba asignado a un bloque del diseño balanceado y escribía libremente la frase que diría al ver cada una de las 20 secuencias de pictogramas de ese bloque. Se inscribieron 57 personas: 45 completaron los 20 ítems (78,9\%), 8 aportaron respuestas parciales de entre 2 y 10 ítems, y 4 no llegaron a responder. La Tabla~\ref{tab:eval-golden-cobertura} detalla la cobertura por bloque: siete alcanzaron el objetivo de seis inscritos, dos quedaron en cinco por el algoritmo de balance del servidor al detenerse la captación y el bloque 9 fue el peor cubierto, con dos completos sobre cinco inscritos.
-
-\begin{table}[ht]
-\centering
-\small
-\begin{tabular}{l c c c c c c c c c c}
-\hline
-Bloque & B1 & B2 & B3 & B4 & B5 & B6 & B7 & B8 & B9 & B10 \\
-\hline
-Completos/inscritos & 3/6 & 6/6 & 3/6 & 6/6 & 5/5 & 5/5 & 6/6 & 3/6 & 2/5 & 6/6 \\
-\hline
-\end{tabular}
-\caption{Cobertura por bloque de la encuesta de \textit{golden standard}: participantes que completaron los 20 ítems sobre el total de inscritos.}
-\label{tab:eval-golden-cobertura}
-\end{table}
-
-El corpus recogido suma 948 respuestas humanas, que tras deduplicación exacta por ítem quedan en 615 referencias únicas. De los 160 ítems no-\textit{anchor}, 22 recibieron una única referencia, 33 reunieron dos, 30 reunieron tres, 30 reunieron cuatro, 25 reunieron cinco y 20 reunieron seis, con una media de 3,39 referencias únicas por ítem (4,74 respuestas brutas por ítem sin deduplicar). Los cuatro \textit{anchors}, que por diseño aparecen en todos los bloques, acumularon entre 46 y 48 respuestas cada uno.
-
-La convergencia entre participantes es la señal más clara de que el corpus captura variabilidad genuina y no ruido. En GS001 (``agua + y + pan''), 27 de 48 respondentes escribieron literalmente ``Agua y pan'' y otros 6 ``Quiero agua y pan'', dejando solo 15 referencias únicas. En GS067 (``cansado''), 36 coincidieron en ``estoy muy cansado''. En GS143 (``yo + querer + agua''), 27 escribieron ``yo quiero agua'' y 11 ``quiero agua''. En total se registraron 168 pares (ítem, texto) repetidos por distintos participantes, y ningún respondente usó el mismo texto en cinco o más ítems distintos, lo que descarta patrones de spam o relleno.
-
-El \textit{golden standard} final contiene los 164 ítems del diseño: los 160 no-\textit{anchor} más los 4 \textit{anchors}, todos con referencias humanas recogidas. Cada ítem lleva asociada su lista de referencias únicas, lista para alimentar BLEU y chrF multi-referencia, junto con la frecuencia con la que cada formulación fue producida por los participantes.
-
-El corpus recogido presenta tres limitaciones. La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica.
-
-De los 160 ítems no-\textit{anchor}, 55 cuentan con dos referencias únicas o menos, lo que aumenta la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore al presentar los resultados.
-
-El esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
-
-Con esto, la encuesta de \textit{golden standard} cumple su función: producir un corpus de referencias humanas contra el que medir cualquier motor. La siguiente encuesta complementa esa medida indirecta con una preferencia humana directa entre las salidas de los tres motores base.
-
-\subsubsection{Encuesta de naturalidad}
+\subsection{Resultados de la encuesta de naturalidad}
 \label{sec:eval-naturalidad}
 
-La encuesta de naturalidad sigue un diseño de elección forzada (\textit{forced-choice}). El evaluador ve una secuencia de pictogramas ARASAAC y las frases generadas por las tres técnicas base (gramática formal, \textit{embeddings} semánticos y LLM), sin saber qué técnica produjo cada frase. Debe seleccionar la que suene más natural en español, o elegir ``Ninguna de las anteriores'' si ninguna le convence (véase la Figura~\ref{fig:eval-naturalidad-encuesta} en el Anexo~\ref{sec:anexo-interfaces-encuestas}).
-
-Frente a una escala Likert~\cite{likert1932}, este formato se prefirió por tres razones. Con una escala Likert cada evaluador tendría que puntuar cada frase por separado (tres puntuaciones por caso), mientras que con elección forzada cada caso se resuelve con una sola decisión. La reducción de carga cognitiva es relevante porque los evaluadores son voluntarios no remunerados, y la brevedad del instrumento condiciona la tasa de finalización. La elección forzada minimiza el sesgo de aquiescencia y produce datos directamente comparables entre técnicas sin necesidad de normalizar escalas individuales.
-
-Se evalúan únicamente las tres técnicas base, no los híbridos. Los motores híbridos combinan las técnicas base mediante post-edición o selección, de modo que su evaluación humana no aportaría información independiente sobre la percepción de naturalidad de cada técnica individual. La evaluación de los híbridos queda cubierta por las métricas automáticas.
-
-Para evitar que la identidad del motor sesgue las respuestas, la evaluación es ciega: el evaluador no conoce qué técnica generó cada frase. El orden de presentación de las opciones se aleatoriza con un \textit{seed} determinístico por caso, de modo que la aleatorización es reproducible pero impide que la posición de una técnica influya en la elección. La decodificación (qué opción corresponde a qué motor) se realiza post-hoc con una clave separada.
-
-Incluir ``Ninguna de las anteriores'' como opción evita forzar una elección cuando todas las frases son deficientes. Sin esta opción, un evaluador que encuentre las tres alternativas poco naturales se vería obligado a seleccionar la ``menos mala'', contaminando los datos con preferencias que no son tales.
-
-Para seleccionar los casos se aplica un muestreo estratificado por longitud de la secuencia y tipo comunicativo. Se priorizan los casos donde las tres técnicas generan frases distintas: cuando dos técnicas producen la misma frase, la elección no aporta información diferencial, así que esos casos se excluyen.
-
-Los 44 ítems resultantes se organizan en dos \textit{sets}, A y B, de 26 ítems cada uno: 18 exclusivos del \textit{set} más 8 \textit{anchors} compartidos. Cada participante ve un único \textit{set}, y los 8 \textit{anchors} sirven como núcleo común para detectar sesgos cruzados entre \textit{sets}.
-
-Cuando dos técnicas generan exactamente la misma frase, la opción duplicada se elimina de la interfaz; si el evaluador elige una frase compartida por varias técnicas, el voto se atribuye a todas las que la generaron.
-
-Se inscribieron 54 personas: 48 completaron los 26 ítems de su \textit{set} (88,9\%), 3 aportaron respuestas parciales de entre 8 y 10 ítems y 3 no llegaron a responder. El conjunto recogido suma 1275 respuestas. La cobertura por \textit{set} es asimétrica: en el \textit{set} A los 27 inscritos completaron el cuestionario (100\%) y en el \textit{set} B lo hicieron 21 de 27 (78\%). Los 44 ítems presentados recibieron al menos una respuesta, con una cobertura del 100\% sobre el diseño. Los 8 \textit{anchors} permiten validar la ausencia de sesgos cruzados entre \textit{sets}: en los ocho ítems compartidos la técnica ganadora coincide entre el \textit{set} A y el \textit{set} B, lo que indica que la asignación de participantes no introdujo desviaciones sistemáticas en los resultados.
+Con el diseño descrito en la Sección~\ref{sec:eval-naturalidad-diseno}, la captación y la cobertura final del cuestionario son las siguientes. Se inscribieron 54 personas: 48 completaron los 26 ítems de su \textit{set} (88,9\%), 3 aportaron respuestas parciales de entre 8 y 10 ítems y 3 no llegaron a responder. El conjunto recogido suma 1275 respuestas. La cobertura por \textit{set} es asimétrica: en el \textit{set} A los 27 inscritos completaron el cuestionario (100\%) y en el \textit{set} B lo hicieron 21 de 27 (78\%). Los 44 ítems presentados recibieron al menos una respuesta, con una cobertura del 100\% sobre el diseño. Los 8 \textit{anchors} permiten validar la ausencia de sesgos cruzados entre \textit{sets}: en los ocho ítems compartidos la técnica ganadora coincide entre el \textit{set} A y el \textit{set} B, lo que indica que la asignación de participantes no introdujo desviaciones sistemáticas en los resultados.
 
 Sobre las 1275 respuestas, el LLM (GPT-4o) aparece como opción más elegida, con 561 votos (44,0\%), seguido por la gramática formal con 303 votos (23,8\%) y los \textit{embeddings} con 300 votos (23,5\%). La opción ``Ninguna de las anteriores'' recibió 111 votos (8,7\%). El LLM dobla aproximadamente la preferencia de cada motor base, pero no domina: cerca de una de cada cuatro respuestas prefiere la gramática y otras tantas los \textit{embeddings}, en casos concretos donde las formulaciones breves y directas de los motores deterministas resultan más naturales a los evaluadores que la reformulación neuronal.
 
