@@ -10,6 +10,7 @@ Reglas comprobadas:
   3. Comillas rectas `"..."` en vez de ``...''.
   4. `\\begin{lstlisting}` solo está permitido en `gramatica-formal.tex`.
   5. Paths o extensiones técnicas en prosa fuera de comandos LaTeX legítimos.
+  6. Decimales con coma (`0,52` o `1{,}5`) en vez de punto (`0.52`, `1.5`).
 """
 from __future__ import annotations
 
@@ -28,6 +29,7 @@ STRAIGHT_QUOTES = re.compile(r'"[^"\n]{1,200}"')
 LSTLISTING_OPEN = re.compile(r"\\begin\{lstlisting\}")
 CITE_CALL = re.compile(r"(^|.)\\cite\{")
 TEXTBF = re.compile(r"\\textbf\{")
+DECIMAL_COMMA = re.compile(r"[0-9](\{,\}|,)[0-9]")
 
 
 def read_hook_input() -> dict:
@@ -78,6 +80,11 @@ def lint(path: Path) -> list[tuple[int, str, str]]:
         if not LEGIT_COMMAND.search(line) and EXT_PATTERN.search(line):
             warnings.append(
                 (i, "path o extensión de archivo en prosa", line.strip())
+            )
+
+        if DECIMAL_COMMA.search(line):
+            warnings.append(
+                (i, "decimal con coma: usar punto (ej. 0.52, no 0,52)", line.strip())
             )
 
     return warnings

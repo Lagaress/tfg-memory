@@ -87,6 +87,7 @@ latexmk -c
 - Em-dash con `---` y espacios: `texto ---inciso--- texto`
 - Acrónimos: definir en la primera aparición (nombre completo + sigla entre paréntesis)
 - Citas con espacio no separable: `~\cite{}`
+- Separador decimal: **punto, no coma**. En prosa `0.52`, no `0,52`. En modo math `1.5 \cdot 10^{-5}`, no `1{,}5 \cdot 10^{-5}`. Aplica a tablas, fórmulas y cuerpo. Convención impuesta por las tutoras.
 
 ## Gotchas
 
