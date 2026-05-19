@@ -13,15 +13,17 @@ El léxico de este motor se construye a partir del léxico de la gramática form
 
 \subsection{Ranking semántico de candidatos}
 
-Cuando la gramática genera múltiples candidatos para una misma entrada, como ``Quiero ir al colegio'' y ``Voy al colegio'' para la secuencia ``ir, colegio'', el sistema los ordena mediante un \textit{score} combinado que pondera la confianza gramatical y la coherencia semántica:
+Cuando la gramática genera múltiples candidatos para una misma entrada, como ``Quiero ir al colegio'' y ``Voy al colegio'' para la secuencia ``ir, colegio'', el sistema los ordena mediante un \textit{score} combinado que pondera la confianza gramatical y la coherencia semántica medida por los \textit{embeddings}.
 
-$$\text{score} = \text{confianza}_{\text{CFG}} \times 0.6 + \text{score}_{\text{\textit{embedding}}} \times 0.4$$
-
-\noindent El score de \textit{embedding} se compone a su vez de dos señales: la preferencia seleccional (60\%), que mide la similitud coseno entre cada par verbo-argumento, y la similitud vectorial a nivel de oración (40\%), que compara el vector compuesto de los pictogramas de entrada con el de la frase generada.
+El componente semántico se construye a partir de dos señales. La primera, la \textit{preferencia seleccional} (60\%), mide la similitud coseno entre cada par verbo-argumento de la oración candidata: comprueba, por ejemplo, si los vectores de ``comer'' y ``manzana'' están próximos en el espacio aprendido sobre grandes corpus. La similitud coseno funciona aquí como medida de proximidad entre vectores: vale 1 cuando apuntan en la misma dirección y 0 cuando son perpendiculares. La segunda señal, la \textit{similitud vectorial a nivel de oración} (40\%), compara el vector compuesto de los pictogramas de entrada con el de la frase generada.
 
 La preferencia seleccional recibe mayor peso porque la coherencia de un par concreto como ``comer''--``manzana'' es una señal más directa que la similitud global de la oración, donde frases con casi las mismas palabras obtienen valores casi idénticos.
 
-Los pesos 0.6/0.4 entre CFG y \textit{embeddings} reflejan una decisión deliberada: la estructura gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
+Con esas dos señales agregadas en el \textit{score} de \textit{embeddings}, la puntuación final combina coherencia semántica y confianza gramatical:
+
+$$\text{score} = \text{confianza}_{\text{CFG}} \times 0.6 + \text{score}_{\text{\textit{embedding}}} \times 0.4$$
+
+\noindent La estructura gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
 
 \subsection{Refinamiento de preposiciones}
 \label{sec:f2-preposiciones}
