@@ -70,13 +70,69 @@ Cuando dos técnicas generan exactamente la misma frase, la opción duplicada se
 \subsubsection{Métricas}
 \label{sec:metricas}
 
-La evaluación emplea métricas organizadas en cuatro categorías: con referencia humana, específicas de CAA, sin referencia y operativas. Las métricas con referencia comparan cada predicción contra la lista de referencias humanas del caso: Exact Match (coincidencia con alguna referencia, case-insensitive y tras normalizar puntuación), BLEU~\cite{papineni2002bleu} (precisión de $n$-gramas, en variantes BLEU-1 y BLEU-4), ROUGE-L~\cite{lin2004rouge} (subsecuencia común más larga), METEOR~\cite{banerjee2005meteor} (media armónica de precisión y recall con penalización por fragmentación), chrF++~\cite{popovic2017chrf} (similitud a nivel de caracteres, útil para la morfología del español) y BERTScore~\cite{zhang2020bertscore} (similitud semántica mediante \textit{embeddings} contextuales de un \textit{transformer} preentrenado en español). BLEU y chrF usan el soporte multi-referencia nativo de sacreBLEU; METEOR, ROUGE-L y BERTScore toman el mejor \textit{score} entre las referencias del caso.
+La evaluación emplea métricas organizadas en cuatro categorías: con referencia humana, específicas de CAA, sin referencia y operativas. Para ilustrar cada una se utiliza como ejemplo recurrente la entrada ``yo, querer, ir, colegio'', con tres referencias humanas (``Quiero ir al colegio'', ``Yo quiero ir al colegio'', ``Quiero ir a la escuela'') y tres hipótesis de motores distintos: A = ``Yo quiero ir al colegio'' (gramática), B = ``Quiero ir al colegio'' (LLM) y C = ``Quiero ir a clase'' (motor menos preciso).
 
-Las métricas específicas de CAA miden la fidelidad al contenido pictográfico. La cobertura verifica qué proporción de los pictogramas de entrada están representados en la salida, comparando lemas mediante spaCy. La fidelidad detecta alucinaciones (palabras de contenido no justificadas por los pictogramas), excluyendo las inferencias pragmáticas legítimas como la inserción del verbo ``querer'' a partir del pictograma ``agua''.
+\textit{Exact Match} (EM) es la métrica más estricta: asigna 1 si la predicción coincide con alguna referencia del caso tras normalizar mayúsculas y puntuación, y 0 en caso contrario. Sobre el ejemplo anterior, la hipótesis B obtiene 1 porque coincide literalmente con una referencia, mientras que la C obtiene 0 al no coincidir con ninguna pese a estar próxima en significado.
 
-Las métricas sin referencia evalúan la naturalidad intrínseca del texto. La perplejidad, calculada con GPT-2 Spanish~\cite{deepesp2019gpt2spanish}, mide cuán probable considera un modelo autoregresivo la oración generada. La pseudo-perplejidad~\cite{salazar2020masked} complementa esta medida con un modelo bidireccional (BETO). Valores menores indican texto más natural.
+BLEU~\cite{papineni2002bleu} compara la predicción con las referencias mediante la precisión modificada de $n$-gramas, atenuada con una penalización por brevedad para evitar que oraciones demasiado cortas obtengan puntuaciones altas:
+\begin{equation}
+\text{BLEU} = \text{BP} \cdot \exp\!\left(\sum_{n=1}^{N} w_n \log p_n\right),
+\end{equation}
+donde $p_n$ es la precisión modificada de $n$-gramas, $w_n = 1/N$ y BP es la penalización por brevedad. BLEU-1 considera solo unigramas y mide coincidencia léxica; BLEU-4 promedia hasta los 4-gramas y exige también orden de palabras. La hipótesis A frente a la referencia ``Yo quiero ir al colegio'' comparte sus cinco unigramas y sus cuatro bigramas, lo que produce un BLEU-4 cercano al máximo; la hipótesis C, en cambio, pierde los $n$-gramas que contienen ``colegio'' y obtiene un BLEU-4 mucho más bajo aunque su BLEU-1 siga siendo razonable.
 
-Las métricas operativas registran la latencia por consulta y el coste económico de los motores que dependen de APIs externas.
+ROUGE-L~\cite{lin2004rouge} se apoya en la subsecuencia común más larga (\textit{Longest Common Subsequence}, LCS) entre la predicción y la referencia, y resume precisión y \textit{recall} en una F-medida:
+\begin{equation}
+P_{\text{LCS}} = \frac{|\text{LCS}(X,Y)|}{|X|}, \quad R_{\text{LCS}} = \frac{|\text{LCS}(X,Y)|}{|Y|}, \quad F_{\text{LCS}} = \frac{(1+\beta^2)\, P_{\text{LCS}}\, R_{\text{LCS}}}{R_{\text{LCS}} + \beta^2\, P_{\text{LCS}}}.
+\end{equation}
+La LCS entre la hipótesis A (``Yo quiero ir al colegio'') y la referencia ``Quiero ir al colegio'' es ``quiero ir al colegio'' (cuatro palabras), lo que da una F-medida alta sin penalizar el ``Yo'' inicial añadido por el motor.
+
+METEOR~\cite{banerjee2005meteor} calcula una media armónica de precisión y \textit{recall} a nivel de palabra y aplica una penalización por fragmentación que castiga cuando las coincidencias aparecen dispersas en lugar de agrupadas:
+\begin{equation}
+\text{METEOR} = F_{\text{mean}} \cdot (1 - \text{Penalty}), \qquad \text{Penalty} = \gamma\,(\text{chunks}/m)^{\beta},
+\end{equation}
+donde $\text{chunks}$ es el número de bloques contiguos de coincidencias y $m$ el total de coincidencias. A diferencia de BLEU, METEOR tolera sinónimos y derivaciones morfológicas, de modo que en la hipótesis C el par ``colegio''/``clase'' puede sumar al \textit{score} si el recurso léxico utilizado registra la relación, mientras que BLEU lo trata como discrepancia léxica.
+
+chrF++~\cite{popovic2017chrf} traslada la comparación al nivel de caracteres, promediando $n$-gramas de longitud 1 a 6 en una F-medida con $\beta$ que pondera más el \textit{recall} que la precisión:
+\begin{equation}
+\text{chrF}_{\beta} = \frac{(1+\beta^2) \cdot P_{\text{chr}} \cdot R_{\text{chr}}}{\beta^2 \cdot P_{\text{chr}} + R_{\text{chr}}}.
+\end{equation}
+Operar sobre caracteres en lugar de palabras es relevante en español, donde flexiones como ``quiero'' frente a ``queremos'' comparten la mayor parte de su raíz; chrF las premia parcialmente, mientras que las métricas léxicas las tratan como tipos distintos. Entre las hipótesis del ejemplo, ``colegio'' frente a ``escuela'' comparte solo unos pocos caracteres y reduce el chrF; ``colegio'' frente a ``colegio'' lo maximiza.
+
+BERTScore~\cite{zhang2020bertscore} abandona la coincidencia superficial y mide similitud semántica entre los \textit{embeddings} contextuales que un \textit{transformer} preentrenado en español asigna a cada \textit{token}:
+\begin{equation}
+P_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{r_j \in r} \cos(x_i, r_j),
+\end{equation}
+con $R_{\text{BERT}}$ y $F_{\text{BERT}}$ análogos. La hipótesis C (``Quiero ir a clase'') obtiene un BERTScore alto frente a ``Quiero ir a la escuela'' porque ``clase'' y ``escuela'' ocupan posiciones próximas en el espacio de \textit{embeddings}, aunque chrF y BLEU las separen.
+
+BLEU y chrF usan el soporte multi-referencia nativo de sacreBLEU; METEOR, ROUGE-L y BERTScore toman el mejor \textit{score} entre las referencias del caso.
+
+Las métricas específicas de CAA miden la fidelidad al contenido pictográfico. La \textit{cobertura} verifica qué proporción de los lemas de entrada están representados en la salida, comparando con spaCy para tolerar la flexión (``quiero'' cuenta como ``querer''):
+\begin{equation}
+\text{Cobertura} = \frac{|\text{lemas de entrada presentes en la salida}|}{|\text{lemas de entrada}|}.
+\end{equation}
+Para la entrada ``yo, querer, ir, colegio'' y la salida ``Quiero ir al colegio'', los cuatro lemas aparecen en la oración generada y la cobertura es $4/4 = 1{,}0$.
+
+La \textit{fidelidad} mira en el sentido opuesto y detecta alucinaciones: palabras de contenido en la salida que no están justificadas por la entrada:
+\begin{equation}
+\text{Fidelidad} = 1 - \frac{|\text{palabras de contenido en la salida no justificadas por la entrada}|}{|\text{palabras de contenido en la salida}|}.
+\end{equation}
+Si la entrada es solo ``agua'' y la salida es ``Quiero agua'', el verbo ``quiero'' no procede de ningún pictograma y, en la versión estándar de la métrica, se contabiliza como alucinación.
+
+La \textit{fidelidad ajustada} corrige este efecto descontando del recuento de alucinaciones las inferencias pragmáticas legítimas, como añadir ``querer'' a partir de un pictograma de necesidad. La métrica conserva la misma estructura que la fidelidad estándar, pero excluye del numerador las palabras que pertenecen a un repertorio prefijado de inferencias esperables; sobre el ejemplo de ``agua'', el verbo ``quiero'' deja de penalizar y la fidelidad ajustada se aproxima a 1.
+
+Las métricas sin referencia evalúan la naturalidad intrínseca del texto, sin requerir comparación con una referencia humana. La \textit{perplejidad}, calculada con GPT-2 Spanish~\cite{deepesp2019gpt2spanish}, mide cuán probable considera un modelo autoregresivo la oración generada:
+\begin{equation}
+\text{PPL}(s) = \exp\!\left(-\frac{1}{N} \sum_{i=1}^{N} \log P(w_i \mid w_{<i})\right).
+\end{equation}
+Valores bajos indican texto que el modelo de lenguaje juzga natural: ``Quiero agua'' presenta una perplejidad baja, mientras que la concatenación literal ``Yo querer agua'' la dispara porque la secuencia es estadísticamente rara en español.
+
+La \textit{pseudo-perplejidad}~\cite{salazar2020masked} es la variante análoga para modelos bidireccionales como BETO: enmascara cada \textit{token} por turnos y mide su probabilidad condicionada a todo el contexto:
+\begin{equation}
+\text{PPPL}(s) = \exp\!\left(-\frac{1}{N} \sum_{i=1}^{N} \log P(w_i \mid w_{\neq i})\right).
+\end{equation}
+Al usar el contexto completo en lugar de solo el izquierdo, la pseudo-perplejidad ofrece una segunda lectura de la naturalidad que no depende del orden de generación de palabras.
+
+Las métricas operativas describen el coste de ejecución sin entrar en la calidad lingüística. La \textit{latencia} registra los milisegundos por consulta y se reporta como mediana para resistir a las colas largas de las distribuciones; el \textit{coste} expresa los dólares por consulta y solo es no nulo en los motores que dependen de APIs externas.
 
 \subsubsection{Tests estadísticos}
 \label{sec:eval-tests}
