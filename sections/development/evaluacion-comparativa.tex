@@ -212,6 +212,8 @@ La perplejidad distingue claramente dos bloques: Hybrid1 y Hybrid2 producen las 
 
 La latencia mantiene un espectro amplio: desde los 0.02 ms de la gramática formal hasta los 4.3 segundos de Hybrid3, con el LLM en 1.5 segundos por llamada a la API.
 
+La Figura~\ref{fig:eval-radar} sintetiza estas observaciones de un vistazo.
+
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/eval-radar.png}
@@ -219,7 +221,7 @@ La latencia mantiene un espectro amplio: desde los 0.02 ms de la gramática form
     \label{fig:eval-radar}
 \end{figure}
 
-La Figura~\ref{fig:eval-radar} sintetiza estas observaciones de un vistazo. El polígono del LLM se aproxima al borde exterior en BLEU-4, chrF, METEOR y ROUGE-L, mientras que los híbridos extienden su superficie hacia cobertura y fidelidad. La gramática y los \textit{embeddings} comparten un perfil casi idéntico, ligeramente comprimido en todas las métricas con referencia humana.
+El polígono del LLM se aproxima al borde exterior en BLEU-4, chrF, METEOR y ROUGE-L, mientras que los híbridos extienden su superficie hacia cobertura y fidelidad. La gramática y los \textit{embeddings} comparten un perfil casi idéntico, ligeramente comprimido en todas las métricas con referencia humana.
 
 A partir de estos datos puede sintetizarse el perfil cualitativo de los tres motores base en las cuatro dimensiones más relevantes para CAA (Tabla~\ref{tab:perfil-motores}).
 
@@ -304,6 +306,8 @@ El cuarto hallazgo muestra que los tres híbridos mejoran cobertura y fidelidad 
 \subsubsection{Distribución de métricas}
 \label{sec:eval-distribuciones}
 
+Los diagramas de caja de la Figura~\ref{fig:eval-boxplots} complementan las medias de la tabla anterior mostrando la distribución completa de cada métrica.
+
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/eval-boxplots.png}
@@ -311,7 +315,7 @@ El cuarto hallazgo muestra que los tres híbridos mejoran cobertura y fidelidad 
     \label{fig:eval-boxplots}
 \end{figure}
 
-Los diagramas de caja de la Figura~\ref{fig:eval-boxplots} complementan las medias de la tabla anterior mostrando la distribución completa de cada métrica. Las dispersiones son notables: con desviaciones estándar cercanas a 0.5 en Exact Match, una parte sustancial del corpus recibe valores extremos (0 o 1) mientras que otra queda en valores intermedios cuando la hipótesis coincide con parte de las referencias pero no con todas.
+Las dispersiones son notables: con desviaciones estándar cercanas a 0.5 en Exact Match, una parte sustancial del corpus recibe valores extremos (0 o 1) mientras que otra queda en valores intermedios cuando la hipótesis coincide con parte de las referencias pero no con todas.
 
 El LLM se diferencia por una densidad mayor en la parte alta de cada métrica: sus predicciones coinciden con alguna referencia humana con más frecuencia que las de las bases o los híbridos. La gramática y los \textit{embeddings} muestran distribuciones prácticamente superpuestas, consecuencia de la equivalencia observada en la Sección~\ref{sec:eval-convergencia}.
 
@@ -321,6 +325,8 @@ Las bases ofrecen menor variabilidad entre ejecuciones (determinismo total) a co
 
 \subsubsection{Análisis por complejidad}
 \label{sec:eval-complejidad}
+
+Las Figuras~\ref{fig:eval-bleu4-complejidad} y~\ref{fig:eval-chrf-complejidad} desglosan el rendimiento por nivel de complejidad de la secuencia de entrada: simple, media y compleja.
 
 \begin{figure}[ht]
     \centering
@@ -336,12 +342,14 @@ Las bases ofrecen menor variabilidad entre ejecuciones (determinismo total) a co
     \label{fig:eval-chrf-complejidad}
 \end{figure}
 
-Las Figuras~\ref{fig:eval-bleu4-complejidad} y~\ref{fig:eval-chrf-complejidad} desglosan el rendimiento por nivel de complejidad de la secuencia de entrada: simple, media y compleja. El LLM mantiene su ventaja sobre las bases en los tres niveles. La brecha entre LLM e híbridos es estable en BLEU-4 y se estrecha en chrF++, consistente con el hecho de que chrF tolera mejor las reformulaciones morfológicas menores que introduce la post-edición.
+El LLM mantiene su ventaja sobre las bases en los tres niveles. La brecha entre LLM e híbridos es estable en BLEU-4 y se estrecha en chrF++, consistente con el hecho de que chrF tolera mejor las reformulaciones morfológicas menores que introduce la post-edición.
 
 La métrica chrF++ se mantiene por encima de 0.80 para todos los motores en los tres niveles, confirmando que las divergencias con las referencias humanas son predominantemente de formulación (orden de palabras, elecciones morfológicas) y no de contenido. BLEU-4, más estricta con la coincidencia exacta de 4-gramas, amplifica estas mismas diferencias. Estas divergencias de formulación tienen orígenes distintos según el motor; la siguiente subsubsección las clasifica por tipo.
 
 \subsubsection{Análisis de errores}
 \label{sec:eval-errores}
+
+La Figura~\ref{fig:eval-errores} muestra la distribución de los tipos de error definidos en la Sección~\ref{sec:metricas} para cada motor.
 
 \begin{figure}[ht]
     \centering
@@ -349,8 +357,6 @@ La métrica chrF++ se mantiene por encima de 0.80 para todos los motores en los 
     \caption{Distribución de tipos de error por motor. Las bases concentran sus errores en inferencias pragmáticas clasificadas como alucinación. Los híbridos reducen estas inferencias pero introducen errores morfológicos y léxicos propios de la reformulación neuronal.}
     \label{fig:eval-errores}
 \end{figure}
-
-La Figura~\ref{fig:eval-errores} muestra la distribución de los tipos de error definidos en la Sección~\ref{sec:metricas} para cada motor.
 
 El hallazgo principal es que la hibridación cambia la naturaleza de los errores, además de su frecuencia. La gramática formal y los \textit{embeddings} presentan un porcentaje notable de casos clasificados como alucinación, lo que puede parecer contradictorio dado que producen salidas correctas. La explicación reside en la definición operativa de alucinación: se basa en la fidelidad de contenido, que penaliza palabras de contenido en la salida no presentes entre los pictogramas de entrada.
 
@@ -423,6 +429,8 @@ Las tres hibridaciones perseguían mejorar alguna dimensión respecto a las téc
 \subsubsection{Mejora relativa}
 \label{sec:eval-mejora}
 
+La Figura~\ref{fig:eval-mejora} cuantifica la mejora relativa de cada híbrido respecto a su técnica base natural: Hybrid1 frente a la gramática formal, Hybrid2 frente a los \textit{embeddings}, y Hybrid3 frente a ambas bases.
+
 \begin{figure}[ht]
     \centering
     \includegraphics[width=\textwidth]{figures/eval-mejora-relativa.png}
@@ -430,7 +438,7 @@ Las tres hibridaciones perseguían mejorar alguna dimensión respecto a las téc
     \label{fig:eval-mejora}
 \end{figure}
 
-La Figura~\ref{fig:eval-mejora} cuantifica la mejora relativa de cada híbrido respecto a su técnica base natural: Hybrid1 frente a la gramática formal, Hybrid2 frente a los \textit{embeddings}, y Hybrid3 frente a ambas bases. El patrón es consistente: los híbridos mejoran las métricas de coincidencia con la referencia humana (exact match sube del 52\% al 55-59\%, BLEU-4 del 0.71 al 0.74-0.75) y mejoran también perplejidad, cobertura y fidelidad. El coste se concentra en la latencia y el coste económico, analizados en la subsección siguiente.
+El patrón es consistente: los híbridos mejoran las métricas de coincidencia con la referencia humana (exact match sube del 52\% al 55-59\%, BLEU-4 del 0.71 al 0.74-0.75) y mejoran también perplejidad, cobertura y fidelidad. El coste se concentra en la latencia y el coste económico, analizados en la subsección siguiente.
 
 La mejora en exact match frente a las bases es uno de los hallazgos clave del estudio. Al reformular las salidas deterministas con un LLM de post-edición, los híbridos recuperan un 3-7\% adicional de coincidencias exactas con las referencias humanas. La explicación es que la post-edición ajusta marcas morfológicas y artículos a las formas que los hablantes eligieron con más frecuencia, acercando la salida a la mediana de formulaciones humanas.
 
