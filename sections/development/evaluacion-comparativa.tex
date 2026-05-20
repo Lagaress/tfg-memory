@@ -36,7 +36,26 @@ Completos/inscritos & 3/6 & 6/6 & 3/6 & 6/6 & 5/5 & 5/5 & 6/6 & 3/6 & 2/5 & 6/6 
 \label{tab:eval-golden-cobertura}
 \end{table}
 
-El corpus recogido suma 948 respuestas humanas, que tras deduplicación exacta por ítem quedan en 615 referencias únicas. De los 160 ítems no-\textit{anchor}, 22 recibieron una única referencia, 33 reunieron dos, 30 reunieron tres, 30 reunieron cuatro, 25 reunieron cinco y 20 reunieron seis, con una media de 3.39 referencias únicas por ítem (4.74 respuestas brutas por ítem sin deduplicar). Los cuatro \textit{anchors}, que por diseño aparecen en todos los bloques, acumularon entre 46 y 48 respuestas cada uno.
+El corpus recogido suma 948 respuestas humanas, que tras deduplicación exacta por ítem quedan en 615 referencias únicas, con una media de 3.39 referencias únicas por ítem (4.74 respuestas brutas sin deduplicar). La Tabla~\ref{tab:eval-referencias-distribucion} detalla la distribución de los 160 ítems no-\textit{anchor} por número de referencias únicas. Los cuatro \textit{anchors}, que por diseño aparecen en todos los bloques, acumularon entre 46 y 48 respuestas cada uno.
+
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{c c}
+\hline
+Referencias únicas & Ítems no-\textit{anchor} \\
+\hline
+1 & 22 \\
+2 & 33 \\
+3 & 30 \\
+4 & 30 \\
+5 & 25 \\
+6 & 20 \\
+\hline
+\end{tabular}
+\caption{Distribución de los 160 ítems no-\textit{anchor} por número de referencias únicas recogidas.}
+\label{tab:eval-referencias-distribucion}
+\end{table}
 
 La convergencia entre participantes es la señal más clara de que el corpus captura variabilidad genuina y no ruido. En GS001 (``agua + y + pan''), 27 de 48 participantes escribieron literalmente ``Agua y pan'' y otros 6 ``Quiero agua y pan'', dejando solo 15 referencias únicas. En GS067 (``cansado''), 36 coincidieron en ``estoy muy cansado''. En GS143 (``yo + querer + agua''), 27 escribieron ``yo quiero agua'' y 11 ``quiero agua''. En total se registraron 168 pares (ítem, texto) repetidos por distintos participantes, y ningún participante usó el mismo texto en cinco o más ítems distintos, lo que descarta patrones de spam o relleno.
 
