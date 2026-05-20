@@ -139,7 +139,7 @@ Las métricas operativas describen el coste de ejecución sin entrar en la calid
 \subsubsection{Tests estadísticos}
 \label{sec:eval-tests}
 
-Una pequeña diferencia entre motores puede deberse al azar de los casos elegidos, no a una mejora real. Solo se considera relevante si supera ese margen aleatorio. Para verificarlo, se aplica un protocolo de tests no paramétricos: pruebas estadísticas que comparan rangos en lugar de valores absolutos y no requieren que los datos sigan una distribución concreta. Se eligen porque las distribuciones de métricas de PLN presentan efecto techo, asimetría pronunciada y, en el caso de la perplejidad, valores extremos que hacen inviable la media como estadístico resumen.
+Una pequeña diferencia entre motores puede deberse al azar de los casos elegidos, no a una mejora real. Solo se considera relevante si supera ese margen aleatorio. Para verificarlo, se aplica un protocolo de tests no paramétricos: pruebas estadísticas que comparan rangos en lugar de valores absolutos y no requieren que los datos sigan una distribución concreta. Se eligen porque las distribuciones de métricas de procesamiento del lenguaje natural presentan efecto techo, asimetría pronunciada y, en el caso de la perplejidad, valores extremos que hacen inviable la media como estadístico resumen.
 
 El test de Friedman~\cite{friedman1937use} actúa como test ómnibus: evalúa si existe al menos un motor significativamente diferente de los demás para cada métrica. Cuando Friedman rechaza la hipótesis nula, se procede a comparaciones por pares con el test de Wilcoxon \textit{signed-rank}~\cite{wilcoxon1945individual}, que compara dos muestras relacionadas (los mismos 164 casos evaluados por dos motores diferentes).
 
