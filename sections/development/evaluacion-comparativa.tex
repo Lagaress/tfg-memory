@@ -100,9 +100,9 @@ Métrica & Qué mide & Cálculo en el ejemplo \\
 \hline
 Exact Match (EM) & Coincidencia literal con alguna referencia tras normalizar mayúsculas y puntuación. & B obtiene 1 (coincide literal); A y C obtienen 0. \\
 BLEU~\cite{papineni2002bleu} & Precisión de $n$-gramas con penalización por brevedad. & A obtiene BLEU-4 cercano al máximo; C cae al perder los $n$-gramas con ``colegio''. \\
-ROUGE-L~\cite{lin2004rouge} & F-medida sobre la subsecuencia común más larga. & La LCS entre A y la referencia es ``quiero ir al colegio'': F-medida alta sin penalizar el ``Yo'' inicial. \\
-METEOR~\cite{banerjee2005meteor} & Media armónica de precisión y \textit{recall} con penalización por fragmentación. Tolera sinónimos y derivaciones. & En C, el par ``colegio''/``clase'' puede sumar si el recurso léxico registra la relación; BLEU lo trata como discrepancia. \\
-chrF++~\cite{popovic2017chrf} & F-medida sobre $n$-gramas de caracteres (longitud 1-6). Premia flexiones del español. & ``colegio''/``escuela'' reduce el chrF; ``colegio''/``colegio'' lo maximiza. \\
+ROUGE-L~\cite{lin2004rouge} & Mide cuántas palabras de la referencia aparecen, en orden, en la predicción. & La LCS entre A y la referencia es ``quiero ir al colegio'': F-medida alta sin penalizar el ``Yo'' inicial. \\
+METEOR~\cite{banerjee2005meteor} & Compara palabra a palabra entre predicción y referencia, con penalización por fragmentación. Tolera sinónimos y derivaciones. & En C, el par ``colegio''/``clase'' puede sumar si el recurso léxico registra la relación; BLEU lo trata como discrepancia. \\
+chrF++~\cite{popovic2017chrf} & Compara fragmentos de caracteres (longitud 1-6) entre predicción y referencia. Premia flexiones del español. & ``colegio''/``escuela'' reduce el chrF; ``colegio''/``colegio'' lo maximiza. \\
 BERTScore~\cite{zhang2020bertscore} & Similitud semántica entre \textit{embeddings} contextuales. & La hipótesis C obtiene BERTScore alto frente a ``Quiero ir a la escuela'' porque ``clase'' y ``escuela'' están próximas en el espacio de \textit{embeddings}. \\
 \hline
 \end{tabular}
