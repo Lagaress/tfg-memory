@@ -61,11 +61,7 @@ La convergencia entre participantes es la señal más clara de que el corpus cap
 
 El \textit{golden standard} final contiene los 164 ítems del diseño: los 160 no-\textit{anchor} más los 4 \textit{anchors}, todos con referencias humanas recogidas. Cada ítem lleva asociada su lista de referencias únicas, lista para alimentar BLEU y chrF multi-referencia, junto con la frecuencia con la que cada formulación fue producida por los participantes.
 
-El corpus recogido presenta tres limitaciones. La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica.
-
-De los 160 ítems no-\textit{anchor}, 55 cuentan con dos referencias únicas o menos, lo que aumenta la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore al presentar los resultados.
-
-El esquema multi-referencia trata todas las referencias como un conjunto sin pesos: las formulaciones repetidas por muchos participantes no ponderan más que las idiosincráticas, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
+El corpus recogido presenta tres limitaciones. La muestra es modesta (45 participantes completos, captados por canales personales) y no pretende representatividad demográfica. De los 160 ítems no-\textit{anchor}, 55 cuentan con dos referencias únicas o menos, lo que aumenta la varianza de BLEU por su sensibilidad a la coincidencia exacta de $n$-gramas; por esta razón conviene priorizar chrF y BERTScore al presentar los resultados. Finalmente, el esquema multi-referencia trata todas las referencias como un conjunto sin pesos, una simplificación que conviene tener presente al comparar motores cuyo estilo coincide con la mayoría estadística de los hablantes.
 
 Con esto, la encuesta de \textit{golden standard} cumple su función: producir un corpus de referencias humanas contra el que medir cualquier motor. La siguiente encuesta complementa esa medida indirecta con una preferencia humana directa entre las salidas de los tres motores base.
 
