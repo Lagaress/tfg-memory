@@ -89,37 +89,38 @@ Cuando dos técnicas generan exactamente la misma frase, la opción duplicada se
 
 La evaluación emplea métricas organizadas en cuatro categorías: con referencia humana, específicas de CAA, sin referencia y operativas. Para ilustrar cada una se utiliza como ejemplo recurrente la entrada ``yo, querer, ir, colegio'', con tres referencias humanas (``Quiero ir al colegio'', ``Yo quiero ir al colegio'', ``Quiero ir a la escuela'') y tres hipótesis de motores distintos: A = ``Yo quiero ir al colegio'' (gramática), B = ``Quiero ir al colegio'' (LLM) y C = ``Quiero ir a clase'' (motor menos preciso).
 
-\textit{Exact Match} (EM) es la métrica más estricta: asigna 1 si la predicción coincide con alguna referencia del caso tras normalizar mayúsculas y puntuación, y 0 en caso contrario. Sobre el ejemplo anterior, la hipótesis B obtiene 1 porque coincide literalmente con una referencia, mientras que la C obtiene 0 al no coincidir con ninguna pese a estar próxima en significado.
+La Tabla~\ref{tab:eval-metricas-referencia} resume las seis métricas con referencia humana del estudio, ordenadas de coincidencia léxica estricta a similitud semántica. A continuación se desarrollan en prosa BLEU y BERTScore, cuyas fórmulas ilustran el contraste entre los dos extremos del espectro; el resto sigue el mismo patrón de comparación predicción-referencia.
 
-BLEU~\cite{papineni2002bleu} compara la predicción con las referencias mediante la precisión modificada de $n$-gramas, atenuada con una penalización por brevedad para evitar que oraciones demasiado cortas obtengan puntuaciones altas:
+\begin{table}[ht]
+\centering
+\small
+\begin{tabular}{l p{5cm} p{6cm}}
+\hline
+Métrica & Qué mide & Cálculo en el ejemplo \\
+\hline
+Exact Match (EM) & Coincidencia literal con alguna referencia tras normalizar mayúsculas y puntuación. & B obtiene 1 (coincide literal); A y C obtienen 0. \\
+BLEU~\cite{papineni2002bleu} & Precisión de $n$-gramas con penalización por brevedad. & A obtiene BLEU-4 cercano al máximo; C cae al perder los $n$-gramas con ``colegio''. \\
+ROUGE-L~\cite{lin2004rouge} & F-medida sobre la subsecuencia común más larga. & La LCS entre A y la referencia es ``quiero ir al colegio'': F-medida alta sin penalizar el ``Yo'' inicial. \\
+METEOR~\cite{banerjee2005meteor} & Media armónica de precisión y \textit{recall} con penalización por fragmentación. Tolera sinónimos y derivaciones. & En C, el par ``colegio''/``clase'' puede sumar si el recurso léxico registra la relación; BLEU lo trata como discrepancia. \\
+chrF++~\cite{popovic2017chrf} & F-medida sobre $n$-gramas de caracteres (longitud 1-6). Premia flexiones del español. & ``colegio''/``escuela'' reduce el chrF; ``colegio''/``colegio'' lo maximiza. \\
+BERTScore~\cite{zhang2020bertscore} & Similitud semántica entre \textit{embeddings} contextuales. & La hipótesis C obtiene BERTScore alto frente a ``Quiero ir a la escuela'' porque ``clase'' y ``escuela'' están próximas en el espacio de \textit{embeddings}. \\
+\hline
+\end{tabular}
+\caption{Resumen de las seis métricas con referencia humana, ordenadas de coincidencia léxica estricta a similitud semántica.}
+\label{tab:eval-metricas-referencia}
+\end{table}
+
+BLEU compara la predicción con las referencias mediante la precisión modificada de $n$-gramas, atenuada con una penalización por brevedad para evitar que oraciones demasiado cortas obtengan puntuaciones altas:
 \begin{equation}
 \text{BLEU} = \text{BP} \cdot \exp\!\left(\sum_{n=1}^{N} w_n \log p_n\right),
 \end{equation}
-donde $p_n$ es la precisión modificada de $n$-gramas, $w_n = 1/N$ y BP es la penalización por brevedad. BLEU-1 considera solo unigramas y mide coincidencia léxica; BLEU-4 promedia hasta los 4-gramas y exige también orden de palabras. La hipótesis A frente a la referencia ``Yo quiero ir al colegio'' comparte sus cinco unigramas y sus cuatro bigramas, lo que produce un BLEU-4 cercano al máximo; la hipótesis C, en cambio, pierde los $n$-gramas que contienen ``colegio'' y obtiene un BLEU-4 mucho más bajo aunque su BLEU-1 siga siendo razonable.
+donde $p_n$ es la precisión modificada de $n$-gramas, $w_n = 1/N$ y BP es la penalización por brevedad. BLEU-1 considera solo unigramas y mide coincidencia léxica; BLEU-4 promedia hasta los 4-gramas y exige también orden de palabras.
 
-ROUGE-L~\cite{lin2004rouge} se apoya en la subsecuencia común más larga (\textit{Longest Common Subsequence}, LCS) entre la predicción y la referencia, y resume precisión y \textit{recall} en una F-medida:
-\begin{equation}
-P_{\text{LCS}} = \frac{|\text{LCS}(X,Y)|}{|X|}, \quad R_{\text{LCS}} = \frac{|\text{LCS}(X,Y)|}{|Y|}, \quad F_{\text{LCS}} = \frac{(1+\beta^2)\, P_{\text{LCS}}\, R_{\text{LCS}}}{R_{\text{LCS}} + \beta^2\, P_{\text{LCS}}}.
-\end{equation}
-La LCS entre la hipótesis A (``Yo quiero ir al colegio'') y la referencia ``Quiero ir al colegio'' es ``quiero ir al colegio'' (cuatro palabras), lo que da una F-medida alta sin penalizar el ``Yo'' inicial añadido por el motor.
-
-METEOR~\cite{banerjee2005meteor} calcula una media armónica de precisión y \textit{recall} a nivel de palabra y aplica una penalización por fragmentación que castiga cuando las coincidencias aparecen dispersas en lugar de agrupadas:
-\begin{equation}
-\text{METEOR} = F_{\text{mean}} \cdot (1 - \text{Penalty}), \qquad \text{Penalty} = \gamma\,(\text{chunks}/m)^{\beta},
-\end{equation}
-donde $\text{chunks}$ es el número de bloques contiguos de coincidencias y $m$ el total de coincidencias. A diferencia de BLEU, METEOR tolera sinónimos y derivaciones morfológicas, de modo que en la hipótesis C el par ``colegio''/``clase'' puede sumar al \textit{score} si el recurso léxico utilizado registra la relación, mientras que BLEU lo trata como discrepancia léxica.
-
-chrF++~\cite{popovic2017chrf} traslada la comparación al nivel de caracteres, promediando $n$-gramas de longitud 1 a 6 en una F-medida con $\beta$ que pondera más el \textit{recall} que la precisión:
-\begin{equation}
-\text{chrF}_{\beta} = \frac{(1+\beta^2) \cdot P_{\text{chr}} \cdot R_{\text{chr}}}{\beta^2 \cdot P_{\text{chr}} + R_{\text{chr}}}.
-\end{equation}
-Operar sobre caracteres en lugar de palabras es relevante en español, donde flexiones como ``quiero'' frente a ``queremos'' comparten la mayor parte de su raíz; chrF las premia parcialmente, mientras que las métricas léxicas las tratan como tipos distintos. Entre las hipótesis del ejemplo, ``colegio'' frente a ``escuela'' comparte solo unos pocos caracteres y reduce el chrF; ``colegio'' frente a ``colegio'' lo maximiza.
-
-BERTScore~\cite{zhang2020bertscore} abandona la coincidencia superficial y mide similitud semántica entre los \textit{embeddings} contextuales que un \textit{transformer} preentrenado en español asigna a cada \textit{token}:
+BERTScore abandona la coincidencia superficial y mide similitud semántica entre los \textit{embeddings} contextuales que un \textit{transformer} preentrenado en español asigna a cada \textit{token}:
 \begin{equation}
 P_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{r_j \in r} \cos(x_i, r_j),
 \end{equation}
-con $R_{\text{BERT}}$ y $F_{\text{BERT}}$ análogos. La hipótesis C (``Quiero ir a clase'') obtiene un BERTScore alto frente a ``Quiero ir a la escuela'' porque ``clase'' y ``escuela'' ocupan posiciones próximas en el espacio de \textit{embeddings}, aunque chrF y BLEU las separen.
+con $R_{\text{BERT}}$ y $F_{\text{BERT}}$ análogos. Frente a BLEU, BERTScore tolera reformulaciones: una predicción puede obtener un BERTScore alto si su sentido es próximo al de la referencia aunque las palabras concretas no coincidan.
 
 BLEU y chrF usan el soporte multi-referencia nativo de sacreBLEU; METEOR, ROUGE-L y BERTScore toman el mejor \textit{score} entre las referencias del caso.
 
