@@ -225,7 +225,7 @@ La tabla de métricas sin referencia añade las dimensiones no capturadas por la
 
 La fidelidad ajustada, que descuenta las inferencias pragmáticas del recuento de alucinaciones, eleva los valores por encima de 0.95 y estrecha las diferencias, lo que indica que la mayor parte de las ``alucinaciones'' detectadas por la fidelidad estándar son inferencias legítimas como el verbo ``querer'' a partir de pictogramas de necesidad.
 
-La perplejidad distingue claramente dos bloques: Hybrid1 y Hybrid2 producen las frases con menor perplejidad mediana (70 y 70, frente a 119 de la gramática y 123 del LLM). Esto confirma que la post-edición por LLM sobre la salida determinista mejora la fluidez según los modelos de lenguaje preentrenados. Hybrid3, con mediana de 102, queda en un nivel intermedio coherente con su diseño de \textit{ranking} por perplejidad aplicado sobre candidatas de calidad similar. La pseudo-perplejidad con BETO reproduce la misma ordenación (medianas de 11 para Hybrid1 y Hybrid2, 25 para las bases y el LLM, 21 para Hybrid3).
+Hybrid1 y Hybrid2 reducen la perplejidad mediana a la mitad respecto a las bases (Tabla~\ref{tab:eval-perplejidad}), lo que confirma que la post-edición por LLM sobre la salida determinista mejora la fluidez según los modelos de lenguaje preentrenados. Hybrid3 queda en un nivel intermedio coherente con su diseño de \textit{ranking} por perplejidad aplicado sobre candidatas de calidad similar.
 
 La latencia mantiene un espectro amplio: desde los 0.02 ms de la gramática formal hasta los 4.3 segundos de Hybrid3, con el LLM en 1.5 segundos por llamada a la API.
 
