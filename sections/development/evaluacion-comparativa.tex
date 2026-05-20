@@ -396,7 +396,7 @@ Hybrid3 & 102 & 21 \\
 \label{tab:eval-perplejidad}
 \end{table}
 
-La Tabla~\ref{tab:eval-perplejidad} revela que la post-edición por LLM es el único mecanismo que mejora de forma medible la naturalidad intrínseca de las salidas: Hybrid1 y Hybrid2 alcanzan las menores perplejidades (medianas de 70 frente a 119 de la gramática, 119 de los \textit{embeddings} y 123 del LLM puro), y la pseudo-perplejidad con BETO confirma la tendencia con medianas de 11 frente a 25. Hybrid3 queda en una mediana intermedia de 102 por una razón estructural: en el 73\% de los casos (véase la Sección~\ref{sec:eval-hibridos}) selecciona la salida de la gramática, de modo que su perplejidad converge con la de su candidata mayoritaria.
+La Tabla~\ref{tab:eval-perplejidad} revela que la post-edición por LLM es el único mecanismo que mejora de forma medible la naturalidad intrínseca de las salidas. Hybrid3 queda en una mediana intermedia por una razón estructural: en el 73\% de los casos (véase la Sección~\ref{sec:eval-hibridos}) selecciona la salida de la gramática, de modo que su perplejidad converge con la de su candidata mayoritaria.
 
 Las distribuciones de perplejidad en bruto presentan colas extremadamente largas por oraciones muy cortas o con vocabulario raro, lo que hace poco informativa la media y obliga a reportar la mediana. El test de Friedman sobre log-perplejidad alcanza $\chi^2 = 232.19$ con $p < 10^{-47}$, la métrica con mayor separación entre motores de todo el estudio.
 
