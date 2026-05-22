@@ -45,7 +45,7 @@ El enfoque más simple consiste en concatenar las etiquetas de los pictogramas s
 
 Para reducir esa carga sobre el interlocutor, los sistemas basados en plantillas definen estructuras predefinidas (por ejemplo, \texttt{[SUJETO] quiere [OBJETO]}) y rellenan los huecos con las palabras correspondientes. Las plantillas garantizan corrección gramatical dentro de su ámbito, pero adolecen de rigidez: cubren solo las estructuras anticipadas por los diseñadores, y cualquier combinación no prevista produce resultados pobres o nulos.
 
-Sin embargo, la tecnología ha permitido crear aproximaciones más avanzadas. Se describen algunas de las más relevantes en las siguientes secciones.
+La tecnología ha permitido crear aproximaciones más sofisticadas, articuladas en torno a tres familias principales: las basadas en gramáticas formales, las basadas en aprendizaje automático y las basadas en modelos de lenguaje.
 
 \subsection{Técnicas basadas en gramáticas}
 
@@ -91,9 +91,9 @@ Para español, el corpus COCOTEROS replica el estilo de CommonGen mediante tripl
 
 En esa dirección, el conjunto de modelos en español ha madurado con proyectos como MarIA~\cite{gutierrez2022maria} (GPT-2 entrenado sobre 570 GB de texto de la Biblioteca Nacional) y los modelos \textit{encoder-decoder} BARTO y T5S, que superan a sus equivalentes multilingües mT5 en tareas de generación.
 
-Pese a estos avances, la dirección pictograma a texto permanece significativamente menos investigada que la inversa. La mayoría del trabajo reciente con modelos de lenguaje aborda la traducción de texto o habla a secuencias de pictogramas, mientras que la expansión de pictogramas en oraciones naturales sigue siendo tratada principalmente por sistemas basados en reglas~\cite{curtis2022stateofart}. No existe, hasta donde alcanza esta revisión, ningún trabajo publicado que aplique modelos de lenguaje a la generación de oraciones en español a partir de pictogramas ARASAAC.
+Aun con estos avances, la dirección pictograma a texto permanece significativamente menos investigada que la inversa. La mayoría del trabajo reciente con modelos de lenguaje aborda la traducción de texto o habla a secuencias de pictogramas, mientras que la expansión de pictogramas en oraciones naturales sigue siendo tratada principalmente por sistemas basados en reglas~\cite{curtis2022stateofart}. No existe, hasta donde alcanza esta revisión, ningún trabajo publicado que aplique modelos de lenguaje a la generación de oraciones en español a partir de pictogramas ARASAAC.
 
-Existen, no obstante, patrones híbridos que combinan técnicas simbólicas y neurales para la generación de lenguaje natural. La Tabla~\ref{tab:h-patrones-descartados} recoge cinco de estos patrones y las razones por las que no resultan aplicables en el contexto de este proyecto.
+La literatura recoge además patrones híbridos que combinan técnicas simbólicas y neurales para la generación de lenguaje natural. La Tabla~\ref{tab:h-patrones-descartados} reúne cinco de estos patrones y las razones por las que no resultan aplicables en el contexto de este proyecto.
 
 \begin{table}[H]
 \centering

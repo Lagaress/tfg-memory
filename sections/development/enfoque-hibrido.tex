@@ -36,7 +36,7 @@ La predicción de preposiciones es una de las contribuciones principales del com
     \item Nivel 3 (reglas por verbo): como \textit{fallback} final, el sistema consulta la preposición por defecto del verbo codificada en el léxico (``ir'' $\rightarrow$ ``a'', ``venir'' $\rightarrow$ ``de'').
 \end{itemize}
 
-Las reglas codificadas cubren los casos conocidos con certeza, los \textit{embeddings} extienden la cobertura a combinaciones no anticipadas, y el \textit{fallback} determinista garantiza que siempre se produce alguna salida.
+Las reglas codificadas cubren los casos conocidos con certeza y los \textit{embeddings} extienden la cobertura a combinaciones no anticipadas. El \textit{fallback} determinista actúa como red de seguridad: asegura que el sistema siempre devuelva una preposición, aunque sea la genérica del verbo.
 
 \subsection{Limitaciones}
 \label{sec:f2-limitaciones}
@@ -47,4 +47,4 @@ Los \textit{embeddings} estáticos, por su parte, capturan similitud semántica 
 
 Los pesos y umbrales que combinan las señales gramaticales y semánticas requieren ajuste manual para cada dominio. No existe un criterio teórico que determine la ponderación óptima entre confianza gramatical y coherencia semántica, lo que hace que la técnica sea difícilmente transferible sin un proceso de calibración específico.
 
-Las dos limitaciones (dependencia de la gramática subyacente y ajuste manual de pesos) sugieren explorar una técnica que aprenda el lenguaje sin reglas codificadas, esto es, los modelos de lenguaje de gran escala que aborda la siguiente técnica.
+Las dos limitaciones (dependencia de la gramática subyacente y ajuste manual de pesos) sugieren explorar una técnica que aprenda el lenguaje sin reglas codificadas: los modelos de lenguaje de gran escala.
