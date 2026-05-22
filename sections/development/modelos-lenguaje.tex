@@ -2,9 +2,9 @@ La gramática y los \textit{embeddings} codifican el conocimiento lingüístico 
 
 El modelo utilizado en este proyecto es GPT-4o de OpenAI, accedido a través de su API. La elección frente a un modelo \textit{open-source} desplegado localmente responde a tres razones prácticas: la calidad del modelo en generación en español, la posibilidad de iterar con rapidez sobre el diseño sin necesidad de infraestructura GPU propia y la ausencia de un corpus de entrenamiento específico que justifique un \textit{fine-tuning}. La adaptación al dominio se hace por ingeniería de \textit{prompts}~\cite{brown2020language}: toda la especialización a CAA reside en un conjunto de instrucciones y ejemplos que acompañan cada consulta al modelo, sin reentrenar sus parámetros.
 
-Un LLM genérico, sin embargo, genera texto libremente: amplía, reformula, añade contexto. En CAA el requisito es el opuesto. Cuando un usuario selecciona los pictogramas ``quiero'', ``comer'' y ``manzana'', la oración debe expresar exactamente eso, sin que el modelo introduzca conceptos que el usuario no ha elegido. Generar contenido que el usuario no ha seleccionado no es un defecto menor de estilo; es un fallo funcional del sistema de comunicación.
+Un LLM genérico, sin embargo, genera texto libremente: amplía la entrada y reformula su contenido para producir frases fluidas. En CAA el requisito es el opuesto. Cuando un usuario selecciona los pictogramas ``quiero'', ``comer'' y ``manzana'', la oración debe expresar exactamente eso, sin que el modelo introduzca conceptos que el usuario no ha elegido. Generar contenido que el usuario no ha seleccionado no es un defecto menor de estilo; es un fallo funcional del sistema de comunicación.
 
-La adaptación opera en tres dimensiones complementarias. La primera es un conjunto de once reglas que restringen el comportamiento del modelo: fidelidad semántica a los pictogramas, formato de salida, registro lingüístico. La segunda son quince ejemplos \textit{few-shot} que muestran al modelo el patrón concreto de transformación esperado. La tercera son metadatos gramaticales que acompañan a cada pictograma (categoría, forma) y desambiguan la entrada.
+La adaptación opera en tres dimensiones complementarias: un conjunto de once reglas que restringen el comportamiento del modelo en fidelidad semántica a los pictogramas, formato de salida y registro lingüístico; quince ejemplos \textit{few-shot} que muestran al modelo el patrón concreto de transformación esperado; y metadatos gramaticales que acompañan a cada pictograma (categoría, forma) y desambiguan la entrada.
 
 En los capítulos anteriores, el conocimiento lingüístico estaba codificado en reglas explícitas (gramática formal) o representado geométricamente como vectores (\textit{embeddings}); aquí ese conocimiento ya viene en el modelo, y el trabajo de adaptación consiste en restringirlo para que opere dentro de los límites del dominio de CAA.
 
@@ -54,7 +54,7 @@ El motor utiliza 15 ejemplos \textit{few-shot}~\cite{brown2020language} que cubr
 \label{tab:f3-fewshot}
 \end{table}
 
-El número de 15 se fijó porque es el mínimo que cubre las ocho categorías del \textit{dataset} con al menos un ejemplo representativo; añadir más ejemplos incrementaría el coste de cada llamada sin beneficio proporcional, dado que los aproximadamente 1.204 \textit{tokens} de entrada ya están dominados por el \textit{prompt} fijo y los \textit{few-shot} existentes.
+El número de 15 se fijó porque es el mínimo que cubre las ocho categorías del \textit{dataset} con al menos un ejemplo representativo; añadir más ejemplos incrementaría el coste de cada llamada sin beneficio proporcional, dado que los aproximadamente 1\,204 \textit{tokens} de entrada ya están dominados por el \textit{prompt} fijo y los \textit{few-shot} existentes.
 
 Los criterios de selección priorizan la cobertura de patrones que requieren inferencia: el ejemplo 4 enseña al modelo a expandir un solo sustantivo en una oración de necesidad; el ejemplo 5, a insertar la preposición contraída \textit{al}; el ejemplo 15, a corregir la concordancia de género. Los ejemplos se adaptaron al formato real del \textit{dataset}, que utiliza tanto infinitivos como formas conjugadas como pictogramas de entrada.
 
@@ -63,7 +63,7 @@ Cada mensaje de usuario formatea los pictogramas incluyendo su categoría gramat
 
 Esta información desambiguadora procede del inventario de metadatos y ayuda al modelo a interpretar correctamente pictogramas polisémicos: ``como'' puede ser verbo (primera persona de ``comer'') o interrogativo (``¿cómo?''), y la categoría aclara la interpretación esperada.
 
-Cada llamada consume aproximadamente 1.204 \textit{tokens} de entrada, de los cuales la gran mayoría corresponden al \textit{system prompt} y los ejemplos \textit{few-shot}. La consulta del usuario aporta típicamente 10-20 \textit{tokens} adicionales. Los \textit{tokens} de salida son muy reducidos: 4 \textit{tokens} en promedio, coherente con la brevedad de las oraciones de CAA.
+Cada llamada consume aproximadamente 1\,204 \textit{tokens} de entrada, de los cuales la gran mayoría corresponden al \textit{system prompt} y los ejemplos \textit{few-shot}. La consulta del usuario aporta típicamente 10-20 \textit{tokens} adicionales. Los \textit{tokens} de salida son muy reducidos: 4 \textit{tokens} en promedio, coherente con la brevedad de las oraciones de CAA.
 
 \subsection{Hiperparámetros y manejo de errores}
 \label{sec:f3-hiperparametros}
@@ -78,7 +78,7 @@ El cliente implementa reintentos diferenciados según el tipo de error: los erro
 
 El coste se estima a partir de los precios de la API\footnote{\url{https://openai.com/api/pricing}}: \$2.50/1M \textit{tokens} de entrada y \$10.00/1M de salida para GPT-4o, frente a \$0.15/1M y \$0.60/1M para GPT-4o-mini.
 
-Con los aproximadamente 1.204 \textit{tokens} de entrada y 4 de salida descritos en la sección~\ref{sec:f3-prompt}, cada consulta cuesta \$0.00018 con GPT-4o-mini y \$0.00305 con GPT-4o, una diferencia de factor 16.7$\times$.
+Con los aproximadamente 1\,204 \textit{tokens} de entrada y 4 de salida descritos en la sección~\ref{sec:f3-prompt}, cada consulta cuesta \$0.00018 con GPT-4o-mini y \$0.00305 con GPT-4o, una diferencia de factor 16.7$\times$.
 
 \subsection{Validación post-generación}
 \label{sec:f3-validacion}
@@ -98,4 +98,4 @@ Los LLMs tampoco ofrecen garantías sobre la fidelidad al contenido de entrada. 
 
 La calidad de la generación depende en gran medida de la ingeniería de \textit{prompts}: la selección de ejemplos, la formulación de las instrucciones y la estructura del contexto influyen directamente en los resultados, y no existe un método sistemático para determinar la configuración óptima para un dominio dado.
 
-Las tres técnicas presentadas tienen fortalezas y carencias complementarias: la gramática garantiza estructura pero rechaza lo no previsto, los \textit{embeddings} añaden sensibilidad semántica sin alterar la generación, y el LLM produce texto natural a costa de fidelidad y reproducibilidad. La sección siguiente examina si combinarlas produce un sistema mejor que cualquiera por separado.
+Las tres técnicas presentadas tienen fortalezas y carencias complementarias: la gramática garantiza estructura pero rechaza lo no previsto, los \textit{embeddings} añaden sensibilidad semántica sin alterar la generación, y el LLM produce texto natural a costa de fidelidad y reproducibilidad. Combinarlas para mitigar las debilidades de cada una es el objetivo de las tres hibridaciones que aborda el siguiente capítulo.

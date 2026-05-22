@@ -5,7 +5,7 @@ Implementados los seis motores, queda la pregunta que vertebra el trabajo: ¿cu�
 
 El experimento compara los seis motores sobre un mismo conjunto de 164 casos. La comparación combina un \textit{golden standard} construido por encuesta a hablantes nativos, un segundo cuestionario que mide la preferencia humana directa entre las tres técnicas base, un repertorio de métricas automáticas con y sin referencia y un protocolo de tests no paramétricos para acotar la significancia de las diferencias observadas.
 
-Tanto el \textit{golden standard} como la encuesta de preferencia se desplegaron como aplicaciones web con \texttt{React} y \texttt{TypeScript}. La interfaz muestra los pictogramas ARASAAC reales con bordes coloreados por categoría según el sistema Fitzgerald, ofrece sesiones reanudables con el progreso guardado en \textit{localStorage} del navegador y envía las respuestas en tiempo real a una base de datos \texttt{Supabase} alojada en la Unión Europea. El consentimiento informado cumple el Reglamento General de Protección de Datos: se recogen datos mínimos (sólo email para detectar envíos duplicados), el consentimiento es explícito, el almacenamiento se realiza en la Unión Europea (UE) y la retención está limitada a la defensa del TFG más seis meses. La captación de participantes se apoyó en carteles de difusión que acompañaron la convocatoria de ambas encuestas, con el objetivo del estudio, el tiempo estimado de participación y un código QR (\textit{Quick Response}) con el enlace al formulario. Su diseño íntegro se recoge en las Figuras~\ref{fig:cartel-golden} y~\ref{fig:cartel-naturalidad} del Anexo~\ref{sec:anexo-carteles}.
+Tanto el \textit{golden standard} como la encuesta de preferencia se desplegaron como aplicaciones web con \texttt{React} y \texttt{TypeScript}. La interfaz muestra los pictogramas ARASAAC reales con bordes coloreados por categoría según el sistema Fitzgerald, ofrece sesiones reanudables con el progreso guardado en \textit{localStorage} del navegador y envía las respuestas en tiempo real a una base de datos \texttt{Supabase} alojada en la Unión Europea. El consentimiento informado cumple el Reglamento General de Protección de Datos: se recogen datos mínimos (solo email para detectar envíos duplicados), el consentimiento es explícito, el almacenamiento se realiza en la Unión Europea (UE) y la retención está limitada a la defensa del TFG más seis meses. La captación de participantes se apoyó en carteles de difusión que acompañaron la convocatoria de ambas encuestas, con el objetivo del estudio, el tiempo estimado de participación y un código QR (\textit{Quick Response}) con el enlace al formulario. Su diseño íntegro se recoge en las Figuras~\ref{fig:cartel-golden} y~\ref{fig:cartel-naturalidad} del Anexo~\ref{sec:anexo-carteles}.
 
 \subsubsection{Conjunto de evaluación: golden standard}
 \label{sec:eval-golden}
@@ -226,7 +226,7 @@ La tabla de métricas sin referencia añade las dimensiones no capturadas por la
 
 La fidelidad ajustada, que descuenta las inferencias pragmáticas del recuento de alucinaciones, eleva los valores por encima de 0.95 y estrecha las diferencias, lo que indica que la mayor parte de las ``alucinaciones'' detectadas por la fidelidad estándar son inferencias legítimas como el verbo ``querer'' a partir de pictogramas de necesidad.
 
-Hybrid1 y Hybrid2 reducen la perplejidad mediana a la mitad respecto a las bases (Tabla~\ref{tab:eval-perplejidad}), lo que confirma que la post-edición por LLM sobre la salida determinista mejora la fluidez según los modelos de lenguaje preentrenados. Hybrid3 queda en un nivel intermedio coherente con su diseño de \textit{ranking} por perplejidad aplicado sobre candidatas de calidad similar.
+Hybrid1 y Hybrid2 rebajan la perplejidad mediana de 119 a 70 respecto a las bases (Tabla~\ref{tab:eval-sin-referencia}), lo que confirma que la post-edición por LLM sobre la salida determinista mejora la fluidez según los modelos de lenguaje preentrenados. Hybrid3 queda en un nivel intermedio coherente con su diseño de \textit{ranking} por perplejidad aplicado sobre candidatas de calidad similar.
 
 La latencia mantiene un espectro amplio: desde los 0.02 ms de la gramática formal hasta los 4.3 segundos de Hybrid3, con el LLM en 1.5 segundos por llamada a la API.
 
@@ -312,11 +312,11 @@ Híbridos $>$ Gramática/Embeddings & Cobertura, fidelidad, fidelidad ajustada &
 
 El primer hallazgo es la equivalencia estadística entre gramática formal y \textit{embeddings} semánticos en todas las métricas. Producen la misma salida en 163 de 164 casos (99.4\%), lo que explica la ausencia de diferencias detectables.
 
-El segundo hallazgo confirma el liderazgo del LLM en las seis métricas basadas en referencia humana. Las reformulaciones neuronales coinciden con las referencias escritas por hablantes nativos con mayor frecuencia que las salidas deterministas, sin penalizar las métricas. El resultado es coherente con el comportamiento observado en la encuesta de naturalidad (Sección~\ref{sec:eval-naturalidad}), donde el LLM es también la opción preferida.
+En las seis métricas basadas en referencia humana se confirma el liderazgo del LLM. Las reformulaciones neuronales coinciden con las referencias escritas por hablantes nativos con mayor frecuencia que las salidas deterministas, sin penalizar las métricas. El resultado es coherente con el comportamiento observado en la encuesta de naturalidad (Sección~\ref{sec:eval-naturalidad}), donde el LLM es también la opción preferida.
 
-El tercer hallazgo es la ventaja clara de Hybrid1 y Hybrid2 en métricas de naturalidad intrínseca. La post-edición por LLM reduce la perplejidad mediana a prácticamente la mitad respecto a la gramática. Hybrid3 ocupa una posición intermedia: su paso de \textit{ranking} por perplejidad selecciona con frecuencia la salida de la gramática (véase la Sección~\ref{sec:eval-hibridos}), lo que suaviza su ganancia en naturalidad respecto a Hybrid1 y Hybrid2.
+Hybrid1 y Hybrid2 destacan en las métricas de naturalidad intrínseca con una ventaja clara: la post-edición por LLM rebaja la perplejidad mediana en más de un 40\% respecto a la gramática. Hybrid3 ocupa una posición intermedia, porque su paso de \textit{ranking} por perplejidad selecciona con frecuencia la salida de la gramática (véase la Sección~\ref{sec:eval-hibridos}), lo que suaviza su ganancia en naturalidad respecto a Hybrid1 y Hybrid2.
 
-El cuarto hallazgo muestra que los tres híbridos mejoran cobertura y fidelidad respecto a las bases y al LLM puro. La ganancia es modesta en valor absoluto (de 0.96 a 0.98-0.99 en cobertura), pero sistemática y estadísticamente significativa. Estas diferencias agregadas se explican mejor al examinar la distribución completa de cada métrica y su comportamiento ante variaciones de longitud y tipo de error.
+En cobertura y fidelidad, los tres híbridos mejoran respecto a las bases y al LLM puro. La ganancia es modesta en valor absoluto (de 0.96 a 0.98-0.99 en cobertura), pero sistemática y estadísticamente significativa. Estas diferencias agregadas se explican mejor al examinar la distribución completa de cada métrica y su comportamiento ante variaciones de longitud y tipo de error.
 
 \subsection{Análisis detallado}
 \label{sec:eval-detallado}
@@ -379,25 +379,7 @@ Al pasar la salida base por un LLM de post-edición, los híbridos reducen estas
 \subsubsection{Perplejidad y naturalidad}
 \label{sec:eval-perplejidad}
 
-\begin{table}[ht]
-\centering
-\begin{tabular}{l r r}
-\hline
-Motor & Perplejidad (GPT-2) & Pseudo-perpl. (BETO) \\
-\hline
-Gramática formal & 119 & 25 \\
-Embeddings & 119 & 25 \\
-LLM & 123 & 25 \\
-Hybrid1 & 70 & 11 \\
-Hybrid2 & 70 & 11 \\
-Hybrid3 & 102 & 21 \\
-\hline
-\end{tabular}
-\caption{Perplejidad y pseudo-perplejidad por motor (medianas redondeadas, $n=164$). Valores menores indican texto más natural según el modelo de lenguaje.}
-\label{tab:eval-perplejidad}
-\end{table}
-
-La Tabla~\ref{tab:eval-perplejidad} revela que la post-edición por LLM es el único mecanismo que mejora de forma medible la naturalidad intrínseca de las salidas. Hybrid3 queda en una mediana intermedia por una razón estructural: en el 73\% de los casos (véase la Sección~\ref{sec:eval-hibridos}) selecciona la salida de la gramática, de modo que su perplejidad converge con la de su candidata mayoritaria.
+Las columnas de perplejidad y pseudo-perplejidad de la Tabla~\ref{tab:eval-sin-referencia} revelan que la post-edición por LLM es el único mecanismo que mejora de forma medible la naturalidad intrínseca de las salidas. Hybrid3 queda en una mediana intermedia por una razón estructural: en el 73\% de los casos (véase la Sección~\ref{sec:eval-hibridos}) selecciona la salida de la gramática, de modo que su perplejidad converge con la de su candidata mayoritaria.
 
 Las distribuciones de perplejidad en bruto presentan colas extremadamente largas por oraciones muy cortas o con vocabulario raro, lo que hace poco informativa la media y obliga a reportar la mediana. El test de Friedman sobre log-perplejidad alcanza $\chi^2 = 232.19$ con $p < 10^{-47}$, la métrica con mayor separación entre motores de todo el estudio.
 
@@ -423,9 +405,9 @@ Frases únicas & Casos & \% del total \\
 \label{tab:eval-diversidad}
 \end{table}
 
-La Tabla~\ref{tab:eval-diversidad} muestra que la mayoría del corpus (69\%) admite exactamente dos formulaciones distintas entre los seis motores, casi todo lo demás (27\%) admite tres, y la convergencia total ocurre sólo en 1 de 164 casos. El patrón se explica por la estructura interna del sistema: los tres motores con componente determinista (gramática, \textit{embeddings}, Hybrid3 cuando selecciona la salida de la gramática) tienden a producir la misma oración, mientras que el LLM y los híbridos con post-edición introducen una o dos variantes adicionales por caso; de hecho, la equivalencia gramática $\equiv$ \textit{embeddings} se da en 163 de 164 casos (99.4\%).
+La Tabla~\ref{tab:eval-diversidad} muestra que la mayoría del corpus (69\%) admite exactamente dos formulaciones distintas entre los seis motores, casi todo lo demás (27\%) admite tres, y la convergencia total ocurre solo en 1 de 164 casos. El patrón se explica por la estructura interna del sistema: los tres motores con componente determinista (gramática, \textit{embeddings}, Hybrid3 cuando selecciona la salida de la gramática) tienden a producir la misma oración, mientras que el LLM y los híbridos con post-edición introducen una o dos variantes adicionales por caso; de hecho, la equivalencia gramática $\equiv$ \textit{embeddings} se da en 163 de 164 casos (99.4\%).
 
-Los bloques de equivalencia notables son gramática $\equiv$ Hybrid3 en 120 casos (73.2\%) y gramática $\equiv$ LLM en 113 casos (68.9\%): en dos tercios del corpus, el LLM genera de forma independiente la misma oración que la gramática, lo que indica que para frases cortas del dominio CAA existe una formulación canónica que distintas técnicas recuperan sin coordinación. Las divergencias mayores aparecen con Hybrid1 y Hybrid2 (gramática $\equiv$ Hybrid1 sólo en 26 casos, 15.9\%; \textit{embeddings} $\equiv$ Hybrid2 en 31 casos, 18.9\%): la post-edición por LLM reformula más del 80\% de las salidas base, lo que explica tanto su mejora en perplejidad como su divergencia sistemática respecto a las técnicas deterministas.
+Los bloques de equivalencia notables son gramática $\equiv$ Hybrid3 en 120 casos (73.2\%) y gramática $\equiv$ LLM en 113 casos (68.9\%): en dos tercios del corpus, el LLM genera de forma independiente la misma oración que la gramática, lo que indica que para frases cortas del dominio CAA existe una formulación canónica que distintas técnicas recuperan sin coordinación. Las divergencias mayores aparecen con Hybrid1 y Hybrid2 (gramática $\equiv$ Hybrid1 solo en 26 casos, 15.9\%; \textit{embeddings} $\equiv$ Hybrid2 en 31 casos, 18.9\%): la post-edición por LLM reformula más del 80\% de las salidas base, lo que explica tanto su mejora en perplejidad como su divergencia sistemática respecto a las técnicas deterministas.
 
 \subsection{Análisis de los híbridos}
 \label{sec:eval-hibridos}

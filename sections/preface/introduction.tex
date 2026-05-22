@@ -7,7 +7,7 @@
 La comunicación es el medio a través del cual construimos relaciones, expresamos necesidades, compartimos ideas y participamos en la vida social. Poder comunicarse de forma efectiva es un eje del bienestar personal.
 
 % 2. Grupo con dificultades (parte 1: prevalencia general)
-Sin embargo, para un porcentaje de la población, comunicarse es un desafío diario. Las personas con Trastorno del Espectro Autista (TEA), entre otras condiciones, encuentran a menudo dificultades importantes para comunicarse verbalmente. Según la Organización Mundial de la Salud, aproximadamente 1 de cada 127 personas presenta autismo a nivel mundial, y en España se estima que existen más de 450.000 personas con esta condición.
+Sin embargo, para un porcentaje de la población, comunicarse es un desafío diario. Las personas con Trastorno del Espectro Autista (TEA), entre otras condiciones, encuentran a menudo dificultades importantes para comunicarse verbalmente. Según la Organización Mundial de la Salud, aproximadamente 1 de cada 127 personas presenta autismo en el mundo, y en España se estima que existen más de 450.000 personas con esta condición.
 
 % 2. Grupo con dificultades (parte 2: subgrupo de autismo profundo)
 Dentro de ese conjunto, los datos de 2023 de los Centros para el Control y la Prevención de Enfermedades de Estados Unidos (CDC) sitúan en torno al 26.7\% la proporción de personas con autismo que presentan lo que se denomina ``autismo profundo'', caracterizado por ser no verbales, mínimamente verbales o tener un coeficiente intelectual inferior a 50~\cite{cdc2023profound}. Esto implica que más de 120.000 personas en España podrían necesitar sistemas alternativos para comunicarse. Para estas personas, las barreras comunicativas condicionan profundamente su día a día y su participación en sociedad.
@@ -19,7 +19,7 @@ Las estrategias tradicionales para facilitar la comunicación a estas personas i
 Para superar estas limitaciones, la tecnología ofrece los denominados Sistemas Aumentativos y Alternativos de Comunicación (SAAC) digitales, también conocidos como Comunicación Aumentativa y Alternativa (CAA). Estos sistemas llevan décadas ofreciendo alternativas al habla, especialmente en entornos educativos y terapéuticos~\cite{demasco1992compansion}. Los más utilizados están basados en pictogramas: símbolos gráficos que representan conceptos, acciones u objetos de forma visual. El recurso sobre el que se construyen la mayoría de aplicaciones y materiales en español es ARASAAC~\cite{arasaac}, el Centro Aragonés para la Comunicación Aumentativa y Alternativa, que pone a disposición más de 11.500 pictogramas de uso libre, acompañados de variantes cromáticas, de género y de estilo que amplían su alcance, cubriendo desde objetos cotidianos hasta emociones o acciones complejas.
 
 % 5. Problemas de las soluciones tecnológicas actuales
-Sin embargo, las aplicaciones disponibles actualmente presentan limitaciones significativas. Sus interfaces pueden resultar confusas y poco intuitivas para los usuarios, pero el problema va más allá de lo visual: estas herramientas en muchos casos se limitan a concatenar palabras. Si un usuario selecciona los pictogramas ``yo'', ``querer'' y ``agua'', el sistema reproduce exactamente eso: ``yo querer agua''. El interlocutor recibe entonces una construcción artificial que tiene que interpretar y que puede generar frustración en el emisor por no poder comunicarse como desearía.
+Las aplicaciones disponibles actualmente, no obstante, presentan limitaciones significativas. Sus interfaces pueden resultar confusas y poco intuitivas para los usuarios, pero el problema va más allá de lo visual: estas herramientas en muchos casos se limitan a concatenar palabras. Si un usuario selecciona los pictogramas ``yo'', ``querer'' y ``agua'', el sistema reproduce exactamente eso: ``yo querer agua''. El interlocutor recibe entonces una construcción artificial que tiene que interpretar y que puede generar frustración en el emisor por no poder comunicarse como desearía.
 
 Otro problema relevante es la velocidad de comunicación. Mientras el habla natural alcanza entre 125 y 185 palabras por minuto, los sistemas de CAA actuales raramente superan las 8-15 palabras por minuto~\cite{elsahar2019aac}. Esta diferencia de un orden de magnitud condiciona el tipo de comunicación posible: limita a los usuarios a intercambios transaccionales cuando lo que necesitan es poder mantener conversaciones reales.
 
@@ -68,7 +68,7 @@ Para alcanzar este objetivo, se plantean los siguientes objetivos específicos:
 
     \item[\textit{Embedding}] Representación de palabras o conceptos como vectores numéricos en un espacio donde elementos similares quedan cercanos. Permite a los algoritmos trabajar con el significado de las palabras.
 
-    \item[Exact Match] Métrica binaria que vale 1 si la oración generada coincide carácter a carácter con alguna de las referencias del \textit{golden standard}, y 0 en caso contrario.
+    \item[\textit{Exact Match}] Métrica binaria que vale 1 si la oración generada coincide carácter a carácter con alguna de las referencias del \textit{golden standard}, y 0 en caso contrario.
 
     \item[FastText] Modelo de \textit{embeddings} de palabras desarrollado por Meta que representa cada palabra a partir de sus fragmentos de caracteres ($n$-gramas). Esto le permite generar vectores para palabras no vistas durante el entrenamiento, una propiedad útil para la morfología del español.
 
@@ -128,7 +128,7 @@ Para alcanzar este objetivo, se plantean los siguientes objetivos específicos:
 
     \item[Temperatura] Parámetro de los modelos de lenguaje que controla la aleatoriedad de la generación. Valores cercanos a 0 producen salidas deterministas y conservadoras; valores más altos favorecen la variabilidad a costa de la consistencia.
 
-    \item[Tests no paramétricos] Pruebas estadísticas que no asumen una distribución específica de los datos. En este proyecto se usan el test de Friedman para detectar diferencias entre los seis motores en cada métrica, y comparaciones pareadas (Wilcoxon o McNemar según el tipo de variable) con corrección de Bonferroni o Holm-Bonferroni para identificar entre qué motores aparecen las diferencias.
+    \item[Pruebas no paramétricas] Pruebas estadísticas que no asumen una distribución específica de los datos. En este proyecto se usan el test de Friedman para detectar diferencias entre los seis motores en cada métrica, y comparaciones pareadas (Wilcoxon o McNemar según el tipo de variable) con corrección de Bonferroni o Holm-Bonferroni para identificar entre qué motores aparecen las diferencias.
 
     \item[\textit{Token}] Unidad mínima con la que un modelo de lenguaje procesa el texto. No coincide necesariamente con una palabra: puede ser una palabra, un fragmento o un signo de puntuación. El coste y la longitud máxima de los modelos comerciales se miden en \textit{tokens}.
 

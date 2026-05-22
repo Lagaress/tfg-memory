@@ -7,7 +7,7 @@ Se implementan tres estrategias de hibridación con objetivos diferenciados. Las
 \subsection{Hybrid1: gramática + LLM como post-editor}
 \label{sec:h-hybrid1}
 
-Hybrid1 se basa en dos patrones complementarios. El primero es el uso de un LLM como post-editor de sistemas de reglas, documentado por Chen et al.~\cite{chen2025axsemantics} en un sistema de producción de AX Semantics: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. El segundo es el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}, que separa la generación en un planificador simbólico que decide qué decir y un realizador neural que lo transforma en texto fluido. Elder et al.~\cite{elder2019intermediate} mostraron que esta separación reduce las alucinaciones respecto a aproximaciones puramente neurales.
+Hybrid1 se apoya en dos patrones complementarios. Por un lado, el uso de un LLM como post-editor de sistemas de reglas, documentado por Chen et al.~\cite{chen2025axsemantics} en un sistema de producción de AX Semantics: el sistema de reglas garantiza la estructura y la fidelidad al contenido, mientras que el LLM aporta fluidez y naturalidad. Por otro lado, el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}, que separa la generación en un planificador simbólico que decide qué decir y un realizador neural que lo transforma en texto fluido. Elder et al.~\cite{elder2019intermediate} mostraron que esta separación reduce las alucinaciones respecto a aproximaciones puramente neurales.
 
 La primera hibridación conecta la gramática formal con el LLM en un \textit{pipeline} secuencial de dos pasos (Figura~\ref{fig:hibridacion1}). Los pictogramas de entrada se procesan primero con la gramática, que intenta generar una frase estructurada. Si la gramática tiene éxito, la frase resultante se envía al LLM para su refinamiento. El LLM actúa como post-editor con ocho reglas estrictas que priorizan la fidelidad al contenido: no puede añadir ni eliminar conceptos, solo mejorar la concordancia, los artículos, el orden y la conjugación.
 
@@ -20,7 +20,7 @@ Si la gramática no reconoce la entrada, se activa un mecanismo de \textit{fallb
     \label{fig:hibridacion1}
 \end{figure}
 
-Para la entrada ``quiero, agua'', la gramática detecta el patrón de necesidad simple y produce ``Quiero agua''. El post-editor evalúa que ya es correcta y la devuelve sin modificar. Para una entrada como ``ayer, abuelo, contar, cuento'', que no encaja en ningún patrón de la gramática, el LLM genera directamente ``Ayer el abuelo contó un cuento''.
+Para la entrada ``quiero, agua'', la gramática detecta el patrón de necesidad simple y produce ``Quiero agua''. El post-editor evalúa que ya es correcta y la devuelve sin modificar. La rama de \textit{fallback} se activa con una entrada como ``ayer, abuelo, contar, cuento'', que no encaja en ningún patrón de la gramática: el LLM la genera directamente y produce ``Ayer el abuelo contó un cuento''.
 
 Esta hibridación depende de un LLM externo para la post-edición, lo que introduce latencia de red, coste por llamada y falta de disponibilidad \textit{offline}. La calidad de la post-edición depende enteramente de la ingeniería de \textit{prompts}, y no existe un criterio formal para determinar si el conjunto de reglas del post-editor es óptimo ni completo.
 
@@ -31,7 +31,7 @@ Hybrid2 replica la estructura de Hybrid1 pero sustituye la gramática pura por e
 
 La única diferencia con Hybrid1 es el motor que produce la frase intermedia: gramática pura en Hybrid1, gramática enriquecida con \textit{embeddings} en Hybrid2. El post-editor es idéntico en ambos casos (mismo \textit{prompt}, mismo modelo), lo que convierte la comparación en un experimento controlado: cualquier diferencia en los resultados se atribuye directamente a la contribución de los \textit{embeddings}.
 
-Las limitaciones son las mismas que las de Hybrid1: dependencia del LLM externo para la post-edición, con las implicaciones de latencia, coste y disponibilidad que ello conlleva.
+Las limitaciones son las mismas que las de Hybrid1: la dependencia del LLM externo para la post-edición acarrea latencia de red y un coste económico por llamada, además de impedir el uso sin conexión.
 
 \begin{figure}[ht]
     \centering
