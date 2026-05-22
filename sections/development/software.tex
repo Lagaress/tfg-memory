@@ -1,4 +1,4 @@
-Los seis motores presentados comparten una base común de patrones de diseño y de tecnologías. El código se distribuye en varios repositorios independientes alojados en GitHub, cada uno con su propio entorno de ejecución, dependencias y ciclo de vida. El Anexo~\ref{cap:repositorios} recoge el mapa completo de repositorios y los enlaces de acceso a cada uno.
+Los seis motores presentados comparten una base común de patrones de diseño y de tecnologías. El código se distribuye en varios repositorios independientes alojados en \texttt{GitHub}, cada uno con su propio entorno de ejecución, dependencias y ciclo de vida. El Anexo~\ref{cap:repositorios} recoge el mapa completo de repositorios y los enlaces de acceso a cada uno.
 
 \subsection{Patrones de diseño}
 
@@ -15,13 +15,13 @@ El manejo de errores sigue una estrategia de degradación progresiva: si un comp
 \subsection{Tecnologías y dependencias}
 
 \begin{itemize}
-    \item Python 3.13 como lenguaje principal para los motores de generación y el \textit{pipeline} de evaluación.
-    \item Lark para la definición y validación de la gramática formal en notación EBNF.
-    \item FastText~\cite{bojanowski2017fasttext} (modelo \texttt{cc.es.300.bin}) para los \textit{embeddings} semánticos.
+    \item \texttt{Python} 3.13 como lenguaje principal para los motores de generación y el \textit{pipeline} de evaluación.
+    \item \texttt{Lark} para la definición y validación de la gramática formal en notación \texttt{EBNF}.
+    \item \texttt{FastText}~\cite{bojanowski2017fasttext} (modelo \texttt{cc.es.300.bin}) para los \textit{embeddings} semánticos.
     \item API de OpenAI (GPT-4o, GPT-4o-mini) para el motor de LLMs y la post-edición.
-    \item spaCy (\texttt{es\_core\_news\_sm}) para la lematización en las métricas de cobertura y fidelidad.
-    \item sacreBLEU, NLTK (\textit{Natural Language Toolkit}) y HuggingFace Transformers para el cálculo de métricas automáticas.
-    \item React Native y Expo para la aplicación móvil.
-    \item React, Vite y Supabase para las encuestas web.
+    \item \texttt{spaCy} (\texttt{es\_core\_news\_sm}) para la lematización en las métricas de cobertura y fidelidad.
+    \item \texttt{sacreBLEU}, \texttt{NLTK} (\textit{Natural Language Toolkit}) y \texttt{HuggingFace Transformers} para el cálculo de métricas automáticas.
+    \item \texttt{React Native} y \texttt{Expo} para la aplicación móvil.
+    \item \texttt{React}, \texttt{Vite} y \texttt{Supabase} para las encuestas web.
 \end{itemize}
 
