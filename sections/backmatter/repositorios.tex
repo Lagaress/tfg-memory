@@ -1,44 +1,44 @@
 \chapter{Repositorios de código}
 \label{cap:repositorios}
 
-El código fuente del proyecto se distribuye en diez repositorios públicos en GitHub bajo la cuenta del autor, en lugar del archivo comprimido que pide la plataforma de defensa: el volumen total (modelos de \textit{embeddings}, datos y dependencias incluidos) supera los veinte megabytes del límite, y la entrega como repositorios mantiene accesibles el historial de \textit{commits}, las \textit{issues} y la documentación. Cada repositorio es independiente y puede clonarse, instalarse y ejecutarse por separado.
+El código fuente del proyecto se distribuye en diez repositorios públicos en GitHub bajo la cuenta del autor~\cite{lagares-github}, en lugar del archivo comprimido que pide la plataforma de defensa: el volumen total (modelos de \textit{embeddings}, datos y dependencias incluidos) supera los veinte megabytes del límite, y la entrega como repositorios mantiene accesibles el historial de \textit{commits}, las \textit{issues} y la documentación. Cada repositorio es independiente y puede clonarse, instalarse y ejecutarse por separado.
 
 \section{Memoria}
 \label{sec:repo-memoria}
 
 \begin{itemize}
-    \item \textit{tfg-memory}~\cite{repo-memory}: memoria del TFG en LaTeX, con figuras, bibliografía y configuración de estilo de la Universidad de Cádiz, lista para compilar con \textit{latexmk}.
+    \item \textit{tfg-memory}: memoria del TFG en LaTeX, con figuras, bibliografía y configuración de estilo de la Universidad de Cádiz, lista para compilar con \textit{latexmk}.
 \end{itemize}
 
 \section{Aplicación móvil y servidor}
 \label{sec:repo-aplicacion}
 
 \begin{itemize}
-    \item \textit{tfg-mobile-app}~\cite{repo-mobile-app}: aplicación móvil Dixi en React Native y Expo; cubre el tablero de pictogramas, las frases frecuentes y los ajustes descritos en el manual de usuario (Anexo~\ref{cap:manual-usuario}).
-    \item \textit{tfg-api}~\cite{repo-api}: servidor REST en Python con FastAPI; orquesta los seis motores de generación con los patrones \textit{Strategy} y \textit{Registry} y actúa de intermediario frente a los servicios externos que requieren credenciales.
+    \item \textit{tfg-mobile-app}: aplicación móvil Dixi en React Native y Expo; cubre el tablero de pictogramas, las frases frecuentes y los ajustes descritos en el manual de usuario (Anexo~\ref{cap:manual-usuario}).
+    \item \textit{tfg-api}: servidor REST en Python con FastAPI; orquesta los seis motores de generación con los patrones \textit{Strategy} y \textit{Registry} y actúa de intermediario frente a los servicios externos que requieren credenciales.
 \end{itemize}
 
 \section{Motores de generación}
 \label{sec:repo-motores}
 
 \begin{itemize}
-    \item \textit{tfg-formal-grammar}~\cite{repo-formal-grammar}: motor de generación basado en gramática libre de contexto implementado con Lark en Python.
-    \item \textit{tfg-embeddings}~\cite{repo-embeddings}: motor que combina la gramática formal con \textit{embeddings} FastText para el \textit{ranking} semántico de candidatos.
-    \item \textit{tfg-llms}~\cite{repo-llms}: motor basado en modelos de lenguaje (GPT-4o) mediante la API de OpenAI.
-    \item \textit{tfg-hybridization}~\cite{repo-hybridization}: implementación de las tres estrategias de hibridación (Hybrid1, Hybrid2 y Hybrid3) descritas en la sección de hibridación.
+    \item \textit{tfg-formal-grammar}: motor de generación basado en gramática libre de contexto implementado con Lark en Python.
+    \item \textit{tfg-embeddings}: motor que combina la gramática formal con \textit{embeddings} FastText para el \textit{ranking} semántico de candidatos.
+    \item \textit{tfg-llms}: motor basado en modelos de lenguaje (GPT-4o) mediante la API de OpenAI.
+    \item \textit{tfg-hybridization}: implementación de las tres estrategias de hibridación (Hybrid1, Hybrid2 y Hybrid3) descritas en la sección de hibridación.
 \end{itemize}
 
 \section{Evaluación}
 \label{sec:repo-evaluacion}
 
 \begin{itemize}
-    \item \textit{tfg-comparison}~\cite{repo-comparison}: \textit{pipeline} de evaluación automática (métricas con y sin referencia, tests de significancia estadística, generación de tablas y gráficas), que opera sobre el \textit{golden standard} producido por la encuesta.
-    \item \textit{tfg-survey-web}~\cite{repo-survey-web}: \textit{monorepo} con las dos encuestas web (\textit{golden standard} y naturalidad), desplegadas como aplicaciones React independientes sobre una base de datos Supabase compartida en la Unión Europea.
+    \item \textit{tfg-comparison}: \textit{pipeline} de evaluación automática (métricas con y sin referencia, tests de significancia estadística, generación de tablas y gráficas), que opera sobre el \textit{golden standard} producido por la encuesta.
+    \item \textit{tfg-survey-web}: \textit{monorepo} con las dos encuestas web (\textit{golden standard} y naturalidad), desplegadas como aplicaciones React independientes sobre una base de datos Supabase compartida en la Unión Europea.
 \end{itemize}
 
 \section{Adquisición de datos}
 \label{sec:repo-datos}
 
 \begin{itemize}
-    \item \textit{tfg-poc-download-data}~\cite{repo-poc-download-data}: pruebas de concepto para conectar con la API pública de ARASAAC y descargar los pictogramas del vocabulario del sistema.
+    \item \textit{tfg-poc-download-data}: pruebas de concepto para conectar con la API pública de ARASAAC y descargar los pictogramas del vocabulario del sistema.
 \end{itemize}
