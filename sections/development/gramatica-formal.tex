@@ -11,7 +11,7 @@ Para abordar estos problemas, la gramática de este proyecto extiende la CFG con
 \subsection{Planteamiento de la técnica}
 \label{sec:f1-planteamiento}
 
-La gramática se define formalmente con Lark~\cite{lark2024}, un \textit{toolkit} de \textit{parsing} para Python que acepta gramáticas en notación EBNF. Las producciones principales describen la jerarquía de tipos oracionales y las estructuras sintagmáticas que el sistema reconoce.
+La gramática se define formalmente con Lark, un \textit{toolkit} de \textit{parsing} para Python que acepta gramáticas en notación EBNF. Las producciones principales describen la jerarquía de tipos oracionales y las estructuras sintagmáticas que el sistema reconoce.
 
 \begin{lstlisting}[caption={Producciones principales de la gramática CFG (notación EBNF/Lark).},label={lst:cfg-producciones},basicstyle=\ttfamily\small,xleftmargin=1cm]
 oracion: oracion_compuesta | oracion_simple

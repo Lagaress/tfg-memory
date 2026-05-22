@@ -16,7 +16,7 @@ El manejo de errores sigue una estrategia de degradación progresiva: si un comp
 
 \begin{itemize}
     \item Python 3.13 como lenguaje principal para los motores de generación y el \textit{pipeline} de evaluación.
-    \item Lark~\cite{lark2024} para la definición y validación de la gramática formal en notación EBNF.
+    \item Lark para la definición y validación de la gramática formal en notación EBNF.
     \item FastText~\cite{bojanowski2017fasttext} (modelo \texttt{cc.es.300.bin}) para los \textit{embeddings} semánticos.
     \item API de OpenAI (GPT-4o, GPT-4o-mini) para el motor de LLMs y la post-edición.
     \item spaCy (\texttt{es\_core\_news\_sm}) para la lematización en las métricas de cobertura y fidelidad.

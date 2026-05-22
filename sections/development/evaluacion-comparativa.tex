@@ -138,7 +138,7 @@ Si la entrada es solo ``agua'' y la salida es ``Quiero agua'', el verbo ``quiero
 
 La \textit{fidelidad ajustada} corrige este efecto descontando del recuento de alucinaciones las inferencias pragmáticas legítimas, como añadir ``querer'' a partir de un pictograma de necesidad. La métrica conserva la misma estructura que la fidelidad estándar, pero excluye del numerador las palabras que pertenecen a un repertorio prefijado de inferencias esperables; sobre el ejemplo de ``agua'', el verbo ``quiero'' deja de penalizar y la fidelidad ajustada se aproxima a 1.
 
-Las métricas sin referencia evalúan la naturalidad intrínseca del texto, sin requerir comparación con una referencia humana. La \textit{perplejidad}, calculada con GPT-2 Spanish~\cite{deepesp2019gpt2spanish}, mide cuán probable considera un modelo autoregresivo la oración generada:
+Las métricas sin referencia evalúan la naturalidad intrínseca del texto, sin requerir comparación con una referencia humana. La \textit{perplejidad}, calculada con GPT-2 Spanish, mide cuán probable considera un modelo autoregresivo la oración generada:
 \begin{equation}
 \text{PPL}(s) = \exp\!\left(-\frac{1}{N} \sum_{i=1}^{N} \log P(w_i \mid w_{<i})\right).
 \end{equation}
