@@ -53,7 +53,7 @@ Referencias únicas & Ítems no-\textit{anchor} \\
 6 & 20 \\
 \hline
 \end{tabular}
-\caption{Distribución de los 160 ítems no-\textit{anchor} por número de referencias únicas recogidas.}
+\caption{Referencias únicas por ítem ($n=160$ no-\textit{anchor}). Los ítems con una sola referencia son los más sensibles a la varianza de BLEU.}
 \label{tab:eval-referencias-distribucion}
 \end{table}
 
@@ -106,7 +106,7 @@ chrF++~\cite{popovic2017chrf} & Compara fragmentos de caracteres (longitud 1-6) 
 BERTScore~\cite{zhang2020bertscore} & Similitud semántica entre \textit{embeddings} contextuales. & La hipótesis C obtiene BERTScore alto frente a ``Quiero ir a la escuela'' porque ``clase'' y ``escuela'' están próximas en el espacio de \textit{embeddings}. \\
 \hline
 \end{tabular}
-\caption{Resumen de las seis métricas con referencia humana, ordenadas de coincidencia léxica estricta a similitud semántica.}
+\caption{Las seis métricas con referencia humana aplicadas en la evaluación. La columna ``Cálculo en el ejemplo'' ilustra cada métrica sobre el caso ``yo, querer, ir, colegio''.}
 \label{tab:eval-metricas-referencia}
 \end{table}
 
@@ -254,7 +254,7 @@ Embeddings (CFG + \texttt{FastText}) & Alta & Baja & 96\% & $<$1 ms \\
 LLM (GPT-4o) & Alta & Alta & 96\% & $\sim$1500 ms \\
 \hline
 \end{tabular}
-\caption{Perfil cualitativo de cada motor base en las dimensiones relevantes para CAA.}
+\caption{Perfil cualitativo de los tres motores base. Los valores de fidelidad y naturalidad son categorías derivadas de las métricas; cobertura y latencia son medianas directas.}
 \label{tab:perfil-motores}
 \end{table}
 
@@ -533,7 +533,7 @@ Latencia & Gramática & 0.02 ms (frente a 4.3 s de Hybrid3) \\
 \hline
 \end{tabular}%
 }
-\caption{Resumen: mejor motor por dimensión evaluada.}
+\caption{Mejor motor por dimensión evaluada. Los valores entre paréntesis sitúan la magnitud del liderazgo frente a las bases.}
 \label{tab:eval-ranking}
 \end{table}
 
