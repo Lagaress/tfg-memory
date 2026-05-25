@@ -223,10 +223,7 @@ FUNCTION {format.names}
       nameptr #1 >
         { namesleft #1 >
             { ", " * t * }
-            { numnames #2 >
-                { "," * }
-                'skip$
-              if$
+            {
               t "others" =
                 { " et~al." * }
                 { ", " * t * }
@@ -316,10 +313,6 @@ FUNCTION {format.full.names}
           namesleft #1 >
             { ", " * t * }
             {
-              numnames #2 >
-                { "," * }
-                'skip$
-              if$
               t "others" =
                 { " et~al." * }
                 { ", " * t * }
