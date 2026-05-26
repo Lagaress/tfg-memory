@@ -53,9 +53,9 @@ ElevenLabs (TTS) & Multilingual v2, v3 & \$0.12 / 1.000 caracteres \\
 
 El desarrollo del proyecto está condicionado por tres riesgos relevantes. El primero es el tamaño del modelo de \texttt{FastText} utilizado por el motor de \textit{embeddings}, que condiciona el despliegue. El modelo preentrenado sobre \textit{Common Crawl} en español ocupa alrededor de 7 GB en disco, lo que descarta funciones \textit{serverless} y servicios con restricciones de memoria. La mitigación consiste en desplegar el servidor mediante contenedores \texttt{Docker} con disco suficiente, lo que restringe la infraestructura pero no impide el funcionamiento.
 
-La dependencia de la API de OpenAI afecta al motor de modelos de lenguaje y a las dos hibridaciones que lo incorporan: sin acceso a Internet, la mitad de los motores deja de operar. El servidor implementa \textit{fallback} automático a la gramática formal y a la gramática enriquecida con \textit{embeddings}, que funcionan en local y permiten seguir dando servicio.
+El segundo riesgo es la dependencia de la API de OpenAI, que afecta al motor de modelos de lenguaje y a las dos hibridaciones que lo incorporan: sin acceso a Internet, la mitad de los motores deja de operar. El servidor implementa \textit{fallback} automático a la gramática formal y a la gramática enriquecida con \textit{embeddings}, que funcionan en local y permiten seguir dando servicio.
 
-El vocabulario cerrado del sistema, limitado a 232 pictogramas de ARASAAC, deja fuera cualquier concepto no representado. La mitigación se abordó en la fase de selección, priorizando los conceptos más frecuentes en la comunicación cotidiana de usuarios de CAA y cubriendo varias categorías semánticas.
+El tercer riesgo es el vocabulario cerrado del sistema, limitado a 232 pictogramas de ARASAAC, deja fuera cualquier concepto no representado. La mitigación se abordó en la fase de selección, priorizando los conceptos más frecuentes en la comunicación cotidiana de usuarios de CAA y cubriendo varias categorías semánticas.
 
 \section{Aseguramiento de la calidad}
 \label{sec:calidad}
