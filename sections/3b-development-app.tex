@@ -12,7 +12,7 @@ El sistema sigue una arquitectura cliente-servidor:
     \item El servidor es una API REST desarrollada con \texttt{FastAPI}\footnote{\url{https://fastapi.tiangolo.com}}. Recibe las etiquetas de los pictogramas seleccionados, las pasa al motor de generación correspondiente y devuelve la frase resultante.
 \end{itemize}
 
-Los motores de generación están escritos en \texttt{Python} y no pueden ejecutarse en un dispositivo móvil, lo que justifica esta separación.
+Los motores de generación están escritos en \texttt{Python} y no pueden ejecutarse en un dispositivo móvil, lo que justifica esta separación. El capítulo desarrolla a continuación cómo se concreta esta arquitectura, empezando por las decisiones tecnológicas de cada capa.
 
 \section{Decisiones tecnológicas}
 \label{sec:app-tecnologias}
