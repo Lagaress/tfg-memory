@@ -23,7 +23,7 @@ Con esas dos medidas agregadas en el \textit{score} de \textit{embeddings}, la p
 
 $$\text{score} = \text{confianza}_{\text{CFG}} \times 0.6 + \text{score}_{\text{\textit{embedding}}} \times 0.4$$
 
-\noindent La confianza gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
+\noindent La confianza gramatical recibe mayor peso porque, para oraciones cortas de CAA, la corrección sintáctica es más fiable que la similitud semántica como indicador de calidad. Por ejemplo, ``Quiero agua'' y la concatenación literal ``Yo querer agua'' comparten los mismos conceptos y obtienen una similitud semántica alta, pero solo la primera está bien formada; la confianza gramatical las distingue con claridad, mientras que la similitud semántica apenas las separa. Todos estos pesos se fijaron manualmente razonando sobre las características del dominio, no mediante optimización automática.
 
 \subsection{Refinamiento de preposiciones}
 \label{sec:f2-preposiciones}
