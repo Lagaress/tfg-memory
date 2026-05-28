@@ -335,7 +335,7 @@ Los diagramas de caja de la Figura~\ref{fig:eval-boxplots} complementan las medi
 
 Las dispersiones son notables (desviaciones estándar cercanas a 0.5 en Exact Match indican que una parte sustancial del corpus recibe valores extremos 0 o 1, mientras otra queda en valores intermedios), y el LLM se diferencia por una densidad mayor en la cola superior de cada métrica: sus predicciones coinciden con alguna referencia humana con más frecuencia que las de las bases o los híbridos. La gramática y los \textit{embeddings} muestran distribuciones prácticamente superpuestas, consecuencia de la equivalencia observada en la Sección~\ref{sec:eval-convergencia}.
 
-Para un sistema de CAA, la dispersión importa tanto como la media: un motor con media alta y alta varianza resulta menos predecible para el usuario, ya que la oración generada puede coincidir con una formulación natural en unos casos y divergir notablemente en otros. Las bases sacrifican media por determinismo total, mientras el LLM y los híbridos elevan la media a costa de variabilidad. La distribución global, sin embargo, no captura cómo varía el rendimiento con la longitud de la entrada, factor que se examina a continuación.
+Para un sistema de CAA, la dispersión importa tanto como la media: un motor con media alta y alta varianza resulta menos predecible para el usuario, ya que la oración generada puede coincidir con una formulación natural en unos casos y divergir notablemente en otros. Las bases sacrifican media por determinismo total, mientras el LLM y los híbridos elevan la media a costa de variabilidad. La distribución global, sin embargo, no captura cómo varía el rendimiento con la complejidad de la entrada, factor que se examina a continuación.
 
 \subsubsection{Análisis por complejidad}
 \label{sec:eval-complejidad}
@@ -379,7 +379,7 @@ Al pasar la salida base por un LLM de post-edición, los híbridos reducen estas
 
 Las columnas de perplejidad y pseudo-perplejidad de la Tabla~\ref{tab:eval-sin-referencia} revelan que la post-edición por LLM es el único mecanismo que mejora de forma medible la naturalidad intrínseca de las salidas. Hybrid3 queda en una mediana intermedia por una razón estructural: en el 73\% de los casos (véase la Sección~\ref{sec:eval-hibridos}) selecciona la salida de la gramática, de modo que su perplejidad converge con la de su candidata mayoritaria.
 
-Las distribuciones de perplejidad en bruto presentan colas extremadamente largas por oraciones muy cortas o con vocabulario raro, lo que hace poco informativa la media y obliga a reportar la mediana. El test de Friedman sobre log-perplejidad alcanza $\chi^2 = 232.19$ con $p < 10^{-47}$, la métrica con mayor separación entre motores de todo el estudio.
+Las distribuciones de perplejidad en bruto presentan valores extremos por oraciones muy cortas o con vocabulario raro, lo que hace poco informativa la media y obliga a reportar la mediana. El test de Friedman sobre log-perplejidad alcanza $\chi^2 = 232.19$ con $p < 10^{-47}$, la métrica con mayor separación entre motores de todo el estudio.
 
 \subsection{Convergencia y diversidad entre motores}
 \label{sec:eval-convergencia}
