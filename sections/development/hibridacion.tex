@@ -54,7 +54,7 @@ A diferencia de Hybrid1 y Hybrid2, que mejoran con post-edición la salida de un
 
 La primera etapa genera una candidata con cada uno de los cinco motores disponibles: gramática formal, \textit{embeddings}, LLM, Hybrid1 y Hybrid2. Si algún motor falla, se descarta su candidata sin afectar al resto.
 
-La segunda etapa evalúa la cobertura de pictogramas de cada candidata: se comprueba qué proporción de los pictogramas de entrada están representados en la frase generada, teniendo en cuenta las variaciones morfológicas del español. Solo pasan al \textit{ranking} las candidatas que cubren el 100\% de los pictogramas. Si ninguna alcanza el umbral, todas pasan al \textit{ranking} como \textit{fallback}.
+La segunda etapa evalúa la cobertura de pictogramas de cada candidata: se comprueba qué proporción de los pictogramas de entrada están representados en la frase generada, teniendo en cuenta las variaciones morfológicas del español (para la entrada ``querer, agua'', la frase ``Quiero agua'' cubre ambos pictogramas, porque ``quiero'' cuenta como una forma de ``querer''). Solo pasan al \textit{ranking} las candidatas que cubren el 100\% de los pictogramas. Si ninguna alcanza el umbral, todas pasan al \textit{ranking} como \textit{fallback}.
 
 La tercera etapa calcula la perplejidad de cada candidata que pasó el filtro de fidelidad mediante un modelo de lenguaje en español y las ordena de menor a mayor. La candidata con menor perplejidad, es decir, la que el modelo considera más natural, se selecciona como resultado final. Se aplica una normalización de puntuación terminal antes del cálculo, ya que la presencia o ausencia de un punto final altera significativamente la perplejidad sin reflejar diferencias reales de calidad.
 
