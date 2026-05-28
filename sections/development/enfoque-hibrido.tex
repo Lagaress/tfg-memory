@@ -9,7 +9,7 @@ Los \textit{embeddings} actúan en este motor como una capa de inteligencia sem�
 \subsection{Léxico}
 \label{sec:f2-lexico}
 
-El léxico de este motor se construye a partir del léxico de la gramática formal, filtrando las entradas a formas base: los verbos se reducen a infinitivos, los adjetivos fusionan pares de género (``bonito''/``bonita'' se unifican en una sola entrada) y los pronombres eliminan duplicados de tilde. Al sistema de \textit{embeddings} le interesa comparar conceptos distintos, no las distintas formas de una misma palabra (``bonito'' y ``bonita'' son el mismo concepto).
+El léxico de este motor se construye a partir del léxico de la gramática formal, filtrando las entradas a formas base: los verbos se reducen a infinitivos, los adjetivos fusionan pares de género (``bonito''/``bonita'' se unifican en una sola entrada) y los pronombres eliminan duplicados de tilde. Al sistema de \textit{embeddings} le interesa comparar conceptos distintos, no las distintas formas de una misma palabra (``querer'' y ``quiero'' cuentan como una sola).
 
 \subsection{Ranking semántico de candidatos}
 
