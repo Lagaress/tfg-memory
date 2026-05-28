@@ -13,7 +13,7 @@ El léxico de este motor se construye a partir del léxico de la gramática form
 
 \subsection{Ranking semántico de candidatos}
 
-Cuando la gramática genera múltiples candidatos para una misma entrada, como ``Quiero ir al colegio'' y ``Voy al colegio'' para la secuencia ``ir, colegio'', el sistema los ordena mediante un \textit{score} combinado que pondera la confianza gramatical y la coherencia semántica medida por los \textit{embeddings}.
+La gramática puede producir varias frases válidas para una misma entrada: la secuencia ``ir, colegio'', por ejemplo, admite tanto ``Quiero ir al colegio'' como ``Voy al colegio''. Ante esas alternativas hace falta un criterio que decida cuál es la más adecuada, y de eso se encarga el \textit{ranking} semántico: ordena los candidatos mediante un \textit{score} combinado que pondera la confianza gramatical y la coherencia semántica medida por los \textit{embeddings}.
 
 El componente semántico se construye a partir de dos señales. La primera, la \textit{preferencia seleccional} (60\%), mide la similitud coseno entre cada par verbo-argumento de la oración candidata: comprueba, por ejemplo, si los vectores de ``comer'' y ``manzana'' están próximos en el espacio aprendido sobre grandes corpus. La similitud coseno funciona aquí como medida de proximidad entre vectores: vale 1 cuando apuntan en la misma dirección y 0 cuando son perpendiculares. La segunda señal, la \textit{similitud vectorial a nivel de oración} (40\%), compara el vector compuesto de los pictogramas de entrada con el de la frase generada.
 
