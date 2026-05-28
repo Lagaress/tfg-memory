@@ -66,7 +66,7 @@ Todo este contenido fijo (reglas, ejemplos y metadatos) domina el coste de cada 
 \subsection{Hiperparámetros y manejo de errores}
 \label{sec:f3-hiperparametros}
 
-La configuración del cliente combina hiperparámetros de generación, una política de reintentos según el tipo de error y una estimación del coste por llamada.
+Más allá del contenido del \textit{prompt}, el motor necesita una configuración operativa que controle cómo se invoca al modelo. Esta configuración del cliente combina hiperparámetros de generación, una política de reintentos según el tipo de error y una estimación del coste por llamada.
 
 La temperatura de 0.3 prioriza la consistencia sobre la creatividad: en CAA, la variabilidad no aporta valor y la predecibilidad es deseable. Una temperatura de 0 sería completamente determinista, pero 0.3 permite cierta flexibilidad para manejar construcciones no vistas en los \textit{few-shot}.
 
