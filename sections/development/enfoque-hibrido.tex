@@ -19,7 +19,7 @@ El componente semántico se construye a partir de dos medidas. La primera, la \t
 
 La preferencia seleccional recibe mayor peso porque la coherencia de un par concreto como ``comer''--``manzana'' es una señal más directa que la similitud global de la oración, donde frases con casi las mismas palabras obtienen valores casi idénticos. Por ejemplo, ``comer manzana'' y ``comer piedra'' comparten casi todo el vocabulario y producen vectores de oración muy parecidos, pero el par ``comer''--``piedra'' recibe una preferencia seleccional mucho más baja que ``comer''--``manzana'', lo que basta para descartar la opción incoherente.
 
-Con esas dos señales agregadas en el \textit{score} de \textit{embeddings}, la puntuación final combina coherencia semántica y confianza gramatical:
+Con esas dos medidas agregadas en el \textit{score} de \textit{embeddings}, la puntuación final combina coherencia semántica y confianza gramatical:
 
 $$\text{score} = \text{confianza}_{\text{CFG}} \times 0.6 + \text{score}_{\text{\textit{embedding}}} \times 0.4$$
 
