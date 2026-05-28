@@ -59,9 +59,7 @@ El número de 15 se fijó porque es el mínimo que cubre las ocho categorías de
 Más allá del número, importa qué ejemplos se eligen. Se priorizaron los casos que más inferencia exigen al modelo: el ejemplo 4 le enseña a expandir un solo sustantivo en una oración de necesidad; el ejemplo 5, a insertar la preposición contraída \textit{al}; el ejemplo 15, a corregir la concordancia de género. Los ejemplos se adaptaron al formato real del \textit{dataset}, que utiliza como pictogramas de entrada tanto infinitivos como formas conjugadas.
 
 
-Cada mensaje de usuario formatea los pictogramas incluyendo su categoría gramatical entre paréntesis (por ejemplo, ``quiero (verbo modal) + agua (sustantivo)'').
-
-Esta información desambiguadora procede del inventario de metadatos y ayuda al modelo a interpretar correctamente pictogramas polisémicos: ``como'' puede ser verbo (primera persona de ``comer'') o interrogativo (``¿cómo?''), y la categoría aclara la interpretación esperada.
+El tercer elemento que acompaña a cada consulta son los metadatos gramaticales: junto a cada pictograma se indica su categoría entre paréntesis, como en ``quiero (verbo modal) + agua (sustantivo)''. Esta marca, tomada del inventario de metadatos, resuelve la ambigüedad de los pictogramas que tienen más de un significado. Por ejemplo, ``como'' puede ser un verbo (``yo como'') o un interrogativo (``¿cómo?''), y la categoría le indica al modelo cuál de los dos se espera.
 
 Cada llamada consume aproximadamente 1\,204 \textit{tokens} de entrada, de los cuales la gran mayoría corresponden al \textit{system prompt} y los ejemplos \textit{few-shot}. La consulta del usuario aporta típicamente 10-20 \textit{tokens} adicionales. Los \textit{tokens} de salida son muy reducidos: 4 \textit{tokens} en promedio, coherente con la brevedad de las oraciones de CAA.
 
