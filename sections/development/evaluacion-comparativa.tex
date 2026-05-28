@@ -72,7 +72,7 @@ Este formato se prefirió frente a una escala Likert~\cite{likert1932} por su me
 
 El alcance de la encuesta se limita a esas tres técnicas base, sin incluir los híbridos. Como los híbridos se construyen a partir de las técnicas base mediante post-edición o selección, valorarlos con personas no aportaría información nueva sobre la naturalidad de cada técnica por separado; su rendimiento se mide con las métricas automáticas.
 
-Para evitar que la identidad del motor sesgue las respuestas, la evaluación es ciega: el evaluador no conoce qué técnica generó cada frase. El orden de presentación de las opciones se aleatoriza con un \textit{seed} determinístico por caso, de modo que la aleatorización es reproducible pero impide que la posición de una técnica influya en la elección. La decodificación (qué opción corresponde a qué motor) se realiza post-hoc con una clave separada.
+Para evitar que la identidad del motor sesgue las respuestas, la evaluación es ciega: el evaluador no conoce qué técnica generó cada frase. El orden de presentación de las opciones se baraja en cada caso a partir de un valor de inicialización fijo (un \textit{seed}), de modo que el barajado es reproducible pero impide que la posición de una técnica influya en la elección. La decodificación (qué opción corresponde a qué motor) se realiza después, una vez recogidas las respuestas, con una clave separada.
 
 Incluir ``Ninguna de las anteriores'' como opción evita forzar una elección cuando todas las frases son deficientes. Sin esta opción, un evaluador que encuentre las tres alternativas poco naturales se vería obligado a seleccionar la ``menos mala'', contaminando los datos con preferencias que no son tales.
 
