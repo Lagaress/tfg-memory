@@ -99,7 +99,7 @@ Métrica & Qué mide & Cálculo en el ejemplo \\
 Exact Match (EM) & Coincidencia literal con alguna referencia tras normalizar mayúsculas y puntuación. & B obtiene 1 (coincide literal); A y C obtienen 0. \\
 BLEU~\cite{papineni2002bleu} & Precisión de $n$-gramas con penalización por brevedad. & A obtiene BLEU-4 cercano al máximo; C cae al perder los $n$-gramas con ``colegio''. \\
 ROUGE-L~\cite{lin2004rouge} & Mide cuántas palabras de la referencia aparecen, en orden, en la predicción. & La subsecuencia común más larga entre A y la referencia es ``quiero ir al colegio'': puntuación alta sin penalizar el ``Yo'' inicial. \\
-METEOR~\cite{banerjee2005meteor} & Compara palabra a palabra entre predicción y referencia, con penalización por fragmentación. Tolera sinónimos y derivaciones. & En C, el par ``colegio''/``clase'' puede sumar si el recurso léxico registra la relación; BLEU lo trata como discrepancia. \\
+METEOR~\cite{banerjee2005meteor} & Compara palabra a palabra entre predicción y referencia, penalizando que las coincidencias queden dispersas. Tolera sinónimos y derivaciones. & En C, el par ``colegio''/``clase'' puede sumar si el recurso léxico registra la relación; BLEU lo trata como discrepancia. \\
 chrF++~\cite{popovic2017chrf} & Compara fragmentos de caracteres (longitud 1-6) entre predicción y referencia. Premia flexiones del español. & ``colegio''/``escuela'' reduce el chrF; ``colegio''/``colegio'' lo maximiza. \\
 BERTScore~\cite{zhang2020bertscore} & Similitud semántica entre \textit{embeddings} contextuales. & La hipótesis C obtiene BERTScore alto frente a ``Quiero ir a la escuela'' porque ``clase'' y ``escuela'' están próximas en el espacio de \textit{embeddings}. \\
 \hline
@@ -120,9 +120,9 @@ P_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{r_j \in r} \cos(x_i, r_j)
 \end{equation}
 con $R_{\text{BERT}}$ y $F_{\text{BERT}}$ análogos. Frente a BLEU, BERTScore tolera reformulaciones: una predicción puede obtener un BERTScore alto si su sentido es próximo al de la referencia aunque las palabras concretas no coincidan.
 
-BLEU y chrF usan el soporte multi-referencia nativo de \texttt{sacreBLEU}; METEOR, ROUGE-L y BERTScore toman el mejor \textit{score} entre las referencias del caso.
+Como cada caso cuenta con varias referencias humanas, conviene precisar cómo las aprovecha cada métrica: BLEU y chrF usan el soporte multi-referencia nativo de \texttt{sacreBLEU}, mientras que METEOR, ROUGE-L y BERTScore toman el mejor \textit{score} entre las referencias del caso.
 
-Las métricas específicas de CAA miden la fidelidad al contenido pictográfico. La \textit{cobertura} verifica qué proporción de los lemas de entrada están representados en la salida, comparando con \texttt{spaCy} para tolerar la flexión (``quiero'' cuenta como ``querer''):
+Las métricas específicas de CAA comprueban que la oración generada refleje los pictogramas seleccionados, sin omitir ni añadir contenido. La \textit{cobertura} verifica qué proporción de los lemas de entrada (las formas base de las palabras) están representados en la salida, comparando con \texttt{spaCy} para tolerar la flexión (``quiero'' cuenta como ``querer''):
 \begin{equation}
 \text{Cobertura} = \frac{|\text{lemas de entrada presentes en la salida}|}{|\text{lemas de entrada}|}.
 \end{equation}
@@ -136,19 +136,19 @@ Si la entrada es solo ``agua'' y la salida es ``Quiero agua'', el verbo ``quiero
 
 La \textit{fidelidad ajustada} corrige este efecto descontando del recuento de alucinaciones las inferencias pragmáticas legítimas, como añadir ``querer'' a partir de un pictograma de necesidad. La métrica conserva la misma estructura que la fidelidad estándar, pero excluye del numerador las palabras que pertenecen a un repertorio prefijado de inferencias esperables; sobre el ejemplo de ``agua'', el verbo ``quiero'' deja de penalizar y la fidelidad ajustada se aproxima a 1.
 
-Las métricas sin referencia evalúan la naturalidad intrínseca del texto, sin requerir comparación con una referencia humana. La \textit{perplejidad}, calculada con GPT-2 Spanish, mide cuán probable considera un modelo autoregresivo la oración generada:
+Las métricas sin referencia evalúan la naturalidad intrínseca del texto, sin requerir comparación con una referencia humana. La \textit{perplejidad}, calculada con GPT-2 Spanish, mide cuán probable considera la oración generada un modelo autoregresivo (uno que predice cada palabra a partir de las anteriores):
 \begin{equation}
 \text{PPL}(s) = \exp\!\left(-\frac{1}{N} \sum_{i=1}^{N} \log P(w_i \mid w_{<i})\right).
 \end{equation}
 Valores bajos indican texto que el modelo de lenguaje juzga natural: ``Quiero agua'' presenta una perplejidad baja, mientras que la concatenación literal ``Yo querer agua'' la dispara porque la secuencia es estadísticamente rara en español.
 
-La \textit{pseudo-perplejidad}~\cite{salazar2020masked} es la variante análoga para modelos bidireccionales como BETO: enmascara cada \textit{token} por turnos y mide su probabilidad condicionada a todo el contexto:
+La \textit{pseudo-perplejidad}~\cite{salazar2020masked} es la variante para modelos como BETO, que leen la frase entera de una vez: oculta cada palabra por turnos y mide con qué probabilidad la acierta usando todo lo que la rodea, antes y después:
 \begin{equation}
 \text{PPPL}(s) = \exp\!\left(-\frac{1}{N} \sum_{i=1}^{N} \log P(w_i \mid w_{\neq i})\right).
 \end{equation}
-Al usar el contexto completo en lugar de solo el izquierdo, la pseudo-perplejidad ofrece una segunda lectura de la naturalidad que no depende del orden de generación de palabras.
+Como aprovecha el contexto completo y no solo lo que precede a cada palabra, ofrece una segunda lectura de la naturalidad que no depende del orden en que se generan las palabras.
 
-Las métricas operativas describen el coste de ejecución sin entrar en la calidad lingüística. La \textit{latencia} registra los milisegundos por consulta y se reporta como mediana para resistir a las colas largas de las distribuciones; el \textit{coste} expresa los dólares por consulta y solo es no nulo en los motores que dependen de APIs externas.
+Las métricas operativas describen el coste de ejecución sin entrar en la calidad lingüística. La \textit{latencia} registra los milisegundos por consulta y se reporta como mediana para no dejarse arrastrar por unos pocos valores extremos; el \textit{coste} expresa los dólares por consulta y solo es no nulo en los motores que dependen de APIs externas.
 
 \subsubsection{Tests estadísticos}
 \label{sec:eval-tests}
