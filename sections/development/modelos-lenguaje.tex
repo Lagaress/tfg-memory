@@ -61,7 +61,7 @@ Más allá del número, importa qué ejemplos se eligen. Se priorizaron los caso
 
 El tercer elemento que acompaña a cada consulta son los metadatos gramaticales: junto a cada pictograma se indica su categoría entre paréntesis, como en ``quiero (verbo modal) + agua (sustantivo)''. Esta marca, tomada del inventario de metadatos, resuelve la ambigüedad de los pictogramas que tienen más de un significado. Por ejemplo, ``como'' puede ser un verbo (``yo como'') o un interrogativo (``¿cómo?''), y la categoría le indica al modelo cuál de los dos se espera.
 
-Cada llamada consume aproximadamente 1\,204 \textit{tokens} de entrada, de los cuales la gran mayoría corresponden al \textit{system prompt} y los ejemplos \textit{few-shot}. La consulta del usuario aporta típicamente 10-20 \textit{tokens} adicionales. Los \textit{tokens} de salida son muy reducidos: 4 \textit{tokens} en promedio, coherente con la brevedad de las oraciones de CAA.
+Todo este contenido fijo (reglas, ejemplos y metadatos) domina el coste de cada llamada: una consulta consume aproximadamente 1\,204 \textit{tokens} de entrada, la gran mayoría del \textit{system prompt} y los ejemplos \textit{few-shot}, mientras que la consulta del usuario aporta típicamente 10-20 \textit{tokens} adicionales. Los \textit{tokens} de salida son muy reducidos: 4 \textit{tokens} en promedio, coherente con la brevedad de las oraciones de CAA.
 
 \subsection{Hiperparámetros y manejo de errores}
 \label{sec:f3-hiperparametros}
