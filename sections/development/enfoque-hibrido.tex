@@ -45,6 +45,6 @@ El enriquecimiento de una gramática formal con \textit{embeddings} hereda las l
 
 Los \textit{embeddings} estáticos, por su parte, miden el parecido de significado entre palabras sueltas, pero no tienen en cuenta el papel que cada una cumple dentro de la frase. La similitud coseno entre ``comer'' y ``manzana'' indica compatibilidad, pero no permite determinar si la relación es de sujeto, objeto o complemento. Para frases cortas esta limitación apenas afecta, pero con oraciones más largas y complejas, no tener en cuenta el contexto dificultaría elegir la interpretación correcta.
 
-Los pesos y umbrales que combinan las señales gramaticales y semánticas requieren ajuste manual para cada dominio. No existe un criterio teórico que determine la ponderación óptima entre confianza gramatical y coherencia semántica, lo que hace que la técnica sea difícilmente transferible sin un proceso de calibración específico.
+A las limitaciones heredadas se añade una propia de la combinación: los pesos y umbrales que ponderan la confianza gramatical y la coherencia semántica requieren ajuste manual para cada dominio. No existe un criterio teórico que determine la ponderación óptima entre ambas, lo que hace que la técnica sea difícilmente transferible sin un proceso de calibración específico.
 
 Las dos limitaciones (dependencia de la gramática subyacente y ajuste manual de pesos) sugieren explorar una técnica que aprenda el lenguaje sin reglas codificadas: los modelos de lenguaje de gran escala.
