@@ -23,7 +23,7 @@ El \textit{formato y registro} (reglas 3-5, 8, 10) restringe la salida a una ún
 Las \textit{reglas lingüísticas} (reglas 6-7, 9, 11) cubren fenómenos específicos: interrogativas con signos ¿...?, posición de la negación, omisión del pronombre sujeto (la propiedad \textit{pro-drop} del español, que prefiere ``quiero agua'' frente a ``yo quiero agua'') y concordancia de género.
 
 
-Las reglas del \textit{system prompt} describen qué debe hacer el modelo, pero no le muestran cómo hacerlo. Sin ejemplos concretos, el modelo tiende a interpretar las instrucciones de forma demasiado literal o demasiado libre, produciendo salidas que cumplen las reglas individualmente pero no capturan el registro ni la brevedad esperados en CAA.
+Estas reglas describen qué debe hacer el modelo, pero no le muestran cómo hacerlo. Sin ejemplos concretos, el modelo tiende a interpretar las instrucciones de forma demasiado literal o demasiado libre, produciendo salidas que cumplen las reglas individualmente pero no capturan el registro ni la brevedad esperados en CAA. Por ejemplo, ante los pictogramas ``querer'' y ``comer'', una lectura demasiado literal devolvería ``querer comer'' y una demasiado libre, algo como ``me apetece muchísimo comer ahora''; lo que se espera es simplemente ``Quiero comer''.
 
 El motor utiliza 15 ejemplos \textit{few-shot}~\cite{brown2020language} que cubren las ocho categorías del \textit{dataset}, recogidos en la Tabla~\ref{tab:f3-fewshot}. Cada ejemplo es un par (pictogramas de entrada, oración esperada) que se inyecta como intercambio usuario-asistente en el historial de mensajes.
 
