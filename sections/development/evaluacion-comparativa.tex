@@ -415,7 +415,7 @@ Las tres hibridaciones perseguían mejorar alguna dimensión respecto a las téc
 \subsubsection{Mejora relativa}
 \label{sec:eval-mejora}
 
-La Figura~\ref{fig:eval-mejora} cuantifica la mejora relativa de cada híbrido respecto a su técnica base natural: Hybrid1 frente a la gramática formal, Hybrid2 frente a los \textit{embeddings}, y Hybrid3 frente a ambas bases.
+La Figura~\ref{fig:eval-mejora} cuantifica esa mejora relativa de cada híbrido frente a su técnica base.
 
 \begin{figure}[ht]
     \centering
@@ -442,14 +442,14 @@ Latencia (med.) & $<$1 ms & $<$1 ms & 1517 ms & 528 ms & 679 ms & 4.3 s \\
 Coste & Gratis & Gratis & \$0.003 & \$0.003 & \$0.003 & \$0.009 \\
 Determinismo & Total & Total & Parcial & Parcial & Parcial & Parcial \\
 Offline & Sí & Sí & No & No & No & No \\
-Dependencias & Ninguna & \texttt{FastText} & API OpenAI & API OpenAI & API+\texttt{FastText} & API OpenAI \\
+Dependencias & Ninguna & \texttt{FastText} & API OpenAI & API OpenAI & API+\texttt{FastText} & API+\texttt{FastText} \\
 \hline
 \end{tabular}
 \caption{Compromisos operativos de los seis motores. Hybrid1 = gramática + LLM; Hybrid2 = (gramática + \textit{embeddings}) + LLM; Hybrid3 = \textit{overgenerate-and-rank}.}
 \label{tab:eval-compromisos}
 \end{table}
 
-La Tabla~\ref{tab:eval-compromisos} amplía la comparación a dimensiones operativas que las métricas de calidad lingüística no capturan. La latencia establece tres niveles diferenciados (los motores deterministas operan en sub-milisegundos, Hybrid1 y Hybrid2 en el rango de 500-700 ms con una sola llamada LLM, el LLM puro en $\sim$1.5 s y Hybrid3 en 4.3 s por sus múltiples generaciones y el paso de \textit{ranking} por perplejidad), y el coste sigue la misma pauta: los motores \textit{offline} son gratuitos, Hybrid1 y Hybrid2 igualan al LLM puro al hacer una sola llamada por caso, y Hybrid3 triplica ese coste al generar múltiples candidatos.
+La Tabla~\ref{tab:eval-compromisos} amplía la comparación a dimensiones operativas que las métricas de calidad lingüística no capturan. La latencia establece cuatro niveles diferenciados (los motores deterministas operan en sub-milisegundos, Hybrid1 y Hybrid2 en el rango de 500-700 ms con una sola llamada LLM, el LLM puro en $\sim$1.5 s y Hybrid3 en 4.3 s por sus múltiples generaciones y el paso de \textit{ranking} por perplejidad), y el coste sigue la misma pauta: los motores \textit{offline} son gratuitos, Hybrid1 y Hybrid2 igualan al LLM puro al hacer una sola llamada por caso, y Hybrid3 triplica ese coste al generar múltiples candidatos.
 
 El determinismo se pierde en cualquier motor que involucre al LLM, incluidos los tres híbridos. Para un usuario de CAA, la previsibilidad de la salida es un factor de confianza: saber que al seleccionar los mismos pictogramas obtendrá siempre la misma oración facilita el aprendizaje del sistema.
 
