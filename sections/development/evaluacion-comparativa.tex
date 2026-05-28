@@ -114,7 +114,7 @@ BLEU compara la predicción con las referencias mediante la precisión modificad
 \end{equation}
 donde $p_n$ es la precisión modificada de $n$-gramas, $w_n = 1/N$ y BP es la penalización por brevedad. BLEU-1 considera solo unigramas y mide coincidencia léxica; BLEU-4 promedia hasta los 4-gramas y exige también orden de palabras.
 
-BERTScore abandona la coincidencia superficial y mide similitud semántica entre los \textit{embeddings} contextuales que un \textit{transformer} preentrenado en español asigna a cada \textit{token}:
+BERTScore abandona la coincidencia superficial y mide la similitud semántica entre los \textit{embeddings} contextuales que un \textit{transformer} preentrenado en español asigna a cada \textit{token}, es decir, entre los vectores que representan cada palabra teniendo en cuenta las que la rodean:
 \begin{equation}
 P_{\text{BERT}} = \frac{1}{|x|} \sum_{x_i \in x} \max_{r_j \in r} \cos(x_i, r_j),
 \end{equation}
