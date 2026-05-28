@@ -56,7 +56,7 @@ Para evitar ese comportamiento, el motor incluye 15 ejemplos \textit{few-shot}~\
 
 El número de 15 se fijó porque es el mínimo que cubre las ocho categorías del \textit{dataset} con al menos un ejemplo representativo. Una vez representadas todas las categorías, cada ejemplo adicional repite un patrón que el modelo ya ha visto, así que aporta poca información nueva y, en cambio, alarga la consulta, lo que encarece cada llamada y aumenta la latencia.
 
-Los criterios de selección priorizan la cobertura de patrones que requieren inferencia: el ejemplo 4 enseña al modelo a expandir un solo sustantivo en una oración de necesidad; el ejemplo 5, a insertar la preposición contraída \textit{al}; el ejemplo 15, a corregir la concordancia de género. Los ejemplos se adaptaron al formato real del \textit{dataset}, que utiliza tanto infinitivos como formas conjugadas como pictogramas de entrada.
+Más allá del número, importa qué ejemplos se eligen. Se priorizaron los casos que más inferencia exigen al modelo: el ejemplo 4 le enseña a expandir un solo sustantivo en una oración de necesidad; el ejemplo 5, a insertar la preposición contraída \textit{al}; el ejemplo 15, a corregir la concordancia de género. Los ejemplos se adaptaron al formato real del \textit{dataset}, que utiliza como pictogramas de entrada tanto infinitivos como formas conjugadas.
 
 
 Cada mensaje de usuario formatea los pictogramas incluyendo su categoría gramatical entre paréntesis (por ejemplo, ``quiero (verbo modal) + agua (sustantivo)'').
