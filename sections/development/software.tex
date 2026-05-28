@@ -10,7 +10,7 @@ Hybrid3 implementa el patrón \textit{overgenerate-and-rank}~\cite{sharma2019ove
 
 Los motores que dependen de recursos costosos (modelos de \textit{embeddings} de varios GB, modelos de perplejidad) emplean inicialización perezosa: los recursos no se cargan al instanciar el motor sino en la primera llamada de generación. Esto permite instanciar múltiples \textit{pipelines} sin consumir memoria innecesariamente.
 
-El manejo de errores sigue una estrategia de degradación progresiva: si un componente falla, el sistema recurre a un mecanismo de \textit{fallback} que garantiza siempre una salida. En las hibridaciones, si la gramática no reconoce la entrada, el LLM genera la frase desde cero; en Hybrid3, si ninguna candidata alcanza cobertura completa, todas pasan al \textit{ranking}.
+El manejo de errores sigue una estrategia de degradación progresiva: si un componente falla, el sistema recurre a un mecanismo de \textit{fallback} que garantiza siempre una salida. En las hibridaciones, si la gramática no reconoce la entrada, el LLM genera la frase desde cero; en Hybrid3, si ninguna candidata alcanza cobertura completa, todas pasan al \textit{ranking}. Así, aunque ninguna sea perfecta, el sistema entrega la mejor opción disponible en lugar de quedarse sin respuesta: en comunicación asistida, una frase aproximada siempre es preferible al silencio.
 
 \subsection{Tecnologías y dependencias}
 
