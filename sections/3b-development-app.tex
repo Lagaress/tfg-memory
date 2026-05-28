@@ -65,7 +65,7 @@ El servidor organiza los motores de generación mediante dos patrones de diseño
 
 Todos los motores implementan una misma interfaz abstracta que define tres operaciones: cargar los recursos necesarios al arrancar (modelos, conexiones a APIs externas), generar una oración a partir de una lista de pictogramas, e identificarse con un nombre único. La respuesta de cada motor incluye la oración generada, el tiempo de procesamiento, un indicador de éxito y, opcionalmente, un mensaje de error o metadatos adicionales.
 
-Un registro central mantiene la relación entre nombres de motores y sus implementaciones. Al arrancar, el servidor lee de sus variables de entorno la lista de motores que debe cargar, los instancia y ejecuta su carga de recursos. Cada motor se inicializa una sola vez y atiende todas las peticiones posteriores como \textit{singleton}. Añadir un motor nuevo consiste en implementar la interfaz abstracta, registrarlo e incluir su nombre en la configuración, sin modificar el código existente.
+Un registro central mantiene la relación entre nombres de motores y sus implementaciones. Al arrancar, el servidor lee de sus variables de entorno la lista de motores que debe cargar, los instancia y ejecuta su carga de recursos. Cada motor se inicializa una sola vez y atiende todas las peticiones posteriores como \textit{singleton}. La principal ventaja de combinar ambos patrones es la extensibilidad: añadir un motor nuevo consiste en implementar la interfaz abstracta, registrarlo e incluir su nombre en la configuración, sin modificar el código existente.
 
 \section{Servidor de generación}
 \label{sec:app-servidor}
