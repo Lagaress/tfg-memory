@@ -60,6 +60,6 @@ La tercera etapa calcula la perplejidad de cada candidata que pasó el filtro de
 
 Hybrid3 acumula la latencia de todos los motores que invoca, lo que la convierte en la opción más lenta. El paradigma de sobregeneración y \textit{ranking} solo aporta valor cuando las candidatas son diversas y la función de \textit{ranking} tiene granularidad suficiente para discriminar entre ellas; en un dominio con frases cortas y vocabulario restringido, las candidatas tienden a converger (los tres motores suelen generar la misma frase, como ``Quiero comer'' para la entrada ``querer, comer'') y el \textit{ranking} pierde capacidad discriminativa, porque apenas hay diferencias entre las que elegir.
 
-El umbral de fidelidad de cobertura completa puede descartar frases naturales que omiten un pictograma con representación implícita: ``Quiero agua'' para la entrada ``yo, quiero, agua'' podría fallar si el sistema no reconoce el sujeto implícito.
+Además, el umbral de cobertura completa puede descartar frases naturales que omiten un pictograma con representación implícita: ``Quiero agua'' para la entrada ``yo, quiero, agua'' podría fallar si el sistema no reconoce el sujeto implícito.
 
 Las tres hibridaciones se evalúan junto a las tres técnicas base en la sección~\ref{sec:evaluacion-comparativa}. La comparación cuantitativa decide en qué dimensiones cada hibridación aporta valor frente a sus técnicas base, y permite contrastar la hipótesis de que combinar motores produce resultados superiores a usarlos por separado.
