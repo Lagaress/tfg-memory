@@ -50,7 +50,7 @@ La gramática completa incluye además las palabras concretas que reconoce, agru
 
 Sobre esa representación en patrones actúan los tres mecanismos que amplían la CFG básica y convierten la secuencia de entrada en una oración completa. El \textit{pattern-matching} sobre categorías gramaticales define cada patrón sintáctico como una secuencia ordenada de categorías (por ejemplo, verbo de necesidad seguido de verbo de acción y objeto), y se selecciona el primer patrón que coincide con las categorías gramaticales de la entrada. Las restricciones de selección (capítulo~\ref{cap:contexto}) validan en la gramática de Dixi que los argumentos de cada verbo cumplan rasgos específicos del léxico CAA: ``comer'' requiere un objeto comestible e ``ir'' requiere un complemento de lugar, condiciones que se codifican como rasgos asociados a cada entrada léxica. Las reglas de inferencia contextual completan la oración cuando la entrada del usuario es incompleta: por ejemplo, la entrada ``agua'' activa la inferencia del verbo ``quiero'', produciendo ``Quiero agua''.
 
-Esta combinación permite manejar la ambigüedad inherente a la entrada abreviada de CAA sin recurrir a modelos estadísticos o neuronales.
+En conjunto, estos tres mecanismos convierten una entrada ambigua en una única frase correcta. Una secuencia tan breve admite varias interpretaciones posibles, y son estas reglas explícitas, sin necesidad de modelos estadísticos ni neuronales, las que descartan las opciones inválidas y fijan una sola oración.
 
 \subsection{Decisiones de diseño específicas}
 \label{sec:f1-postprocesamiento}
