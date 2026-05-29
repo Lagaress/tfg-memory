@@ -4,9 +4,9 @@ Los seis motores presentados comparten una base común de patrones de diseño y 
 
 Los motores de generación comparten varios patrones de diseño que facilitan la composición y el mantenimiento del sistema.
 
-La separación entre generación y post-procesamiento sigue el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}: un componente simbólico decide la estructura de la oración y un componente neural refina el resultado. Este patrón se aplica en Hybrid1 y Hybrid2, donde la gramática o los \textit{embeddings} producen una frase estructurada y el LLM la mejora.
+La separación entre generación y post-procesamiento sigue el patrón \textit{plan-then-realize}~\cite{moryossef2019stepbystep}, que se aplica en Hybrid1 y Hybrid2: la gramática o los \textit{embeddings} producen una frase estructurada y el LLM la mejora.
 
-Hybrid3 implementa el patrón \textit{overgenerate-and-rank}~\cite{sharma2019overgenerate}: múltiples generadores producen candidatas, un filtro descarta las que no cumplen restricciones de fidelidad y una función de \textit{ranking} selecciona la mejor. Este patrón desacopla la generación de la selección, permitiendo añadir o retirar generadores sin modificar la lógica de \textit{ranking}.
+Hybrid3 implementa el patrón \textit{overgenerate-and-rank}~\cite{sharma2019overgenerate}, que desacopla la generación de la selección y permite añadir o retirar generadores sin modificar la lógica de \textit{ranking}.
 
 Los motores que dependen de recursos costosos (modelos de \textit{embeddings} de varios GB, modelos de perplejidad) emplean inicialización perezosa: los recursos no se cargan al instanciar el motor sino en la primera llamada de generación. Esto permite instanciar múltiples \textit{pipelines} sin consumir memoria innecesariamente.
 
