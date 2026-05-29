@@ -87,7 +87,7 @@ La contenerización convierte el despliegue en una operación reproducible: la m
 \section{Síntesis de voz}
 \label{sec:app-tts}
 
-La frase que el servidor devuelve cierra la mitad textual del flujo; la otra mitad consiste en convertirla en voz audible. La elección del motor de síntesis que realiza esa conversión responde a tres criterios. El primero es el funcionamiento sin conexión, porque un usuario que depende del dispositivo para comunicarse no puede asumir interrupciones por falta de cobertura. El segundo es la disponibilidad de voces infantiles en español, donde la única opción comercial documentada es \textit{es-MX-MarinaNeural} de Azure, con acento mexicano y sin equivalente peninsular. El tercero es la latencia, porque en una conversación presencial un retardo superior a unos pocos cientos de milisegundos rompe el ritmo natural del diálogo.
+La frase que el servidor devuelve cierra la mitad textual del flujo; la otra mitad consiste en convertirla en voz audible. La elección del motor de síntesis que realiza esa conversión responde a dos criterios. El primero es el funcionamiento sin conexión, porque un usuario que depende del dispositivo para comunicarse no puede asumir interrupciones por falta de cobertura. El segundo es la latencia, porque en una conversación presencial un retardo superior a unos pocos cientos de milisegundos rompe el ritmo natural del diálogo.
 
 Para conjugar estos criterios la app combina dos motores complementarios: un servicio neuronal externo como motor principal cuando hay conexión a Internet y los motores nativos de la plataforma como respaldo \textit{offline}.
 
