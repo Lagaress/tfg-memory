@@ -15,7 +15,7 @@ La aplicación no requiere conocimientos técnicos previos. Quien sepa usar un t
 
 Al abrir Dixi por primera vez aparece el tablero de comunicación vacío, listo para usarse. No hay pasos de configuración previa ni pantallas de bienvenida: la app asume que quien la abre quiere comunicarse y prioriza llegar cuanto antes a esa función. La Figura~\ref{fig:manual-primer-contacto} muestra ese primer vistazo.
 
-En la parte inferior de la pantalla hay una barra con tres pestañas, que son las tres zonas de la aplicación. La primera es el \textit{Tablero}, donde se construyen mensajes nuevos seleccionando pictogramas (Figura~\ref{fig:manual-tablero-activo}). La segunda es \textit{Frases frecuentes}, una colección de expresiones preparadas para reproducir directamente (Figura~\ref{fig:manual-frases-lista}). La tercera es \textit{Ajustes}, donde se configura la voz, el aspecto y las opciones de accesibilidad (Figura~\ref{fig:manual-ajustes}). Se pasa de una a otra tocando su icono; la aplicación recuerda el estado de cada pestaña, de modo que volver al tablero devuelve los pictogramas tal como estaban.
+En la parte inferior de la pantalla hay una barra con tres pestañas, que son las tres zonas de la aplicación. La primera es el \textit{Tablero}, donde se construyen mensajes nuevos seleccionando pictogramas (Figura~\ref{fig:manual-tablero-activo}). La segunda es \textit{Frases frecuentes}, una colección de expresiones preparadas para reproducir directamente (Figura~\ref{fig:manual-frases-lista}). La tercera es \textit{Ajustes}, donde se configura la voz, el aspecto y las opciones de accesibilidad (Figura~\ref{fig:manual-ajustes}). Se pasa de una a otra tocando su icono; la aplicación recuerda lo que había en cada pestaña, de modo que volver al tablero devuelve los pictogramas tal como estaban.
 
 \begin{figure}[ht]
     \centering
@@ -49,7 +49,7 @@ El flujo para decir algo es el siguiente:
     \item Cuando el mensaje esté listo, pulsar el botón del altavoz, situado en la esquina inferior derecha, para reproducir la frase en voz alta.
 \end{enumerate}
 
-El botón del altavoz solo se activa cuando hay al menos un pictograma seleccionado. Mientras la aplicación está sintetizando la voz, el botón aparece atenuado para evitar que se pulse varias veces seguidas. Si el dispositivo tiene activada la vibración háptica, cada toque devuelve una pequeña respuesta táctil que confirma la acción.
+El botón del altavoz solo se activa cuando hay al menos un pictograma seleccionado. Mientras la aplicación está preparando la voz, el botón aparece atenuado para evitar que se pulse varias veces seguidas. Si el dispositivo tiene activada la vibración, cada toque devuelve una pequeña respuesta táctil que confirma la acción.
 
 Junto al altavoz hay un segundo botón flotante con un signo ``+'' que abre una ventana para añadir un pictograma propio. Esta opción está pensada para cuando el vocabulario incorporado no cubre algo que el usuario necesita expresar con frecuencia: un nombre de una mascota, un lugar concreto, un alimento poco habitual. El diálogo pide una imagen y una etiqueta textual, y el pictograma resultante queda disponible en la categoría elegida para incluirlo en mensajes futuros. La Figura~\ref{fig:manual-pictograma-personalizado} muestra este diálogo.
 
@@ -97,10 +97,12 @@ La pestaña de \textit{Ajustes} agrupa las opciones que permiten adaptar Dixi a 
     \label{fig:manual-ajustes}
 \end{figure}
 
-La primera sección, \textit{Voz}, controla cómo suena Dixi. Se puede elegir entre la voz del sistema del dispositivo, disponible siempre y sin conexión, y una voz neuronal externa de mayor calidad cuando hay Internet. La velocidad se ajusta entre 0.5$\times$ y 2.0$\times$, y el tono entre 0.5 y 2.0, moviendo los respectivos deslizadores. Un botón ``Probar'' reproduce una frase corta con los parámetros actuales, de forma que la configuración se oye antes de aceptarla.
+La primera sección, \textit{Voz}, controla cómo suena Dixi. Se puede elegir entre la voz del sistema del dispositivo, disponible siempre y sin conexión, y una voz externa de mayor calidad cuando hay Internet. La velocidad se ajusta entre 0.5$\times$ y 2.0$\times$, y el tono entre 0.5 y 2.0, moviendo los respectivos deslizadores. Un botón ``Probar'' reproduce una frase corta con los parámetros actuales, de forma que la configuración se oye antes de aceptarla.
 
 La sección de \textit{Apariencia} cambia el aspecto visual. El interruptor de modo oscuro alterna entre tema claro y tema oscuro, útil según la luz del entorno y las preferencias visuales del usuario. El tamaño de los pictogramas se elige entre pequeño, mediano y grande, y el número de columnas de la cuadrícula entre tres, cuatro y cinco. Más columnas muestran más pictogramas a la vez pero los hacen más pequeños; menos columnas los agrandan y reducen la precisión motora necesaria para tocarlos.
 
-La sección de \textit{Accesibilidad} reúne los ajustes de vibración y tamaño de fuente. La vibración, cuando está activada, devuelve una respuesta háptica al tocar cualquier elemento interactivo. El tamaño de fuente, ajustable entre 14 y 22 píxeles, afecta a las etiquetas de los pictogramas y al resto de textos de la interfaz.
+La sección de \textit{Accesibilidad} reúne los ajustes de vibración y tamaño de fuente. Cuando la vibración está activada, el dispositivo responde con un leve toque al pulsar cualquier botón o pictograma. El tamaño de fuente, ajustable entre 14 y 22 píxeles, afecta a las etiquetas de los pictogramas y al resto de textos de la interfaz.
 
 La última sección, \textit{Acerca de}, no modifica nada: muestra la versión de la aplicación y los créditos, con un enlace al portal de ARASAAC~\cite{arasaac}, que es el origen de los pictogramas que Dixi utiliza.
+
+Con estas tres pantallas, Dixi cubre lo esencial de la comunicación diaria: construir mensajes nuevos con pictogramas, tener a mano las frases de siempre y adaptar la aplicación a cada persona.
