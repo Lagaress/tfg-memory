@@ -78,7 +78,7 @@ Para atender esas peticiones con rapidez, los recursos pesados (modelos de \text
 
 El servidor abstrae por completo el origen de la frase: la app envía las etiquetas de pictogramas y recibe la frase generada sin conocer qué motor la produjo ni qué credenciales se usaron. Tampoco implementa autenticación propia, una simplificación aceptable en un proyecto académico donde se ejecuta en red local.
 
-El manejo de errores sigue una estrategia de degradación. Si un motor falla durante la generación, el adaptador devuelve la respuesta con un indicador de error en lugar de provocar un fallo completo del servidor. Esto permite que la app distinga entre un fallo de red (que requiere reintentar) y un fallo del motor (que puede resolverse mostrando un mensaje al usuario o recurriendo al generador local como respaldo).
+El servidor aísla los fallos de cada motor: si un motor falla durante la generación, el adaptador devuelve la respuesta con un indicador de error en lugar de provocar un fallo completo del servidor. Esto permite que la app distinga entre un fallo de red (que requiere reintentar) y un fallo del motor (que puede resolverse mostrando un mensaje al usuario o recurriendo al generador local como respaldo).
 
 Para facilitar el despliegue, el servidor está contenerizado con \texttt{Docker}\footnote{\url{https://www.docker.com}}. La imagen parte de una distribución ligera de \texttt{Python} 3.13, copia el código de la API y el del motor de generación, instala las dependencias e inicia el servidor en el puerto 8000. Un fichero de configuración de \texttt{Docker Compose}\footnote{\url{https://docs.docker.com/compose/}} permite levantar el servicio con un solo comando, sin necesidad de instalar \texttt{Python} ni las dependencias en la máquina anfitriona.
 
